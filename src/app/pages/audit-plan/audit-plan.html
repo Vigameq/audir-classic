@@ -82,12 +82,10 @@
     </div>
     <div class="field">
       <label>Site</label>
-      <input
-        type="text"
-        name="site"
-        [(ngModel)]="auditForm.site"
-        placeholder="Configured in settings"
-      />
+      <select name="site" [(ngModel)]="auditForm.site">
+        <option value="">Select site</option>
+        <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+      </select>
       <small>Optional. Sites are configured in Settings.</small>
     </div>
     <div class="field">
@@ -101,12 +99,10 @@
     </div>
     <div class="field">
       <label>Region</label>
-      <input
-        type="text"
-        name="region"
-        [(ngModel)]="auditForm.region"
-        placeholder="Configured in settings"
-      />
+      <select name="region" [(ngModel)]="auditForm.region">
+        <option value="">Select region</option>
+        <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+      </select>
       <small>Optional. Regions are configured in Settings.</small>
     </div>
     <div class="field full">

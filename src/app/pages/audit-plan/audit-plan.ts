@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DepartmentService } from '../../services/department.service';
+import { RegionService } from '../../services/region.service';
+import { SiteService } from '../../services/site.service';
 import { User, UserService } from '../../services/user.service';
 
 @Component({
@@ -13,6 +15,8 @@ import { User, UserService } from '../../services/user.service';
 export class AuditPlan implements OnInit {
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly siteService = inject(SiteService);
+  private readonly regionService = inject(RegionService);
 
   protected noteChars = 0;
   protected auditForm = {
@@ -168,6 +172,14 @@ export class AuditPlan implements OnInit {
 
   protected get departments(): string[] {
     return this.departmentService.departments();
+  }
+
+  protected get sites(): string[] {
+    return this.siteService.sites();
+  }
+
+  protected get regions(): string[] {
+    return this.regionService.regions();
   }
 
   ngOnInit(): void {
