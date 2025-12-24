@@ -57,6 +57,13 @@
   font-size: 0.95rem;
 }
 
+.nav-shell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
 .app-nav a {
   text-decoration: none;
   color: var(--color-ink);
@@ -71,6 +78,22 @@
   border-color: var(--color-accent);
   background: rgba(255, 154, 0, 0.12);
   color: var(--color-ink-strong);
+}
+
+.logout {
+  border: 1px solid rgba(255, 154, 0, 0.5);
+  background: #fff6eb;
+  color: var(--color-ink);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font: inherit;
+}
+
+.logout:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
 }
 
 .app-main {

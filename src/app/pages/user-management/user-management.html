@@ -41,7 +41,14 @@
       <span>{{ user.phone || '—' }}</span>
       <span>{{ user.department }}</span>
       <span>{{ user.role }}</span>
-      <span class="status" [class.active]="user.status === 'Active'">{{ user.status }}</span>
+      <span
+        class="status"
+        [class.active]="user.status === 'Active'"
+        [class.pending]="user.status === 'Pending'"
+        [class.suspended]="user.status === 'Suspended'"
+      >
+        {{ user.status }}
+      </span>
       <span>{{ user.lastActive }}</span>
       <span class="actions">
         <button class="ghost small" type="button" (click)="openEdit(user)">Edit</button>
