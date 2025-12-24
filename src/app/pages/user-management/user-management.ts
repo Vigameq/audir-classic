@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { User, UserService } from '../../services/user.service';
 
 type UserRow = {
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -19,7 +21,9 @@ type UserRow = {
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
 })
-export class UserManagement {
+export class UserManagement implements OnInit {
+  private readonly userService = inject(UserService);
+
   protected showInviteModal = false;
   protected showEditModal = false;
   protected selectedUser: UserRow | null = null;
@@ -37,37 +41,13 @@ export class UserManagement {
   };
 
   protected readonly roles = ['Auditor', 'Manager', 'Super Admin'];
+  protected users: UserRow[] = [];
 
-  protected readonly users: UserRow[] = [
-    {
-      firstName: 'Riya',
-      lastName: 'Patel',
-      email: 'riya@audir.com',
-      department: 'Risk & compliance',
-      role: 'Auditor',
-      status: 'Active',
-      lastActive: 'Today',
-    },
-    {
-      firstName: 'Lucas',
-      lastName: 'Martin',
-      email: 'lucas@audir.com',
-      phone: '+1 415 555 0104',
-      department: 'Infrastructure',
-      role: 'Manager',
-      status: 'Active',
-      lastActive: 'Yesterday',
-    },
-    {
-      firstName: 'Amara',
-      lastName: 'Singh',
-      email: 'amara@audir.com',
-      department: 'Executive',
-      role: 'Super Admin',
-      status: 'Pending',
-      lastActive: '2 days ago',
-    },
-  ];
+  protected editForm: UserRow | null = null;
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
 
   protected openInvite(): void {
     this.showInviteModal = true;
@@ -81,28 +61,60 @@ export class UserManagement {
     if (form.invalid) {
       return;
     }
-    this.users.unshift({
-      firstName: this.onboardForm.firstName,
-      lastName: this.onboardForm.lastName,
-      email: this.onboardForm.email,
-      phone: this.onboardForm.phone || undefined,
-      department: this.onboardForm.department,
-      role: this.onboardForm.role,
-      status: this.onboardForm.status,
-      lastActive: 'Just now',
-    });
-    form.resetForm();
-    this.showInviteModal = false;
+    this.userService
+      .createUser({
+        first_name: this.onboardForm.firstName,
+        last_name: this.onboardForm.lastName,
+        email: this.onboardForm.email,
+        phone: this.onboardForm.phone || null,
+        department: this.onboardForm.department,
+        role: this.onboardForm.role,
+        status: this.onboardForm.status,
+        password: this.onboardForm.password,
+      })
+      .subscribe({
+        next: (created) => {
+          this.users.unshift(this.mapUser(created));
+          form.resetForm();
+          this.showInviteModal = false;
+        },
+      });
   }
 
   protected openEdit(user: UserRow): void {
     this.selectedUser = { ...user };
+    this.editForm = { ...user };
     this.showEditModal = true;
   }
 
   protected closeEdit(): void {
     this.showEditModal = false;
     this.selectedUser = null;
+    this.editForm = null;
+  }
+
+  protected saveEdit(): void {
+    if (!this.editForm) {
+      return;
+    }
+    this.userService
+      .updateUser(this.editForm.id, {
+        first_name: this.editForm.firstName,
+        last_name: this.editForm.lastName,
+        phone: this.editForm.phone || null,
+        department: this.editForm.department,
+        role: this.editForm.role,
+        status: this.editForm.status,
+      })
+      .subscribe({
+        next: (updated) => {
+          const index = this.users.findIndex((user) => user.id === updated.id);
+          if (index >= 0) {
+            this.users[index] = this.mapUser(updated);
+          }
+          this.closeEdit();
+        },
+      });
   }
 
   protected get filteredUsers(): UserRow[] {
@@ -118,15 +130,52 @@ export class UserManagement {
   }
 
   protected resetPassword(user: UserRow): void {
-    const confirmed = window.confirm(
-      `Reset password for ${user.firstName} ${user.lastName}?`
+    const newPassword = window.prompt(
+      `Enter a new password for ${user.firstName} ${user.lastName}`
     );
-    if (!confirmed) {
+    if (!newPassword) {
       return;
     }
-    const target = this.users.find((entry) => entry.email === user.email);
-    if (target) {
-      target.lastActive = 'Password reset sent';
+    this.userService.resetPassword(user.id, newPassword).subscribe({
+      next: () => {
+        const target = this.users.find((entry) => entry.id === user.id);
+        if (target) {
+          target.lastActive = 'Password reset sent';
+        }
+      },
+    });
+  }
+
+  private loadUsers(): void {
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        this.users = users.map((user) => this.mapUser(user));
+      },
+    });
+  }
+
+  private mapUser(user: User): UserRow {
+    return {
+      id: user.id,
+      firstName: user.first_name ?? '',
+      lastName: user.last_name ?? '',
+      email: user.email,
+      phone: user.phone ?? undefined,
+      department: user.department ?? '',
+      role: user.role,
+      status: user.status,
+      lastActive: this.formatLastActive(user.last_active),
+    };
+  }
+
+  private formatLastActive(value?: string | null): string {
+    if (!value) {
+      return '—';
     }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    return date.toLocaleDateString();
   }
 }

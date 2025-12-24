@@ -6,17 +6,30 @@
       <p>Role-based access for Auditors, Managers, and Admins.</p>
     </div>
 
-    <form class="login-form">
+    <form class="login-form" (ngSubmit)="signIn()">
       <label>
         Work email
-        <input type="email" placeholder="name@company.com" required />
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="name@company.com"
+          required
+        />
       </label>
       <label>
         Password
-        <input type="password" placeholder="Enter your password" required />
+        <input
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Enter your password"
+          required
+        />
       </label>
-      <button type="button" class="primary" (click)="signIn()">Sign in</button>
+      <button type="submit" class="primary">Sign in</button>
       <button type="button" class="ghost">Request access</button>
+      <p class="error" *ngIf="loginError">{{ loginError }}</p>
     </form>
   </div>
 

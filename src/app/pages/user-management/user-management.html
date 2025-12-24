@@ -171,51 +171,69 @@
         <h2>Edit user</h2>
         <button class="icon" type="button" (click)="closeEdit()">Close</button>
       </header>
-      <form class="modal-form">
+      <form class="modal-form" *ngIf="editForm">
         <div class="field">
           <label>First name <span class="req">*</span></label>
-          <input type="text" [value]="selectedUser.firstName" required />
+          <input
+            type="text"
+            name="editFirstName"
+            [(ngModel)]="editForm.firstName"
+            required
+          />
         </div>
         <div class="field">
           <label>Last name <span class="req">*</span></label>
-          <input type="text" [value]="selectedUser.lastName" required />
+          <input
+            type="text"
+            name="editLastName"
+            [(ngModel)]="editForm.lastName"
+            required
+          />
         </div>
         <div class="field">
           <label>Email ID</label>
-          <input type="email" [value]="selectedUser.email" disabled />
+          <input type="email" [value]="editForm.email" disabled />
         </div>
         <div class="field">
           <label>Phone number</label>
-          <input type="tel" [value]="selectedUser.phone || ''" placeholder="Optional" />
+          <input
+            type="tel"
+            name="editPhone"
+            [(ngModel)]="editForm.phone"
+            placeholder="Optional"
+          />
         </div>
         <div class="field">
           <label>Department <span class="req">*</span></label>
-          <input type="text" [value]="selectedUser.department" required />
+          <input
+            type="text"
+            name="editDepartment"
+            [(ngModel)]="editForm.department"
+            required
+          />
         </div>
         <div class="field">
           <label>Role <span class="req">*</span></label>
-          <select required>
-            <option [selected]="selectedUser.role === 'Auditor'">Auditor</option>
-            <option [selected]="selectedUser.role === 'Manager'">Manager</option>
-            <option [selected]="selectedUser.role === 'Super Admin'">Super Admin</option>
+          <select name="editRole" [(ngModel)]="editForm.role" required>
+            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
           </select>
         </div>
         <div class="field">
           <label>Status <span class="req">*</span></label>
-          <select required>
-            <option [selected]="selectedUser.status === 'Active'">Active</option>
-            <option [selected]="selectedUser.status === 'Pending'">Pending</option>
-            <option [selected]="selectedUser.status === 'Suspended'">Suspended</option>
+          <select name="editStatus" [(ngModel)]="editForm.status" required>
+            <option value="Active">Active</option>
+            <option value="Pending">Pending</option>
+            <option value="Suspended">Suspended</option>
           </select>
         </div>
         <div class="field">
           <label>Last active</label>
-          <input type="text" [value]="selectedUser.lastActive" disabled />
+          <input type="text" [value]="editForm.lastActive" disabled />
         </div>
       </form>
       <footer>
         <button class="ghost" type="button" (click)="closeEdit()">Cancel</button>
-        <button class="primary" type="button">Save changes</button>
+        <button class="primary" type="button" (click)="saveEdit()">Save changes</button>
       </footer>
     </div>
   </div>

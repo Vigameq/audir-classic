@@ -39,6 +39,8 @@ testem.log
 __screenshots__/
 .env.local
 .venv/
+backend/.env
+backend/.venv/
 
 # System files
 .DS_Store
