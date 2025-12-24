@@ -6,38 +6,65 @@
       <p class="subtitle">Capture the key details needed to manage the audit plan.</p>
     </div>
     <div class="header-actions">
-      <button class="ghost">Save draft</button>
-      <button class="primary">Submit for review</button>
+      <button class="ghost" type="button" (click)="cancel(planForm)">Cancel</button>
+      <button class="primary" type="button" (click)="createAudit(planForm)">
+        Create Audit
+      </button>
     </div>
   </header>
 
-  <form class="plan-form">
+  <form class="plan-form" #planForm="ngForm">
     <div class="field">
       <label>Start Date <span class="req">*</span></label>
-      <input type="date" required />
+      <input
+        type="date"
+        name="startDate"
+        [(ngModel)]="auditForm.startDate"
+        required
+      />
     </div>
     <div class="field">
       <label>End Date <span class="req">*</span></label>
-      <input type="date" required />
+      <input
+        type="date"
+        name="endDate"
+        [(ngModel)]="auditForm.endDate"
+        required
+      />
     </div>
     <div class="field">
       <label>Audit Type <span class="req">*</span></label>
-      <select required>
+      <select name="auditType" [(ngModel)]="auditForm.auditType" required>
         <option value="">Select audit type</option>
         <option *ngFor="let type of auditTypes" [value]="type">{{ type }}</option>
       </select>
     </div>
     <div class="field">
       <label>Audit Subtype</label>
-      <input type="text" placeholder="Optional subtype" />
+      <input
+        type="text"
+        name="auditSubtype"
+        [(ngModel)]="auditForm.auditSubtype"
+        placeholder="Optional subtype"
+      />
     </div>
     <div class="field">
       <label>Auditor Name</label>
-      <input type="text" placeholder="Optional auditor name" />
+      <input
+        type="text"
+        name="auditorName"
+        [(ngModel)]="auditForm.auditorName"
+        placeholder="Optional auditor name"
+      />
     </div>
     <div class="field">
       <label>Department</label>
-      <input type="text" placeholder="Optional department" />
+      <input
+        type="text"
+        name="department"
+        [(ngModel)]="auditForm.department"
+        placeholder="Optional department"
+      />
     </div>
     <div class="field">
       <label>Location (City)</label>
@@ -45,7 +72,9 @@
         type="text"
         list="city-list"
         placeholder="Select or type city"
-        [disabled]="!selectedCountry"
+        name="locationCity"
+        [(ngModel)]="auditForm.locationCity"
+        [disabled]="!auditForm.country"
       />
       <datalist id="city-list">
         <option *ngFor="let city of cities" [value]="city"></option>
@@ -53,12 +82,17 @@
     </div>
     <div class="field">
       <label>Site</label>
-      <input type="text" placeholder="Configured in settings" />
+      <input
+        type="text"
+        name="site"
+        [(ngModel)]="auditForm.site"
+        placeholder="Configured in settings"
+      />
       <small>Optional. Sites are configured in Settings.</small>
     </div>
     <div class="field">
       <label>Country</label>
-      <select [(ngModel)]="selectedCountry" name="country">
+      <select [(ngModel)]="auditForm.country" name="country">
         <option value="">Select country</option>
         <option value="India">India</option>
         <option value="USA">USA</option>
@@ -67,7 +101,12 @@
     </div>
     <div class="field">
       <label>Region</label>
-      <input type="text" placeholder="Configured in settings" />
+      <input
+        type="text"
+        name="region"
+        [(ngModel)]="auditForm.region"
+        placeholder="Configured in settings"
+      />
       <small>Optional. Regions are configured in Settings.</small>
     </div>
     <div class="field full">
@@ -76,8 +115,9 @@
         rows="6"
         maxlength="100"
         placeholder="Add up to 100 characters"
-        (input)="updateNoteChars(note.value)"
-        #note
+        name="auditNote"
+        [(ngModel)]="auditForm.auditNote"
+        (input)="updateNoteChars(auditForm.auditNote)"
       ></textarea>
       <div class="note-meta">
         <span>Optional. Add context or special instructions.</span>

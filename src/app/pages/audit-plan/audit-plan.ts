@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-audit-plan',
@@ -10,7 +10,19 @@ import { FormsModule } from '@angular/forms';
 })
 export class AuditPlan {
   protected noteChars = 0;
-  protected selectedCountry = '';
+  protected auditForm = {
+    startDate: '',
+    endDate: '',
+    auditType: '',
+    auditSubtype: '',
+    auditorName: '',
+    department: '',
+    locationCity: '',
+    site: '',
+    country: '',
+    region: '',
+    auditNote: '',
+  };
 
   protected readonly auditTypes = [
     'Internal',
@@ -141,10 +153,35 @@ export class AuditPlan {
   };
 
   protected get cities(): string[] {
-    return this.citiesByCountry[this.selectedCountry] ?? [];
+    return this.citiesByCountry[this.auditForm.country] ?? [];
   }
 
   protected updateNoteChars(value: string): void {
     this.noteChars = value.length;
+  }
+
+  protected cancel(form: NgForm): void {
+    this.auditForm = {
+      startDate: '',
+      endDate: '',
+      auditType: '',
+      auditSubtype: '',
+      auditorName: '',
+      department: '',
+      locationCity: '',
+      site: '',
+      country: '',
+      region: '',
+      auditNote: '',
+    };
+    this.noteChars = 0;
+    form.resetForm(this.auditForm);
+  }
+
+  protected createAudit(form: NgForm): void {
+    if (form.invalid) {
+      return;
+    }
+    this.cancel(form);
   }
 }
