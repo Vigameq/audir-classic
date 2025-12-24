@@ -23,6 +23,8 @@ export class UserManagement {
   protected showInviteModal = false;
   protected showEditModal = false;
   protected selectedUser: UserRow | null = null;
+  protected searchTerm = '';
+  protected roleFilter = '';
   protected onboardForm = {
     firstName: '',
     lastName: '',
@@ -33,6 +35,8 @@ export class UserManagement {
     status: '',
     password: '',
   };
+
+  protected readonly roles = ['Auditor', 'Manager', 'Super Admin'];
 
   protected readonly users: UserRow[] = [
     {
@@ -99,5 +103,30 @@ export class UserManagement {
   protected closeEdit(): void {
     this.showEditModal = false;
     this.selectedUser = null;
+  }
+
+  protected get filteredUsers(): UserRow[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    return this.users.filter((user) => {
+      const matchesTerm =
+        !term ||
+        `${user.firstName} ${user.lastName}`.toLowerCase().includes(term) ||
+        user.email.toLowerCase().includes(term);
+      const matchesRole = !this.roleFilter || user.role === this.roleFilter;
+      return matchesTerm && matchesRole;
+    });
+  }
+
+  protected resetPassword(user: UserRow): void {
+    const confirmed = window.confirm(
+      `Reset password for ${user.firstName} ${user.lastName}?`
+    );
+    if (!confirmed) {
+      return;
+    }
+    const target = this.users.find((entry) => entry.email === user.email);
+    if (target) {
+      target.lastActive = 'Password reset sent';
+    }
   }
 }

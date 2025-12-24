@@ -15,12 +15,15 @@
     <div class="panel-header">
       <h2>Active users</h2>
       <div class="filters">
-        <input type="search" placeholder="Search name or email" />
-        <select>
-          <option>All roles</option>
-          <option>Auditor</option>
-          <option>Manager</option>
-          <option>Super Admin</option>
+        <input
+          type="search"
+          placeholder="Search name or email"
+          [(ngModel)]="searchTerm"
+          name="searchTerm"
+        />
+        <select [(ngModel)]="roleFilter" name="roleFilter">
+          <option value="">All roles</option>
+          <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
         </select>
       </div>
     </div>
@@ -35,7 +38,7 @@
       <span>Last active</span>
       <span>Actions</span>
     </div>
-    <div class="table-row" *ngFor="let user of users">
+    <div class="table-row" *ngFor="let user of filteredUsers">
       <span>{{ user.firstName }} {{ user.lastName }}</span>
       <span>{{ user.email }}</span>
       <span>{{ user.phone || '—' }}</span>
@@ -52,7 +55,9 @@
       <span>{{ user.lastActive }}</span>
       <span class="actions">
         <button class="ghost small" type="button" (click)="openEdit(user)">Edit</button>
-        <button class="ghost small" type="button">Reset password</button>
+        <button class="ghost small" type="button" (click)="resetPassword(user)">
+          Reset password
+        </button>
       </span>
     </div>
   </section>
