@@ -20,6 +20,7 @@
         type="date"
         name="startDate"
         [(ngModel)]="auditForm.startDate"
+        [min]="today"
         required
       />
     </div>
@@ -29,6 +30,7 @@
         type="date"
         name="endDate"
         [(ngModel)]="auditForm.endDate"
+        [min]="auditForm.startDate || today"
         required
       />
     </div>

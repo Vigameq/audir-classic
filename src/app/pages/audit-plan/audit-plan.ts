@@ -19,6 +19,7 @@ export class AuditPlan implements OnInit {
   private readonly regionService = inject(RegionService);
 
   protected noteChars = 0;
+  protected readonly today = new Date().toISOString().split('T')[0];
   protected auditForm = {
     startDate: '',
     endDate: '',
