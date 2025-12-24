@@ -1,0 +1,20 @@
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <div>
+      <div class="brand-name">Audir Enterprise</div>
+      <div class="brand-subtitle">Enterprise audit workspace</div>
+    </div>
+  </div>
+  <nav class="app-nav">
+    <a routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Login</a>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Overview</a>
+    <a routerLink="/auditor" routerLinkActive="active">Auditor</a>
+    <a routerLink="/manager" routerLinkActive="active">Manager</a>
+    <a routerLink="/super-admin" routerLinkActive="active">Super Admin</a>
+  </nav>
+</header>
+
+<main class="app-main">
+  <router-outlet></router-outlet>
+</main>
