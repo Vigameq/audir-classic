@@ -7,7 +7,7 @@
     </div>
     <div class="header-actions">
       <button class="ghost">Export</button>
-      <button class="primary">Invite user</button>
+      <button class="primary" (click)="openInvite()">Invite user</button>
     </div>
   </header>
 
@@ -62,4 +62,61 @@
       <span>2 days ago</span>
     </div>
   </section>
+
+  <div class="modal-backdrop" *ngIf="showInviteModal">
+    <div class="modal">
+      <header>
+        <h2>Invite user</h2>
+        <button class="icon" type="button" (click)="closeInvite()">Close</button>
+      </header>
+      <form class="modal-form">
+        <div class="field">
+          <label>First name <span class="req">*</span></label>
+          <input type="text" placeholder="First name" required />
+        </div>
+        <div class="field">
+          <label>Last name <span class="req">*</span></label>
+          <input type="text" placeholder="Last name" required />
+        </div>
+        <div class="field">
+          <label>Email ID <span class="req">*</span></label>
+          <input type="email" placeholder="name@company.com" required />
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <input type="tel" placeholder="Optional" />
+        </div>
+        <div class="field">
+          <label>Department <span class="req">*</span></label>
+          <input type="text" placeholder="Department" required />
+        </div>
+        <div class="field">
+          <label>Role <span class="req">*</span></label>
+          <select required>
+            <option value="">Select role</option>
+            <option>Auditor</option>
+            <option>Manager</option>
+            <option>Super Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status <span class="req">*</span></label>
+          <select required>
+            <option value="">Select status</option>
+            <option>Active</option>
+            <option>Pending</option>
+            <option>Suspended</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Last active</label>
+          <input type="text" placeholder="Set after first login" disabled />
+        </div>
+      </form>
+      <footer>
+        <button class="ghost" type="button" (click)="closeInvite()">Cancel</button>
+        <button class="primary" type="button">Send invite</button>
+      </footer>
+    </div>
+  </div>
 </section>
