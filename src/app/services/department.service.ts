@@ -23,6 +23,12 @@ export class DepartmentService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
 
+  removeDepartment(name: string): void {
+    const next = this.departmentsSignal().filter((dept) => dept !== name);
+    this.departmentsSignal.set(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
   private loadDepartments(): string[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {

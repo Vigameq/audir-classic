@@ -23,29 +23,52 @@
         <button class="primary" type="submit">Add</button>
       </form>
       <div class="tag-list">
-        <span class="tag" *ngFor="let department of departments">{{ department }}</span>
+        <span class="tag" *ngFor="let department of departments">
+          {{ department }}
+          <button type="button" class="remove" (click)="removeDepartment(department)">×</button>
+        </span>
       </div>
     </article>
 
     <article class="settings-card">
       <h2>Sites</h2>
       <p>Define site names used across audit plans.</p>
-      <button class="ghost">Manage sites</button>
+      <form class="inline-form" #siteForm="ngForm" (ngSubmit)="addSite(siteForm)">
+        <input
+          type="text"
+          name="site"
+          [(ngModel)]="newSite"
+          placeholder="Add site name"
+          required
+        />
+        <button class="primary" type="submit">Add</button>
+      </form>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let site of sites">
+          {{ site }}
+          <button type="button" class="remove" (click)="removeSite(site)">×</button>
+        </span>
+      </div>
     </article>
     <article class="settings-card">
       <h2>Regions</h2>
       <p>Maintain regional groupings for reporting.</p>
-      <button class="ghost">Manage regions</button>
-    </article>
-    <article class="settings-card">
-      <h2>Audit templates</h2>
-      <p>Configure audit types and default checklists.</p>
-      <button class="ghost">Manage templates</button>
-    </article>
-    <article class="settings-card">
-      <h2>Access defaults</h2>
-      <p>Set role defaults and onboarding policies.</p>
-      <button class="ghost">Edit defaults</button>
+      <form class="inline-form" #regionForm="ngForm" (ngSubmit)="addRegion(regionForm)">
+        <input
+          type="text"
+          name="region"
+          [(ngModel)]="newRegion"
+          placeholder="Add region name"
+          required
+        />
+        <button class="primary" type="submit">Add</button>
+      </form>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let region of regions">
+          {{ region }}
+          <button type="button" class="remove" (click)="removeRegion(region)">×</button>
+        </span>
+      </div>
     </article>
   </div>
 </section>

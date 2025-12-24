@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DepartmentService } from '../../services/department.service';
+import { RegionService } from '../../services/region.service';
+import { SiteService } from '../../services/site.service';
 
 @Component({
   selector: 'app-settings',
@@ -11,10 +13,22 @@ import { DepartmentService } from '../../services/department.service';
 })
 export class Settings {
   private readonly departmentService = inject(DepartmentService);
+  private readonly siteService = inject(SiteService);
+  private readonly regionService = inject(RegionService);
   protected newDepartment = '';
+  protected newSite = '';
+  protected newRegion = '';
 
   protected get departments(): string[] {
     return this.departmentService.departments();
+  }
+
+  protected get sites(): string[] {
+    return this.siteService.sites();
+  }
+
+  protected get regions(): string[] {
+    return this.regionService.regions();
   }
 
   protected addDepartment(form: NgForm): void {
@@ -25,5 +39,37 @@ export class Settings {
     this.departmentService.addDepartment(value);
     this.newDepartment = '';
     form.resetForm();
+  }
+
+  protected removeDepartment(name: string): void {
+    this.departmentService.removeDepartment(name);
+  }
+
+  protected addSite(form: NgForm): void {
+    const value = this.newSite.trim();
+    if (!value) {
+      return;
+    }
+    this.siteService.addSite(value);
+    this.newSite = '';
+    form.resetForm();
+  }
+
+  protected removeSite(name: string): void {
+    this.siteService.removeSite(name);
+  }
+
+  protected addRegion(form: NgForm): void {
+    const value = this.newRegion.trim();
+    if (!value) {
+      return;
+    }
+    this.regionService.addRegion(value);
+    this.newRegion = '';
+    form.resetForm();
+  }
+
+  protected removeRegion(name: string): void {
+    this.regionService.removeRegion(name);
   }
 }
