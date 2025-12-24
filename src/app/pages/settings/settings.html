@@ -1,0 +1,51 @@
+<section class="settings">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Administration</p>
+      <h1>Settings</h1>
+      <p class="subtitle">Configure sites, regions, audit templates, and access defaults.</p>
+    </div>
+    <button class="primary">Save changes</button>
+  </header>
+
+  <div class="settings-grid">
+    <article class="settings-card wide">
+      <h2>Departments</h2>
+      <p>Create and manage departments used across the platform.</p>
+      <form class="inline-form" #departmentForm="ngForm" (ngSubmit)="addDepartment(departmentForm)">
+        <input
+          type="text"
+          name="department"
+          [(ngModel)]="newDepartment"
+          placeholder="Add department name"
+          required
+        />
+        <button class="primary" type="submit">Add</button>
+      </form>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let department of departments">{{ department }}</span>
+      </div>
+    </article>
+
+    <article class="settings-card">
+      <h2>Sites</h2>
+      <p>Define site names used across audit plans.</p>
+      <button class="ghost">Manage sites</button>
+    </article>
+    <article class="settings-card">
+      <h2>Regions</h2>
+      <p>Maintain regional groupings for reporting.</p>
+      <button class="ghost">Manage regions</button>
+    </article>
+    <article class="settings-card">
+      <h2>Audit templates</h2>
+      <p>Configure audit types and default checklists.</p>
+      <button class="ghost">Manage templates</button>
+    </article>
+    <article class="settings-card">
+      <h2>Access defaults</h2>
+      <p>Set role defaults and onboarding policies.</p>
+      <button class="ghost">Edit defaults</button>
+    </article>
+  </div>
+</section>

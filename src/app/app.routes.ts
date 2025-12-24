@@ -29,6 +29,11 @@ export const routes: Routes = [
     title: 'User Management',
   },
   {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings').then((m) => m.Settings),
+    title: 'Settings',
+  },
+  {
     path: 'auditor',
     loadComponent: () => import('./pages/auditor/auditor').then((m) => m.Auditor),
     title: 'Auditor Workspace',

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { DepartmentService } from '../../services/department.service';
+import { User, UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-audit-plan',
@@ -8,7 +10,10 @@ import { FormsModule, NgForm } from '@angular/forms';
   templateUrl: './audit-plan.html',
   styleUrl: './audit-plan.scss',
 })
-export class AuditPlan {
+export class AuditPlan implements OnInit {
+  private readonly userService = inject(UserService);
+  private readonly departmentService = inject(DepartmentService);
+
   protected noteChars = 0;
   protected auditForm = {
     startDate: '',
@@ -23,6 +28,7 @@ export class AuditPlan {
     region: '',
     auditNote: '',
   };
+  protected auditors: User[] = [];
 
   protected readonly auditTypes = [
     'Internal',
@@ -158,6 +164,18 @@ export class AuditPlan {
 
   protected updateNoteChars(value: string): void {
     this.noteChars = value.length;
+  }
+
+  protected get departments(): string[] {
+    return this.departmentService.departments();
+  }
+
+  ngOnInit(): void {
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        this.auditors = users.filter((user) => user.role === 'Auditor');
+      },
+    });
   }
 
   protected cancel(form: NgForm): void {

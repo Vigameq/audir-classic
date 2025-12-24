@@ -50,21 +50,21 @@
     </div>
     <div class="field">
       <label>Auditor Name</label>
-      <input
-        type="text"
-        name="auditorName"
-        [(ngModel)]="auditForm.auditorName"
-        placeholder="Optional auditor name"
-      />
+      <select name="auditorName" [(ngModel)]="auditForm.auditorName">
+        <option value="">Select auditor</option>
+        <option *ngFor="let auditor of auditors" [value]="auditor.email">
+          {{ auditor.first_name }} {{ auditor.last_name }}
+        </option>
+      </select>
     </div>
     <div class="field">
       <label>Department</label>
-      <input
-        type="text"
-        name="department"
-        [(ngModel)]="auditForm.department"
-        placeholder="Optional department"
-      />
+      <select name="department" [(ngModel)]="auditForm.department">
+        <option value="">Select department</option>
+        <option *ngFor="let department of departments" [value]="department">
+          {{ department }}
+        </option>
+      </select>
     </div>
     <div class="field">
       <label>Location (City)</label>
