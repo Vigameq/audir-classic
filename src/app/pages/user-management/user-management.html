@@ -7,7 +7,7 @@
     </div>
     <div class="header-actions">
       <button class="ghost">Export</button>
-      <button class="primary" (click)="openInvite()">Invite user</button>
+      <button class="primary" (click)="openInvite()">Onboard user</button>
     </div>
   </header>
 
@@ -33,40 +33,26 @@
       <span>Role</span>
       <span>Status</span>
       <span>Last active</span>
+      <span>Actions</span>
     </div>
-    <div class="table-row">
-      <span>Riya Patel</span>
-      <span>riya@audir.com</span>
-      <span>—</span>
-      <span>Risk & compliance</span>
-      <span>Auditor</span>
-      <span class="status active">Active</span>
-      <span>Today</span>
-    </div>
-    <div class="table-row">
-      <span>Lucas Martin</span>
-      <span>lucas@audir.com</span>
-      <span>+1 415 555 0104</span>
-      <span>Infrastructure</span>
-      <span>Manager</span>
-      <span class="status active">Active</span>
-      <span>Yesterday</span>
-    </div>
-    <div class="table-row">
-      <span>Amara Singh</span>
-      <span>amara@audir.com</span>
-      <span>—</span>
-      <span>Executive</span>
-      <span>Super Admin</span>
-      <span class="status">Pending</span>
-      <span>2 days ago</span>
+    <div class="table-row" *ngFor="let user of users">
+      <span>{{ user.firstName }} {{ user.lastName }}</span>
+      <span>{{ user.email }}</span>
+      <span>{{ user.phone || '—' }}</span>
+      <span>{{ user.department }}</span>
+      <span>{{ user.role }}</span>
+      <span class="status" [class.active]="user.status === 'Active'">{{ user.status }}</span>
+      <span>{{ user.lastActive }}</span>
+      <span>
+        <button class="ghost small" type="button" (click)="openEdit(user)">Edit</button>
+      </span>
     </div>
   </section>
 
   <div class="modal-backdrop" *ngIf="showInviteModal">
     <div class="modal">
       <header>
-        <h2>Invite user</h2>
+        <h2>Onboard user</h2>
         <button class="icon" type="button" (click)="closeInvite()">Close</button>
       </header>
       <form class="modal-form">
@@ -115,7 +101,62 @@
       </form>
       <footer>
         <button class="ghost" type="button" (click)="closeInvite()">Cancel</button>
-        <button class="primary" type="button">Send invite</button>
+        <button class="primary" type="button">Onboard user</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showEditModal && selectedUser">
+    <div class="modal">
+      <header>
+        <h2>Edit user</h2>
+        <button class="icon" type="button" (click)="closeEdit()">Close</button>
+      </header>
+      <form class="modal-form">
+        <div class="field">
+          <label>First name <span class="req">*</span></label>
+          <input type="text" [value]="selectedUser.firstName" required />
+        </div>
+        <div class="field">
+          <label>Last name <span class="req">*</span></label>
+          <input type="text" [value]="selectedUser.lastName" required />
+        </div>
+        <div class="field">
+          <label>Email ID</label>
+          <input type="email" [value]="selectedUser.email" disabled />
+        </div>
+        <div class="field">
+          <label>Phone number</label>
+          <input type="tel" [value]="selectedUser.phone || ''" placeholder="Optional" />
+        </div>
+        <div class="field">
+          <label>Department <span class="req">*</span></label>
+          <input type="text" [value]="selectedUser.department" required />
+        </div>
+        <div class="field">
+          <label>Role <span class="req">*</span></label>
+          <select required>
+            <option [selected]="selectedUser.role === 'Auditor'">Auditor</option>
+            <option [selected]="selectedUser.role === 'Manager'">Manager</option>
+            <option [selected]="selectedUser.role === 'Super Admin'">Super Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status <span class="req">*</span></label>
+          <select required>
+            <option [selected]="selectedUser.status === 'Active'">Active</option>
+            <option [selected]="selectedUser.status === 'Pending'">Pending</option>
+            <option [selected]="selectedUser.status === 'Suspended'">Suspended</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Last active</label>
+          <input type="text" [value]="selectedUser.lastActive" disabled />
+        </div>
+      </form>
+      <footer>
+        <button class="ghost" type="button" (click)="closeEdit()">Cancel</button>
+        <button class="primary" type="button">Save changes</button>
       </footer>
     </div>
   </div>

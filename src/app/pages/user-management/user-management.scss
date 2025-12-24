@@ -53,6 +53,11 @@ button.ghost {
   border-color: rgba(255, 154, 0, 0.35);
 }
 
+button.small {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+}
+
 .panel {
   background: #ffffff;
   border-radius: 1.5rem;
@@ -87,7 +92,7 @@ select {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1.2fr 1.6fr 1.2fr 1.2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.2fr 1.6fr 1.2fr 1.2fr 1fr 1fr 1fr 0.8fr;
   gap: 0.5rem;
   padding: 0.7rem 0.5rem;
   border-bottom: 1px solid rgba(20, 10, 0, 0.06);
