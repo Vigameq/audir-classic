@@ -6,8 +6,7 @@
       <div class="brand-subtitle">Enterprise audit workspace</div>
     </div>
   </div>
-  <nav class="app-nav">
-    <a routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Login</a>
+  <nav class="app-nav" *ngIf="auth.isLoggedIn()">
     <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
     <a routerLink="/audit-plan" routerLinkActive="active">Audit Plan</a>
     <a routerLink="/user-management" routerLinkActive="active">User Management</a>
