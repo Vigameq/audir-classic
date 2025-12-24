@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
 
 type UserRow = {
   firstName: string;
@@ -14,7 +15,7 @@ type UserRow = {
 
 @Component({
   selector: 'app-user-management',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
 })
@@ -22,6 +23,16 @@ export class UserManagement {
   protected showInviteModal = false;
   protected showEditModal = false;
   protected selectedUser: UserRow | null = null;
+  protected onboardForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    department: '',
+    role: '',
+    status: '',
+    password: '',
+  };
 
   protected readonly users: UserRow[] = [
     {
@@ -59,6 +70,24 @@ export class UserManagement {
   }
 
   protected closeInvite(): void {
+    this.showInviteModal = false;
+  }
+
+  protected onboardUser(form: NgForm): void {
+    if (form.invalid) {
+      return;
+    }
+    this.users.unshift({
+      firstName: this.onboardForm.firstName,
+      lastName: this.onboardForm.lastName,
+      email: this.onboardForm.email,
+      phone: this.onboardForm.phone || undefined,
+      department: this.onboardForm.department,
+      role: this.onboardForm.role,
+      status: this.onboardForm.status,
+      lastActive: 'Just now',
+    });
+    form.resetForm();
     this.showInviteModal = false;
   }
 

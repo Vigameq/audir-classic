@@ -43,8 +43,9 @@
       <span>{{ user.role }}</span>
       <span class="status" [class.active]="user.status === 'Active'">{{ user.status }}</span>
       <span>{{ user.lastActive }}</span>
-      <span>
+      <span class="actions">
         <button class="ghost small" type="button" (click)="openEdit(user)">Edit</button>
+        <button class="ghost small" type="button">Reset password</button>
       </span>
     </div>
   </section>
@@ -55,30 +56,59 @@
         <h2>Onboard user</h2>
         <button class="icon" type="button" (click)="closeInvite()">Close</button>
       </header>
-      <form class="modal-form">
+      <form class="modal-form" #onboardFormRef="ngForm">
         <div class="field">
           <label>First name <span class="req">*</span></label>
-          <input type="text" placeholder="First name" required />
+          <input
+            type="text"
+            name="firstName"
+            [(ngModel)]="onboardForm.firstName"
+            placeholder="First name"
+            required
+          />
         </div>
         <div class="field">
           <label>Last name <span class="req">*</span></label>
-          <input type="text" placeholder="Last name" required />
+          <input
+            type="text"
+            name="lastName"
+            [(ngModel)]="onboardForm.lastName"
+            placeholder="Last name"
+            required
+          />
         </div>
         <div class="field">
           <label>Email ID <span class="req">*</span></label>
-          <input type="email" placeholder="name@company.com" required />
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="onboardForm.email"
+            placeholder="name@company.com"
+            required
+          />
         </div>
         <div class="field">
           <label>Phone number</label>
-          <input type="tel" placeholder="Optional" />
+          <input
+            type="tel"
+            name="phone"
+            [(ngModel)]="onboardForm.phone"
+            placeholder="Optional"
+          />
         </div>
         <div class="field">
           <label>Department <span class="req">*</span></label>
-          <input type="text" placeholder="Department" required />
+          <input
+            type="text"
+            name="department"
+            [(ngModel)]="onboardForm.department"
+            placeholder="Department"
+            required
+          />
         </div>
         <div class="field">
           <label>Role <span class="req">*</span></label>
-          <select required>
+          <select name="role" [(ngModel)]="onboardForm.role" required>
             <option value="">Select role</option>
             <option>Auditor</option>
             <option>Manager</option>
@@ -86,8 +116,18 @@
           </select>
         </div>
         <div class="field">
+          <label>Create password <span class="req">*</span></label>
+          <input
+            type="password"
+            name="password"
+            [(ngModel)]="onboardForm.password"
+            placeholder="Set a temporary password"
+            required
+          />
+        </div>
+        <div class="field">
           <label>Status <span class="req">*</span></label>
-          <select required>
+          <select name="status" [(ngModel)]="onboardForm.status" required>
             <option value="">Select status</option>
             <option>Active</option>
             <option>Pending</option>
@@ -101,7 +141,14 @@
       </form>
       <footer>
         <button class="ghost" type="button" (click)="closeInvite()">Cancel</button>
-        <button class="primary" type="button">Onboard user</button>
+        <button
+          class="primary"
+          type="button"
+          [disabled]="onboardFormRef.invalid"
+          (click)="onboardUser(onboardFormRef)"
+        >
+          Onboard user
+        </button>
       </footer>
     </div>
   </div>
