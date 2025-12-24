@@ -2,8 +2,8 @@
   <header class="plan-header">
     <div>
       <p class="eyebrow">Audit planning</p>
-      <h1>Audit plan details</h1>
-      <p class="subtitle">Capture the key details needed to manage the audit plan.</p>
+      <h1>Audit plan workspace</h1>
+      <p class="subtitle">Structure scope, ownership, and schedule in one view.</p>
     </div>
     <div class="header-actions">
       <button class="ghost" type="button" (click)="cancel(planForm)">Cancel</button>
@@ -13,114 +13,193 @@
     </div>
   </header>
 
-  <form class="plan-form" #planForm="ngForm">
-    <div class="field">
-      <label>Start Date <span class="req">*</span></label>
-      <input
-        type="date"
-        name="startDate"
-        [(ngModel)]="auditForm.startDate"
-        [min]="today"
-        required
-      />
-    </div>
-    <div class="field">
-      <label>End Date <span class="req">*</span></label>
-      <input
-        type="date"
-        name="endDate"
-        [(ngModel)]="auditForm.endDate"
-        [min]="auditForm.startDate || today"
-        required
-      />
-    </div>
-    <div class="field">
-      <label>Audit Type <span class="req">*</span></label>
-      <select name="auditType" [(ngModel)]="auditForm.auditType" required>
-        <option value="">Select audit type</option>
-        <option *ngFor="let type of auditTypes" [value]="type">{{ type }}</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Audit Subtype</label>
-      <input
-        type="text"
-        name="auditSubtype"
-        [(ngModel)]="auditForm.auditSubtype"
-        placeholder="Optional subtype"
-      />
-    </div>
-    <div class="field">
-      <label>Auditor Name</label>
-      <select name="auditorName" [(ngModel)]="auditForm.auditorName">
-        <option value="">Select auditor</option>
-        <option *ngFor="let auditor of auditors" [value]="auditor.email">
-          {{ auditor.first_name }} {{ auditor.last_name }}
-        </option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Department</label>
-      <select name="department" [(ngModel)]="auditForm.department">
-        <option value="">Select department</option>
-        <option *ngFor="let department of departments" [value]="department">
-          {{ department }}
-        </option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Location (City)</label>
-      <input
-        type="text"
-        list="city-list"
-        placeholder="Select or type city"
-        name="locationCity"
-        [(ngModel)]="auditForm.locationCity"
-        [disabled]="!auditForm.country"
-      />
-      <datalist id="city-list">
-        <option *ngFor="let city of cities" [value]="city"></option>
-      </datalist>
-    </div>
-    <div class="field">
-      <label>Site</label>
-      <select name="site" [(ngModel)]="auditForm.site">
-        <option value="">Select site</option>
-        <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
-      </select>
-      <small>Optional. Sites are configured in Settings.</small>
-    </div>
-    <div class="field">
-      <label>Country</label>
-      <select [(ngModel)]="auditForm.country" name="country">
-        <option value="">Select country</option>
-        <option value="India">India</option>
-        <option value="USA">USA</option>
-        <option value="Canada">Canada</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Region</label>
-      <select name="region" [(ngModel)]="auditForm.region">
-        <option value="">Select region</option>
-        <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
-      </select>
-      <small>Optional. Regions are configured in Settings.</small>
-    </div>
-    <div class="field full">
-      <label>Audit Note</label>
-      <textarea
-        rows="6"
-        maxlength="100"
-        placeholder="Add up to 100 characters"
-        name="auditNote"
-        [(ngModel)]="auditForm.auditNote"
-        (input)="updateNoteChars(auditForm.auditNote)"
-      ></textarea>
-      <div class="note-meta">
-        <span>Optional. Add context or special instructions.</span>
-        <span [class.limit]="noteChars >= 100">{{ noteChars }}/100 characters</span>
+  <div class="plan-layout">
+    <form class="plan-form" #planForm="ngForm">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Timeline</h2>
+            <p>Set the key dates for kickoff and completion.</p>
+          </div>
+          <span class="pill">Required</span>
+        </div>
+        <div class="grid two">
+          <div class="field">
+            <label>Start Date <span class="req">*</span></label>
+            <input
+              type="date"
+              name="startDate"
+              [(ngModel)]="auditForm.startDate"
+              [min]="today"
+              required
+            />
+          </div>
+          <div class="field">
+            <label>End Date <span class="req">*</span></label>
+            <input
+              type="date"
+              name="endDate"
+              [(ngModel)]="auditForm.endDate"
+              [min]="auditForm.startDate || today"
+              required
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Audit type</h2>
+            <p>Define the audit category and owner.</p>
+          </div>
+        </div>
+        <div class="grid two">
+          <div class="field">
+            <label>Audit Type <span class="req">*</span></label>
+            <select name="auditType" [(ngModel)]="auditForm.auditType" required>
+              <option value="">Select audit type</option>
+              <option *ngFor="let type of auditTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Audit Subtype</label>
+            <input
+              type="text"
+              name="auditSubtype"
+              [(ngModel)]="auditForm.auditSubtype"
+              placeholder="Optional subtype"
+            />
+          </div>
+          <div class="field">
+            <label>Auditor Name</label>
+            <select name="auditorName" [(ngModel)]="auditForm.auditorName">
+              <option value="">Select auditor</option>
+              <option *ngFor="let auditor of auditors" [value]="auditor.email">
+                {{ auditor.first_name }} {{ auditor.last_name }}
+              </option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Department</label>
+            <select name="department" [(ngModel)]="auditForm.department">
+              <option value="">Select department</option>
+              <option *ngFor="let department of departments" [value]="department">
+                {{ department }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Location</h2>
+            <p>Clarify where this audit takes place.</p>
+          </div>
+        </div>
+        <div class="grid three">
+          <div class="field">
+            <label>Country</label>
+            <select [(ngModel)]="auditForm.country" name="country">
+              <option value="">Select country</option>
+              <option value="India">India</option>
+              <option value="USA">USA</option>
+              <option value="Canada">Canada</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Location (City)</label>
+            <input
+              type="text"
+              list="city-list"
+              placeholder="Select or type city"
+              name="locationCity"
+              [(ngModel)]="auditForm.locationCity"
+              [disabled]="!auditForm.country"
+            />
+            <datalist id="city-list">
+              <option *ngFor="let city of cities" [value]="city"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label>Site</label>
+            <select name="site" [(ngModel)]="auditForm.site">
+              <option value="">Select site</option>
+              <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Region</label>
+            <select name="region" [(ngModel)]="auditForm.region">
+              <option value="">Select region</option>
+              <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Audit note</h2>
+            <p>Optional note for the audit scope (100 characters max).</p>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Audit Note</label>
+          <textarea
+            rows="5"
+            maxlength="100"
+            placeholder="Add up to 100 characters"
+            name="auditNote"
+            [(ngModel)]="auditForm.auditNote"
+            (input)="updateNoteChars(auditForm.auditNote)"
+          ></textarea>
+          <div class="note-meta">
+            <span>Optional. Add context or special instructions.</span>
+            <span [class.limit]="noteChars >= 100">{{ noteChars }}/100 characters</span>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="summary-card">
+      <div class="summary-header">
+        <h3>Audit summary</h3>
+        <span class="pill light">Live preview</span>
       </div>
-    </div>
-  </form>
+      <div class="summary-row">
+        <span>Audit type</span>
+        <strong>{{ auditForm.auditType || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Auditor</span>
+        <strong>{{ auditForm.auditorName || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Dates</span>
+        <strong>
+          {{ auditForm.startDate || '—' }} → {{ auditForm.endDate || '—' }}
+        </strong>
+      </div>
+      <div class="summary-row">
+        <span>Location</span>
+        <strong>
+          {{ auditForm.locationCity || '—' }} {{ auditForm.country || '' }}
+        </strong>
+      </div>
+      <div class="summary-row">
+        <span>Status</span>
+        <strong>Draft</strong>
+      </div>
+      <div class="summary-actions">
+        <button class="ghost" type="button" (click)="cancel(planForm)">Clear</button>
+        <button class="primary" type="button" (click)="createAudit(planForm)">
+          Create Audit
+        </button>
+      </div>
+    </aside>
+  </div>
 </section>
