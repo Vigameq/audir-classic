@@ -5,7 +5,6 @@
       <h1>Settings</h1>
       <p class="subtitle">Configure sites, regions, audit templates, and access defaults.</p>
     </div>
-    <button class="primary">Save changes</button>
   </header>
 
   <div class="settings-grid">
@@ -67,6 +66,30 @@
         <span class="tag" *ngFor="let region of regions">
           {{ region }}
           <button type="button" class="remove" (click)="removeRegion(region)">×</button>
+        </span>
+      </div>
+    </article>
+    <article class="settings-card">
+      <h2>Response Type</h2>
+      <p>Configure default response options.</p>
+      <form
+        class="inline-form"
+        #responseTypeForm="ngForm"
+        (ngSubmit)="addResponseType(responseTypeForm)"
+      >
+        <input
+          type="text"
+          name="responseType"
+          [(ngModel)]="newResponseType"
+          placeholder="Add response type"
+          required
+        />
+        <button class="primary" type="submit">Add</button>
+      </form>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let responseType of responseTypes">
+          {{ responseType }}
+          <button type="button" class="remove" (click)="removeResponseType(responseType)">×</button>
         </span>
       </div>
     </article>
