@@ -56,7 +56,7 @@
       <span>{{ audit.region || '—' }}</span>
       <span>{{ audit.auditNote || '—' }}</span>
       <span>
-        <button class="ghost small" type="button" (click)="openPerform(audit)">Perform</button>
+        <button class="primary small" type="button" (click)="openPerform(audit)">Perform</button>
       </span>
     </div>
     <div class="empty" *ngIf="!audits.length">
