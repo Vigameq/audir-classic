@@ -210,6 +210,7 @@ export class AuditPlan implements OnInit {
       country: '',
       region: '',
       auditNote: '',
+      responseType: '',
     };
     this.noteChars = 0;
     form.resetForm(this.auditForm);
