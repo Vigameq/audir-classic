@@ -6,8 +6,21 @@
       <p class="subtitle">Review and execute all created audit plans.</p>
     </div>
     <div class="header-actions">
-      <button class="ghost">Export</button>
-      <button class="primary">New audit</button>
+      <label class="filter">
+        From
+        <input type="date" [(ngModel)]="filterStart" name="filterStart" />
+      </label>
+      <label class="filter">
+        To
+        <input type="date" [(ngModel)]="filterEnd" name="filterEnd" />
+      </label>
+      <label class="filter">
+        Sort
+        <select [(ngModel)]="sortOrder" name="sortOrder">
+          <option value="desc">Newest first</option>
+          <option value="asc">Oldest first</option>
+        </select>
+      </label>
     </div>
   </header>
 
@@ -28,6 +41,7 @@
       <span>Site</span>
       <span>Region</span>
       <span>Note</span>
+      <span>Action</span>
     </div>
     <div class="table-row" *ngFor="let audit of audits">
       <span class="code">{{ audit.code }}</span>
@@ -41,9 +55,36 @@
       <span>{{ audit.site || '—' }}</span>
       <span>{{ audit.region || '—' }}</span>
       <span>{{ audit.auditNote || '—' }}</span>
+      <span>
+        <button class="ghost small" type="button" (click)="openPerform(audit)">Perform</button>
+      </span>
     </div>
     <div class="empty" *ngIf="!audits.length">
       No audits created yet. Create one in Audit Plan.
     </div>
   </section>
+
+  <div class="drawer-backdrop" *ngIf="activeAudit">
+    <aside class="drawer">
+      <header class="drawer-header">
+        <div>
+          <h2>Audit perform</h2>
+          <p class="subtitle">
+            {{ activeAudit.auditType }} · {{ activeAudit.code }}
+          </p>
+        </div>
+        <button class="ghost small" type="button" (click)="closePerform()">Close</button>
+      </header>
+
+      <section class="drawer-content">
+        <h3>Template questions</h3>
+        <div class="empty" *ngIf="!activeTemplate">
+          No template found for this audit type.
+        </div>
+        <ol class="question-list" *ngIf="activeTemplate">
+          <li *ngFor="let question of activeTemplate.questions">{{ question }}</li>
+        </ol>
+      </section>
+    </aside>
+  </div>
 </section>
