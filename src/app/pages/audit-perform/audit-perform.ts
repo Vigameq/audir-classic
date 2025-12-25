@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
+import { DepartmentService } from '../../services/department.service';
 import { ResponseService } from '../../services/response.service';
 import { TemplateRecord, TemplateService } from '../../services/template.service';
 
@@ -15,6 +16,7 @@ export class AuditPerform {
   private readonly auditPlanService = inject(AuditPlanService);
   private readonly templateService = inject(TemplateService);
   private readonly responseService = inject(ResponseService);
+  private readonly departmentService = inject(DepartmentService);
 
   protected get audits() {
     const audits = this.auditPlanService.plans();
@@ -46,6 +48,7 @@ export class AuditPerform {
   protected responseOptions: string[] = [];
   protected responseSelections: string[] = [];
   protected noteWords: number[] = [];
+  protected ncAssignments: string[] = [];
   protected filterStart = '';
   protected filterEnd = '';
   protected sortOrder: 'asc' | 'desc' = 'desc';
@@ -63,6 +66,9 @@ export class AuditPerform {
     this.noteWords = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(0)
       : [];
+    this.ncAssignments = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
   }
 
   protected closePerform(): void {
@@ -71,6 +77,11 @@ export class AuditPerform {
     this.responseOptions = [];
     this.responseSelections = [];
     this.noteWords = [];
+    this.ncAssignments = [];
+  }
+
+  protected get departments(): string[] {
+    return this.departmentService.departments();
   }
 
   protected countWords(value: string): number {

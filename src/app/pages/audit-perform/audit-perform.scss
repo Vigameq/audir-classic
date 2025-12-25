@@ -209,6 +209,25 @@ button.small {
   gap: 0.5rem;
 }
 
+.nc-row {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.nc-row label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.nc-row select {
+  font: inherit;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
 .note-row {
   display: grid;
   gap: 0.4rem;
