@@ -6,7 +6,7 @@
       <p class="subtitle">Import spreadsheet questions for audit execution.</p>
     </div>
     <div class="header-actions">
-      <button class="ghost" type="button" (click)="openImportModal()">
+      <button class="primary" type="button" (click)="openImportModal()">
         Import
       </button>
     </div>
@@ -21,7 +21,11 @@
       <article class="template-item" *ngFor="let template of templates">
         <div>
           <h3>{{ template.name }}</h3>
-          <p>{{ template.questions.length }} questions · {{ template.tags.length }} tags</p>
+          <p>{{ template.questions.length }} questions</p>
+          <p class="note-text" *ngIf="template.note">{{ template.note }}</p>
+          <div class="tag-list" *ngIf="template.tags.length">
+            <span class="tag" *ngFor="let tag of template.tags">{{ tag }}</span>
+          </div>
         </div>
         <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
       </article>
