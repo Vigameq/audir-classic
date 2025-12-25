@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { TemplateService } from '../../services/template.service';
 
 @Component({
   selector: 'app-templates',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './templates.html',
   styleUrl: './templates.scss',
 })
@@ -36,18 +37,17 @@ export class Templates {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1 });
-      const questions = rows
-        .map((row) => String(row[0] ?? '').trim())
-        .filter((value, index) => {
-          if (!value) {
-            return false;
-          }
-          if (index === 0 && value.toLowerCase() === 'question') {
-            return false;
-          }
-          return true;
-        });
+      const rows: unknown[][] = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1 });
+      const normalized: string[] = rows.map((row: unknown[]) => String(row[0] ?? '').trim());
+      const questions: string[] = normalized.filter((value: string, index: number) => {
+        if (!value) {
+          return false;
+        }
+        if (index === 0 && value.toLowerCase() === 'question') {
+          return false;
+        }
+        return true;
+      });
       this.templateService.setQuestions(questions);
     } catch {
       this.importError = 'Unable to read the spreadsheet. Please upload a valid .xlsx file.';
