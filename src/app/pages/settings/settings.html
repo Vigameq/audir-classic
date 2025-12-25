@@ -76,7 +76,9 @@
       <div class="response-list" *ngIf="responses.length">
         <div class="response-item" *ngFor="let response of responses">
           <strong>{{ response.name }}</strong>
-          <span class="tag">{{ response.type }}</span>
+          <div class="tag-list">
+            <span class="tag" *ngFor="let tag of response.types">{{ tag }}</span>
+          </div>
         </div>
       </div>
     </article>
@@ -95,7 +97,21 @@
         </label>
         <label class="field">
           Response type
-          <input type="text" [(ngModel)]="responseType" placeholder="Type tag" />
+          <div class="tag-input">
+            <input
+              type="text"
+              [(ngModel)]="responseTypeInput"
+              placeholder="Type tag"
+              name="responseTypeInput"
+            />
+            <button class="ghost" type="button" (click)="addResponseType()">Add tag</button>
+          </div>
+          <div class="tag-list" *ngIf="responseTypes.length">
+            <span class="tag" *ngFor="let tag of responseTypes">
+              {{ tag }}
+              <button type="button" class="remove" (click)="removeResponseType(tag)">×</button>
+            </span>
+          </div>
         </label>
       </div>
       <footer>

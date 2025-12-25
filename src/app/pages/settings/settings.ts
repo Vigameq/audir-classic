@@ -20,8 +20,9 @@ export class Settings {
   protected newRegion = '';
   protected showResponseModal = false;
   protected responseName = '';
-  protected responseType = '';
-  protected responses: { name: string; type: string }[] = [];
+  protected responseTypeInput = '';
+  protected responseTypes: string[] = [];
+  protected responses: { name: string; types: string[] }[] = [];
 
   protected get departments(): string[] {
     return this.departmentService.departments();
@@ -85,17 +86,34 @@ export class Settings {
   protected closeResponseModal(): void {
     this.showResponseModal = false;
     this.responseName = '';
-    this.responseType = '';
+    this.responseTypeInput = '';
+    this.responseTypes = [];
   }
 
   protected addResponse(): void {
     const name = this.responseName.trim();
-    const type = this.responseType.trim();
-    if (!name || !type) {
+    if (!name || !this.responseTypes.length) {
       return;
     }
-    this.responses = [{ name, type }, ...this.responses];
+    this.responses = [{ name, types: [...this.responseTypes] }, ...this.responses];
     this.closeResponseModal();
+  }
+
+  protected addResponseType(): void {
+    const value = this.responseTypeInput.trim();
+    if (!value) {
+      return;
+    }
+    if (this.responseTypes.includes(value)) {
+      this.responseTypeInput = '';
+      return;
+    }
+    this.responseTypes = [...this.responseTypes, value];
+    this.responseTypeInput = '';
+  }
+
+  protected removeResponseType(value: string): void {
+    this.responseTypes = this.responseTypes.filter((item) => item !== value);
   }
 
 }
