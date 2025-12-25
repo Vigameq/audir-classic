@@ -120,6 +120,13 @@
   border: 1px solid rgba(20, 10, 0, 0.08);
   background: #fffaf4;
   font-size: 0.85rem;
+  position: relative;
+}
+
+.response-item .ghost.small {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
 }
 
 .response-item strong {
