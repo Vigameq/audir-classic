@@ -5,12 +5,7 @@
       <h1>Audit Plan</h1>
       <p class="subtitle">Capture the key details needed to manage the audit plan.</p>
     </div>
-    <div class="header-actions">
-      <button class="ghost" type="button" (click)="cancel(planForm)">Cancel</button>
-      <button class="primary" type="button" (click)="createAudit(planForm)">
-        Create Audit
-      </button>
-    </div>
+    <div class="header-actions"></div>
   </header>
 
   <div class="plan-layout">
@@ -215,6 +210,12 @@
       <div class="summary-row">
         <span>Status</span>
         <strong>Draft</strong>
+      </div>
+      <div class="summary-actions">
+        <button class="ghost" type="button" (click)="cancel(planForm)">Cancel</button>
+        <button class="primary" type="button" (click)="createAudit(planForm)">
+          Create Audit
+        </button>
       </div>
     </aside>
   </div>
