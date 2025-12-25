@@ -70,7 +70,8 @@
         <div>
           <h2>Audit perform</h2>
           <p class="subtitle">
-            {{ activeAudit.auditType }} · {{ activeAudit.code }}
+            {{ activeAudit.auditType }} · {{ activeAudit.code }} ·
+            {{ activeAudit.responseType || 'Response type not set' }}
           </p>
         </div>
         <button class="ghost small" type="button" (click)="closePerform()">Close</button>
