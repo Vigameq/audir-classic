@@ -12,21 +12,6 @@
     </div>
   </header>
 
-  <section class="panel">
-    <div class="panel-header">
-      <h2>Questions</h2>
-      <span class="count">{{ questions.length }} total</span>
-    </div>
-    <p class="error" *ngIf="importError">{{ importError }}</p>
-    <div class="loading" *ngIf="isImporting">Importing…</div>
-    <ol class="question-list" *ngIf="questions.length">
-      <li *ngFor="let question of questions">{{ question }}</li>
-    </ol>
-    <div class="empty" *ngIf="!questions.length && !isImporting">
-      No questions imported yet.
-    </div>
-  </section>
-
   <section class="panel" *ngIf="templates.length">
     <div class="panel-header">
       <h2>Saved templates</h2>
