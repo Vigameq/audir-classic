@@ -19,6 +19,7 @@ export class Templates {
   protected noteChars = 0;
   protected tagInput = '';
   protected tags: string[] = [];
+  protected showImportModal = false;
 
   protected get questions(): string[] {
     return this.templateService.questions();
@@ -59,6 +60,14 @@ export class Templates {
 
   protected clearQuestions(): void {
     this.templateService.clear();
+  }
+
+  protected openImportModal(): void {
+    this.showImportModal = true;
+  }
+
+  protected closeImportModal(): void {
+    this.showImportModal = false;
   }
 
   protected updateNoteChars(value: string): void {
