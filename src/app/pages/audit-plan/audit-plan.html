@@ -87,6 +87,15 @@
               </option>
             </select>
           </div>
+          <div class="field">
+            <label>Response Type</label>
+            <select name="responseType" [(ngModel)]="auditForm.responseType">
+              <option value="">Select response</option>
+              <option *ngFor="let response of responses" [value]="response">
+                {{ response }}
+              </option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -105,15 +114,6 @@
               <option value="India">India</option>
               <option value="USA">USA</option>
               <option value="Canada">Canada</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Response Type</label>
-            <select name="responseType" [(ngModel)]="auditForm.responseType">
-              <option value="">Select response</option>
-              <option *ngFor="let response of responses" [value]="response">
-                {{ response }}
-              </option>
             </select>
           </div>
           <div class="field">
