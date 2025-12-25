@@ -30,7 +30,7 @@
       <span>Note</span>
     </div>
     <div class="table-row" *ngFor="let audit of audits">
-      <span class="code">Audit Code: {{ audit.code }}</span>
+      <span class="code">{{ audit.code }}</span>
       <span>{{ audit.startDate }} → {{ audit.endDate }}</span>
       <span>{{ audit.auditType }}</span>
       <span>{{ audit.auditSubtype || '—' }}</span>
