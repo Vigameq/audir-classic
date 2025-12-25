@@ -100,6 +100,14 @@ button.ghost {
   background: #ffffff;
 }
 
+.note input {
+  font: inherit;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
 .note-meta {
   display: flex;
   justify-content: space-between;
@@ -189,6 +197,37 @@ button.ghost {
   padding: 1.5rem;
   color: var(--color-muted);
   font-size: 0.9rem;
+}
+
+.template-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.8rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  background: #fffaf4;
+}
+
+.template-item h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.template-item p {
+  margin: 0.2rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.meta {
+  font-size: 0.75rem;
+  color: var(--color-muted);
 }
 
 .header-actions button:disabled {

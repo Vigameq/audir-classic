@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
-import { TemplateService } from '../../services/template.service';
+import { TemplateRecord, TemplateService } from '../../services/template.service';
 
 @Component({
   selector: 'app-templates',
@@ -20,9 +20,15 @@ export class Templates {
   protected tagInput = '';
   protected tags: string[] = [];
   protected showImportModal = false;
+  protected templateName = '';
+  protected createError = '';
 
   protected get questions(): string[] {
     return this.templateService.questions();
+  }
+
+  protected get templates(): TemplateRecord[] {
+    return this.templateService.templates();
   }
 
   protected async onFileSelected(event: Event): Promise<void> {
@@ -68,6 +74,7 @@ export class Templates {
 
   protected closeImportModal(): void {
     this.showImportModal = false;
+    this.createError = '';
   }
 
   protected updateNoteChars(value: string): void {
@@ -89,5 +96,25 @@ export class Templates {
 
   protected removeTag(tag: string): void {
     this.tags = this.tags.filter((item) => item !== tag);
+  }
+
+  protected createTemplate(): void {
+    if (!this.questions.length) {
+      this.createError = 'Import questions before creating a template.';
+      return;
+    }
+    const name = this.templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
+    this.templateService.createTemplate({
+      name,
+      note: this.importNote.trim(),
+      tags: this.tags,
+      questions: this.questions,
+    });
+    this.templateName = '';
+    this.importNote = '';
+    this.noteChars = 0;
+    this.tags = [];
+    this.createError = '';
+    this.showImportModal = false;
   }
 }

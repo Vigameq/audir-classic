@@ -27,6 +27,22 @@
     </div>
   </section>
 
+  <section class="panel" *ngIf="templates.length">
+    <div class="panel-header">
+      <h2>Saved templates</h2>
+      <span class="count">{{ templates.length }} total</span>
+    </div>
+    <div class="template-list">
+      <article class="template-item" *ngFor="let template of templates">
+        <div>
+          <h3>{{ template.name }}</h3>
+          <p>{{ template.questions.length }} questions · {{ template.tags.length }} tags</p>
+        </div>
+        <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
+      </article>
+    </div>
+  </section>
+
   <div class="modal-backdrop" *ngIf="showImportModal">
     <div class="modal">
       <header>
@@ -35,10 +51,19 @@
       </header>
       <div class="modal-body">
         <p class="hint">Upload a single-sheet .xlsx with one column of questions.</p>
-        <label class="ghost file-button">
+        <button class="ghost file-button" type="button">
           Choose file
           <input type="file" accept=".xlsx" (change)="onFileSelected($event)" />
-        </label>
+        </button>
+        <div class="note">
+          <label>Template name (optional)</label>
+          <input
+            type="text"
+            name="templateName"
+            [(ngModel)]="templateName"
+            placeholder="Template name"
+          />
+        </div>
         <div class="note">
           <label>Import note (optional)</label>
           <textarea
@@ -78,9 +103,13 @@
             </span>
           </div>
         </div>
+        <p class="error" *ngIf="createError">{{ createError }}</p>
       </div>
       <footer>
         <button class="ghost" type="button" (click)="closeImportModal()">Cancel</button>
+        <button class="primary" type="button" (click)="createTemplate()">
+          Create template
+        </button>
       </footer>
     </div>
   </div>
