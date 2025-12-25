@@ -34,6 +34,17 @@ export const routes: Routes = [
     title: 'Settings',
   },
   {
+    path: 'audit-perform',
+    loadComponent: () =>
+      import('./pages/audit-perform/audit-perform').then((m) => m.AuditPerform),
+    title: 'Audit Perform',
+  },
+  {
+    path: 'templates',
+    loadComponent: () => import('./pages/templates/templates').then((m) => m.Templates),
+    title: 'Templates',
+  },
+  {
     path: 'auditor',
     loadComponent: () => import('./pages/auditor/auditor').then((m) => m.Auditor),
     title: 'Auditor Workspace',
