@@ -74,7 +74,18 @@
             {{ activeAudit.responseType || 'Response type not set' }}
           </p>
         </div>
-        <button class="ghost small" type="button" (click)="closePerform()">Close</button>
+        <div class="drawer-meta">
+          <div class="progress">
+            <span>{{ answeredCount }}/{{ totalQuestions }} answered</span>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="totalQuestions ? (answeredCount / totalQuestions) * 100 : 0"
+              ></div>
+            </div>
+          </div>
+          <button class="ghost small" type="button" (click)="closePerform()">Close</button>
+        </div>
       </header>
 
       <section class="drawer-content">
@@ -83,9 +94,12 @@
           No template found for this audit type.
         </div>
         <ol class="question-list" *ngIf="activeTemplate">
-          <li *ngFor="let question of activeTemplate.questions; let i = index">
-            <div class="question-row">
-              <span>{{ question }}</span>
+          <li class="question-card" *ngFor="let question of activeTemplate.questions; let i = index">
+            <div class="question-header">
+              <div>
+                <span class="question-index">Q{{ i + 1 }}</span>
+                <p class="question-text">{{ question }}</p>
+              </div>
               <select [(ngModel)]="responseSelections[i]" name="response-{{ i }}">
                 <option value="">Select response</option>
                 <option *ngFor="let option of responseOptions" [value]="option">
@@ -93,32 +107,42 @@
                 </option>
               </select>
             </div>
-            <div class="evidence-row">
-              <span>Attach evidence</span>
-              <div class="evidence-actions">
-                <button class="ghost small" type="button">Upload file</button>
-                <button class="ghost small" type="button">Take photo</button>
+            <div class="question-body">
+              <div class="evidence-row">
+                <span>Attach evidence</span>
+                <div class="evidence-actions">
+                  <button class="ghost small" type="button">Upload file</button>
+                  <button class="ghost small" type="button">Take photo</button>
+                </div>
+              </div>
+              <div class="nc-row">
+                <label>Assign NC</label>
+                <select [(ngModel)]="ncAssignments[i]" name="nc-{{ i }}">
+                  <option value="">Select department</option>
+                  <option *ngFor="let department of departments" [value]="department">
+                    {{ department }}
+                  </option>
+                </select>
+              </div>
+              <div class="note-row">
+                <label>Auditor note</label>
+                <textarea
+                  rows="3"
+                  maxlength="1000"
+                  placeholder="Add up to 1000 words"
+                  (input)="noteWords[i] = countWords(note.value)"
+                  #note
+                ></textarea>
+                <span class="note-count">{{ noteWords[i] }}/1000 words</span>
               </div>
             </div>
-            <div class="nc-row">
-              <label>Assign NC</label>
-              <select [(ngModel)]="ncAssignments[i]" name="nc-{{ i }}">
-                <option value="">Select department</option>
-                <option *ngFor="let department of departments" [value]="department">
-                  {{ department }}
-                </option>
-              </select>
-            </div>
-            <div class="note-row">
-              <label>Auditor note</label>
-              <textarea
-                rows="3"
-                maxlength="1000"
-                placeholder="Add up to 1000 words"
-                (input)="noteWords[i] = countWords(note.value)"
-                #note
-              ></textarea>
-              <span class="note-count">{{ noteWords[i] }}/1000 words</span>
+            <div class="question-actions">
+              <button class="ghost small" type="button" (click)="saveQuestion(i)">
+                {{ savedQuestions[i] ? 'Saved' : 'Save' }}
+              </button>
+              <button class="primary small" type="button" (click)="submitQuestion()">
+                Submit
+              </button>
             </div>
           </li>
         </ol>

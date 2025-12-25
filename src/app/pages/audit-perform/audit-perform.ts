@@ -49,6 +49,15 @@ export class AuditPerform {
   protected responseSelections: string[] = [];
   protected noteWords: number[] = [];
   protected ncAssignments: string[] = [];
+  protected savedQuestions: boolean[] = [];
+
+  protected get totalQuestions(): number {
+    return this.activeTemplate?.questions.length ?? 0;
+  }
+
+  protected get answeredCount(): number {
+    return this.responseSelections.filter((value) => value && value.trim().length > 0).length;
+  }
   protected filterStart = '';
   protected filterEnd = '';
   protected sortOrder: 'asc' | 'desc' = 'desc';
@@ -69,6 +78,9 @@ export class AuditPerform {
     this.ncAssignments = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
+    this.savedQuestions = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(false)
+      : [];
   }
 
   protected closePerform(): void {
@@ -78,10 +90,19 @@ export class AuditPerform {
     this.responseSelections = [];
     this.noteWords = [];
     this.ncAssignments = [];
+    this.savedQuestions = [];
   }
 
   protected get departments(): string[] {
     return this.departmentService.departments();
+  }
+
+  protected saveQuestion(index: number): void {
+    this.savedQuestions[index] = true;
+  }
+
+  protected submitQuestion(): void {
+    // no-op for now
   }
 
   protected countWords(value: string): number {

@@ -153,6 +153,13 @@ button.small {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(20, 10, 0, 0.08);
 }
 
 .drawer-header h2 {
@@ -172,11 +179,72 @@ button.small {
 
 .drawer-content .question-list {
   margin: 0;
-  padding-left: 1.2rem;
+  padding: 0;
   display: grid;
   gap: 0.6rem;
   color: var(--color-muted);
   font-size: 0.95rem;
+  list-style: none;
+}
+
+.drawer-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  min-width: 180px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 0.35rem;
+  background: rgba(255, 154, 0, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-accent);
+}
+
+.question-card {
+  background: #fffaf4;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.question-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.question-index {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.question-text {
+  margin: 0.2rem 0 0;
+  color: var(--color-ink);
+}
+
+.question-body {
+  display: grid;
+  gap: 0.7rem;
 }
 
 .question-row {
@@ -250,6 +318,12 @@ button.small {
 .note-count {
   font-size: 0.75rem;
   color: var(--color-muted);
+}
+
+.question-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
 }
 
 @media (max-width: 720px) {
