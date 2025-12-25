@@ -116,4 +116,8 @@ export class Settings {
     this.responseTypes = this.responseTypes.filter((item) => item !== value);
   }
 
+  public removeResponse(name: string): void {
+    this.responses = this.responses.filter((item) => item.name !== name);
+  }
+
 }
