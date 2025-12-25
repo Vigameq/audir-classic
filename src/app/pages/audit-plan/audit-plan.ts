@@ -232,6 +232,7 @@ export class AuditPlan implements OnInit {
       country: this.auditForm.country,
       region: this.auditForm.region,
       auditNote: this.auditForm.auditNote,
+      responseType: this.auditForm.responseType,
     });
     this.cancel(form);
   }
