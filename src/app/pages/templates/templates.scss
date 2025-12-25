@@ -53,6 +53,149 @@ button.ghost {
   border-color: rgba(255, 154, 0, 0.35);
 }
 
+.file-input {
+  display: none;
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  border: 1px solid var(--color-line);
+  padding: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.count {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.note {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.note label {
+  font-size: 0.85rem;
+}
+
+.note textarea {
+  font: inherit;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
+.note-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.note-meta .limit {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.tags {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tags label {
+  font-size: 0.85rem;
+}
+
+.tag-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tag-input input {
+  flex: 1 1 220px;
+  font: inherit;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tag {
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(255, 154, 0, 0.12);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tag .remove {
+  border: none;
+  background: rgba(255, 154, 0, 0.25);
+  color: #7a4300;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.loading {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.question-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.header-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

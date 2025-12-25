@@ -3,38 +3,77 @@
     <div>
       <p class="eyebrow">Audit templates</p>
       <h1>Templates</h1>
-      <p class="subtitle">Manage reusable audit types and default control sets.</p>
+      <p class="subtitle">Import spreadsheet questions for audit execution.</p>
     </div>
     <div class="header-actions">
-      <button class="ghost">Import</button>
-      <button class="primary">Create template</button>
+      <button class="ghost" type="button" (click)="fileInput.click()">
+        Import .xlsx
+      </button>
+      <input
+        #fileInput
+        class="file-input"
+        type="file"
+        accept=".xlsx"
+        (change)="onFileSelected($event)"
+      />
+      <button class="primary" type="button" (click)="clearQuestions()" [disabled]="!questions.length">
+        Clear list
+      </button>
     </div>
   </header>
 
-  <div class="template-grid">
-    <article class="template-card">
-      <h2>ISO 27001 Core</h2>
-      <p>114 controls · 12 sections · Updated last week</p>
-      <div class="meta">
-        <span class="tag">Standard</span>
-        <span class="tag">Global</span>
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Questions</h2>
+      <span class="count">{{ questions.length }} total</span>
+    </div>
+    <p class="hint">Upload a single-sheet .xlsx with one column of questions.</p>
+    <div class="note">
+      <label>Import note (optional)</label>
+      <textarea
+        rows="2"
+        maxlength="100"
+        placeholder="Add up to 100 characters"
+        name="importNote"
+        [(ngModel)]="importNote"
+        (input)="updateNoteChars(importNote)"
+      ></textarea>
+      <div class="note-meta">
+        <span>Optional note saved with this import.</span>
+        <span [class.limit]="noteChars >= 100">{{ noteChars }}/100</span>
       </div>
-    </article>
-    <article class="template-card">
-      <h2>SOC 2 Type II</h2>
-      <p>64 controls · 5 criteria · Updated yesterday</p>
-      <div class="meta">
-        <span class="tag">Financial</span>
-        <span class="tag">Tech</span>
+    </div>
+    <div class="tags">
+      <label>Tags (up to 3)</label>
+      <div class="tag-input">
+        <input
+          type="text"
+          name="tagInput"
+          [(ngModel)]="tagInput"
+          placeholder="Add a tag"
+          [disabled]="tags.length >= 3"
+        />
+        <button class="ghost" type="button" (click)="addTag()" [disabled]="tags.length >= 3">
+          Add tag
+        </button>
       </div>
-    </article>
-    <article class="template-card">
-      <h2>Vendor Due Diligence</h2>
-      <p>28 controls · 3 sections · Updated 3 days ago</p>
-      <div class="meta">
-        <span class="tag">Third party</span>
-        <span class="tag">Risk</span>
+      <div class="note-meta">
+        <span>{{ tags.length }}/3 tags used</span>
       </div>
-    </article>
-  </div>
+      <div class="tag-list" *ngIf="tags.length">
+        <span class="tag" *ngFor="let tag of tags">
+          {{ tag }}
+          <button type="button" class="remove" (click)="removeTag(tag)">×</button>
+        </span>
+      </div>
+    </div>
+    <p class="error" *ngIf="importError">{{ importError }}</p>
+    <div class="loading" *ngIf="isImporting">Importing…</div>
+    <ol class="question-list" *ngIf="questions.length">
+      <li *ngFor="let question of questions">{{ question }}</li>
+    </ol>
+    <div class="empty" *ngIf="!questions.length && !isImporting">
+      No questions imported yet.
+    </div>
+  </section>
 </section>
