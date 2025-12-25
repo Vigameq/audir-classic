@@ -1,0 +1,14 @@
+.page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.page-header h1 {
+  font-family: var(--font-display);
+  margin: 0 0 0.5rem;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--color-muted);
+}

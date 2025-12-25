@@ -23,6 +23,23 @@ export const routes: Routes = [
     title: 'Audit Plan',
   },
   {
+    path: 'audit-manage',
+    loadComponent: () =>
+      import('./pages/audit-manage/audit-manage').then((m) => m.AuditManage),
+    title: 'Audit Manage',
+  },
+  {
+    path: 'nc-management',
+    loadComponent: () =>
+      import('./pages/nc-management/nc-management').then((m) => m.NcManagement),
+    title: 'NC Management',
+  },
+  {
+    path: 'reports',
+    loadComponent: () => import('./pages/reports/reports').then((m) => m.Reports),
+    title: 'Reports',
+  },
+  {
     path: 'user-management',
     loadComponent: () =>
       import('./pages/user-management/user-management').then((m) => m.UserManagement),
