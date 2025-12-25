@@ -239,10 +239,13 @@ button.ghost {
   color: var(--color-muted);
 }
 
-.delete {
+.template-meta {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  display: grid;
+  justify-items: end;
+  gap: 0.35rem;
 }
 
 .template-item .question-list {

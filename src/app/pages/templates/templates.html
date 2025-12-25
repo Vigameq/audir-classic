@@ -30,14 +30,16 @@
             <li *ngFor="let question of template.questions">{{ question }}</li>
           </ol>
         </div>
-        <button
-          class="ghost small delete"
-          type="button"
-          (click)="$event.stopPropagation(); deleteTemplate(template.id)"
-        >
-          Delete
-        </button>
-        <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
+        <div class="template-meta">
+          <button
+            class="ghost small delete"
+            type="button"
+            (click)="$event.stopPropagation(); deleteTemplate(template.id)"
+          >
+            Delete
+          </button>
+          <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
+        </div>
       </article>
     </div>
   </section>
