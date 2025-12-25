@@ -5,6 +5,7 @@ import { AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
 import { SiteService } from '../../services/site.service';
+import { TemplateService } from '../../services/template.service';
 import { User, UserService } from '../../services/user.service';
 
 @Component({
@@ -19,6 +20,7 @@ export class AuditPlan implements OnInit {
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
+  private readonly templateService = inject(TemplateService);
 
   protected noteChars = 0;
   protected readonly today = new Date().toISOString().split('T')[0];
@@ -37,14 +39,9 @@ export class AuditPlan implements OnInit {
   };
   protected auditors: User[] = [];
 
-  protected readonly auditTypes = [
-    'Internal',
-    'ISO 27001',
-    'SOC 2',
-    'SOX',
-    'PCI DSS',
-    'HIPAA',
-  ];
+  protected get auditTypes(): string[] {
+    return this.templateService.templates().map((template) => template.name);
+  }
 
   protected readonly citiesByCountry: Record<string, string[]> = {
     India: [

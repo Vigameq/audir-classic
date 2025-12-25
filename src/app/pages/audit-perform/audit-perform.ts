@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { TemplateRecord, TemplateService } from '../../services/template.service';
 
 @Component({
   selector: 'app-audit-perform',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './audit-perform.html',
   styleUrl: './audit-perform.scss',
 })
