@@ -93,6 +93,24 @@
                 </option>
               </select>
             </div>
+            <div class="evidence-row">
+              <span>Attach evidence</span>
+              <div class="evidence-actions">
+                <button class="ghost small" type="button">Upload file</button>
+                <button class="ghost small" type="button">Take photo</button>
+              </div>
+            </div>
+            <div class="note-row">
+              <label>Auditor note</label>
+              <textarea
+                rows="3"
+                maxlength="1000"
+                placeholder="Add up to 1000 words"
+                (input)="noteWords[i] = countWords(note.value)"
+                #note
+              ></textarea>
+              <span class="note-count">{{ noteWords[i] }}/1000 words</span>
+            </div>
           </li>
         </ol>
       </section>

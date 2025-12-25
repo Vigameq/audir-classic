@@ -45,6 +45,7 @@ export class AuditPerform {
   protected activeTemplate: TemplateRecord | null = null;
   protected responseOptions: string[] = [];
   protected responseSelections: string[] = [];
+  protected noteWords: number[] = [];
   protected filterStart = '';
   protected filterEnd = '';
   protected sortOrder: 'asc' | 'desc' = 'desc';
@@ -59,6 +60,9 @@ export class AuditPerform {
       .find((item) => item.name === audit.responseType);
     this.responseOptions = response?.types ?? [];
     this.responseSelections = [];
+    this.noteWords = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(0)
+      : [];
   }
 
   protected closePerform(): void {
@@ -66,5 +70,14 @@ export class AuditPerform {
     this.activeTemplate = null;
     this.responseOptions = [];
     this.responseSelections = [];
+    this.noteWords = [];
+  }
+
+  protected countWords(value: string): number {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return 0;
+    }
+    return trimmed.split(/\s+/).length;
   }
 }
