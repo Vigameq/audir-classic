@@ -80,7 +80,7 @@ button.small {
 
 .table-row {
   display: grid;
-  grid-template-columns: 2fr 1.4fr 1.2fr 1.2fr 1.3fr 1fr 1fr 1fr 1fr 2fr;
+  grid-template-columns: 1fr 2fr 1.4fr 1.2fr 1.2fr 1.3fr 1fr 1fr 1fr 1fr 2fr;
   gap: 0.5rem;
   padding: 0.7rem 0.5rem;
   border-bottom: 1px solid rgba(20, 10, 0, 0.06);
@@ -103,6 +103,12 @@ button.small {
   padding: 1.5rem;
   color: var(--color-muted);
   font-size: 0.9rem;
+}
+
+.code {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #7a4300;
 }
 
 @media (max-width: 720px) {

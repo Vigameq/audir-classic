@@ -17,6 +17,7 @@
       <span class="count">{{ audits.length }} total</span>
     </div>
     <div class="table-row heading">
+      <span>Audit code</span>
       <span>Dates</span>
       <span>Audit type</span>
       <span>Subtype</span>
@@ -29,6 +30,7 @@
       <span>Note</span>
     </div>
     <div class="table-row" *ngFor="let audit of audits">
+      <span class="code">Audit Code: {{ audit.code }}</span>
       <span>{{ audit.startDate }} → {{ audit.endDate }}</span>
       <span>{{ audit.auditType }}</span>
       <span>{{ audit.auditSubtype || '—' }}</span>

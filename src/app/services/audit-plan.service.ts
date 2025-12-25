@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 
 export type AuditPlanRecord = {
   id: string;
+  code: string;
   startDate: string;
   endDate: string;
   auditType: string;
@@ -29,6 +30,7 @@ export class AuditPlanService {
       {
         ...plan,
         id: crypto.randomUUID(),
+        code: this.generateCode(),
         createdAt: new Date().toISOString(),
       },
       ...this.plansSignal(),
@@ -51,5 +53,14 @@ export class AuditPlanService {
       return [];
     }
     return [];
+  }
+
+  private generateCode(): string {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = '';
+    for (let i = 0; i < 6; i += 1) {
+      code += alphabet[Math.floor(Math.random() * alphabet.length)];
+    }
+    return code;
   }
 }
