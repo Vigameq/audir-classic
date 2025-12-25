@@ -83,7 +83,17 @@
           No template found for this audit type.
         </div>
         <ol class="question-list" *ngIf="activeTemplate">
-          <li *ngFor="let question of activeTemplate.questions">{{ question }}</li>
+          <li *ngFor="let question of activeTemplate.questions; let i = index">
+            <div class="question-row">
+              <span>{{ question }}</span>
+              <select [(ngModel)]="responseSelections[i]" name="response-{{ i }}">
+                <option value="">Select response</option>
+                <option *ngFor="let option of responseOptions" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+          </li>
         </ol>
       </section>
     </aside>

@@ -179,6 +179,21 @@ button.small {
   font-size: 0.95rem;
 }
 
+.question-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.question-row select {
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
 @media (max-width: 720px) {
   .table-row {
     grid-template-columns: 1fr;
