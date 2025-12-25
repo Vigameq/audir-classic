@@ -22,6 +22,7 @@ export class Templates {
   protected showImportModal = false;
   protected templateName = '';
   protected createError = '';
+  protected expandedTemplateId: string | null = null;
 
   protected get questions(): string[] {
     return this.templateService.questions();
@@ -116,5 +117,17 @@ export class Templates {
     this.tags = [];
     this.createError = '';
     this.showImportModal = false;
+  }
+
+  protected deleteTemplate(id: string): void {
+    const confirmed = window.confirm('Delete this template?');
+    if (!confirmed) {
+      return;
+    }
+    this.templateService.deleteTemplate(id);
+  }
+
+  protected toggleTemplate(id: string): void {
+    this.expandedTemplateId = this.expandedTemplateId === id ? null : id;
   }
 }

@@ -18,7 +18,7 @@
       <span class="count">{{ templates.length }} total</span>
     </div>
     <div class="template-list">
-      <article class="template-item" *ngFor="let template of templates">
+      <article class="template-item" *ngFor="let template of templates" (click)="toggleTemplate(template.id)">
         <div>
           <h3>{{ template.name }}</h3>
           <p>{{ template.questions.length }} questions</p>
@@ -26,8 +26,20 @@
           <div class="tag-list" *ngIf="template.tags.length">
             <span class="tag" *ngFor="let tag of template.tags">{{ tag }}</span>
           </div>
+          <ol class="question-list" *ngIf="expandedTemplateId === template.id">
+            <li *ngFor="let question of template.questions">{{ question }}</li>
+          </ol>
         </div>
-        <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
+        <div class="template-actions">
+          <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
+          <button
+            class="ghost small"
+            type="button"
+            (click)="$event.stopPropagation(); deleteTemplate(template.id)"
+          >
+            Delete
+          </button>
+        </div>
       </article>
     </div>
   </section>

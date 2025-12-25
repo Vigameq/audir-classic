@@ -44,6 +44,12 @@ export class TemplateService {
     localStorage.setItem(TEMPLATE_KEY, JSON.stringify(next));
   }
 
+  deleteTemplate(id: string): void {
+    const next = this.templatesSignal().filter((item) => item.id !== id);
+    this.templatesSignal.set(next);
+    localStorage.setItem(TEMPLATE_KEY, JSON.stringify(next));
+  }
+
   private loadQuestions(): string[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
