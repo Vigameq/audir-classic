@@ -4,6 +4,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
+import { ResponseService } from '../../services/response.service';
 import { SiteService } from '../../services/site.service';
 import { TemplateService } from '../../services/template.service';
 import { User, UserService } from '../../services/user.service';
@@ -21,6 +22,7 @@ export class AuditPlan implements OnInit {
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
   private readonly templateService = inject(TemplateService);
+  private readonly responseService = inject(ResponseService);
 
   protected noteChars = 0;
   protected readonly today = new Date().toISOString().split('T')[0];
@@ -36,6 +38,7 @@ export class AuditPlan implements OnInit {
     country: '',
     region: '',
     auditNote: '',
+    responseType: '',
   };
   protected auditors: User[] = [];
 
@@ -180,6 +183,10 @@ export class AuditPlan implements OnInit {
 
   protected get regions(): string[] {
     return this.regionService.regions();
+  }
+
+  protected get responses(): string[] {
+    return this.responseService.responses().map((response) => response.name);
   }
 
   ngOnInit(): void {

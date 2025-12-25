@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
+import { ResponseDefinition, ResponseService } from '../../services/response.service';
 import { SiteService } from '../../services/site.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class Settings {
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
+  private readonly responseService = inject(ResponseService);
   protected newDepartment = '';
   protected newSite = '';
   protected newRegion = '';
@@ -22,7 +24,9 @@ export class Settings {
   protected responseName = '';
   protected responseTypeInput = '';
   protected responseTypes: string[] = [];
-  protected responses: { name: string; types: string[] }[] = [];
+  protected get responses(): ResponseDefinition[] {
+    return this.responseService.responses();
+  }
 
   protected get departments(): string[] {
     return this.departmentService.departments();
@@ -95,7 +99,7 @@ export class Settings {
     if (!name || !this.responseTypes.length) {
       return;
     }
-    this.responses = [{ name, types: [...this.responseTypes] }, ...this.responses];
+    this.responseService.addResponse({ name, types: [...this.responseTypes] });
     this.closeResponseModal();
   }
 
@@ -117,7 +121,7 @@ export class Settings {
   }
 
   public removeResponse(name: string): void {
-    this.responses = this.responses.filter((item) => item.name !== name);
+    this.responseService.removeResponse(name);
   }
 
 }

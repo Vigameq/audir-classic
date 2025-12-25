@@ -108,6 +108,15 @@
             </select>
           </div>
           <div class="field">
+            <label>Response Type</label>
+            <select name="responseType" [(ngModel)]="auditForm.responseType">
+              <option value="">Select response</option>
+              <option *ngFor="let response of responses" [value]="response">
+                {{ response }}
+              </option>
+            </select>
+          </div>
+          <div class="field">
             <label>Location (City)</label>
             <input
               type="text"
@@ -205,6 +214,10 @@
       <div class="summary-row">
         <span>Region</span>
         <strong>{{ auditForm.region || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Response type</span>
+        <strong>{{ auditForm.responseType || '—' }}</strong>
       </div>
       <div class="summary-row">
         <span>Audit note</span>
