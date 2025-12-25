@@ -25,7 +25,7 @@ export class AuditPlanService {
 
   readonly plans = this.plansSignal.asReadonly();
 
-  addPlan(plan: Omit<AuditPlanRecord, 'id' | 'createdAt'>): void {
+  addPlan(plan: Omit<AuditPlanRecord, 'id' | 'createdAt' | 'code'>): void {
     const next = [
       {
         ...plan,
