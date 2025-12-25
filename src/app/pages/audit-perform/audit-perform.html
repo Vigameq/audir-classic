@@ -70,7 +70,8 @@
         <div>
           <h2>Audit perform</h2>
           <p class="subtitle">
-            {{ activeAudit.auditType }} · {{ activeAudit.code }} ·
+            {{ activeAudit.auditType }} · {{ activeAudit.auditSubtype || '—' }} ·
+            {{ activeAudit.code }} ·
             {{ activeAudit.responseType || 'Response type not set' }}
           </p>
         </div>
@@ -100,12 +101,26 @@
                 <span class="question-index">Q{{ i + 1 }}</span>
                 <p class="question-text">{{ question }}</p>
               </div>
-              <select [(ngModel)]="responseSelections[i]" name="response-{{ i }}">
-                <option value="">Select response</option>
-                <option *ngFor="let option of responseOptions" [value]="option">
-                  {{ option }}
-                </option>
-              </select>
+              <div class="inline-fields">
+                <div class="field">
+                  <label>Select response</label>
+                  <select [(ngModel)]="responseSelections[i]" name="response-{{ i }}">
+                    <option value="">Select response</option>
+                    <option *ngFor="let option of responseOptions" [value]="option">
+                      {{ option }}
+                    </option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Assign NC</label>
+                  <select [(ngModel)]="ncAssignments[i]" name="nc-{{ i }}">
+                    <option value="">Select department</option>
+                    <option *ngFor="let department of departments" [value]="department">
+                      {{ department }}
+                    </option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="question-body">
               <div class="evidence-row">
@@ -114,15 +129,6 @@
                   <button class="ghost small" type="button">Upload file</button>
                   <button class="ghost small" type="button">Take photo</button>
                 </div>
-              </div>
-              <div class="nc-row">
-                <label>Assign NC</label>
-                <select [(ngModel)]="ncAssignments[i]" name="nc-{{ i }}">
-                  <option value="">Select department</option>
-                  <option *ngFor="let department of departments" [value]="department">
-                    {{ department }}
-                  </option>
-                </select>
               </div>
               <div class="note-row">
                 <label>Auditor note</label>
