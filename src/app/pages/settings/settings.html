@@ -72,25 +72,23 @@
     <article class="settings-card">
       <h2>Response Type</h2>
       <p>Configure default response options.</p>
-      <form
-        class="inline-form"
-        #responseTypeForm="ngForm"
-        (ngSubmit)="addResponseType(responseTypeForm)"
-      >
-        <input
-          type="text"
-          name="responseType"
-          [(ngModel)]="newResponseType"
-          placeholder="Add response type"
-          required
-        />
-        <button class="primary" type="submit">Add</button>
-      </form>
-      <div class="tag-list">
-        <span class="tag" *ngFor="let responseType of responseTypes">
-          {{ responseType }}
-          <button type="button" class="remove" (click)="removeResponseType(responseType)">×</button>
-        </span>
+      <div class="response-grid">
+        <label class="field">
+          Response 1
+          <select>
+            <option>Yes</option>
+            <option>No</option>
+            <option>Maybe</option>
+          </select>
+        </label>
+        <label class="field">
+          Response 2
+          <select>
+            <option>Compliant</option>
+            <option>Non-compliance</option>
+            <option>Maybe</option>
+          </select>
+        </label>
       </div>
     </article>
   </div>

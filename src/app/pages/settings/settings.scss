@@ -104,6 +104,26 @@
   padding: 0;
 }
 
+.response-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.response-grid .field {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.response-grid select {
+  font: inherit;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
 button {
   font: inherit;
   border: 1px solid transparent;

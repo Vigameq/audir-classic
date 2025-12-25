@@ -3,7 +3,6 @@ import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
-import { ResponseTypeService } from '../../services/response-type.service';
 import { SiteService } from '../../services/site.service';
 
 @Component({
@@ -16,11 +15,9 @@ export class Settings {
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
-  private readonly responseTypeService = inject(ResponseTypeService);
   protected newDepartment = '';
   protected newSite = '';
   protected newRegion = '';
-  protected newResponseType = '';
 
   protected get departments(): string[] {
     return this.departmentService.departments();
@@ -34,9 +31,6 @@ export class Settings {
     return this.regionService.regions();
   }
 
-  protected get responseTypes(): string[] {
-    return this.responseTypeService.responseTypes();
-  }
 
   protected addDepartment(form: NgForm): void {
     const value = this.newDepartment.trim();
@@ -80,17 +74,4 @@ export class Settings {
     this.regionService.removeRegion(name);
   }
 
-  protected addResponseType(form: NgForm): void {
-    const value = this.newResponseType.trim();
-    if (!value) {
-      return;
-    }
-    this.responseTypeService.addResponseType(value);
-    this.newResponseType = '';
-    form.resetForm();
-  }
-
-  protected removeResponseType(name: string): void {
-    this.responseTypeService.removeResponseType(name);
-  }
 }
