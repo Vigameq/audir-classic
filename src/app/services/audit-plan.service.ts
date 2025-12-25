@@ -14,6 +14,7 @@ export type AuditPlanRecord = {
   country: string;
   region: string;
   auditNote: string;
+  responseType: string;
   createdAt: string;
 };
 
