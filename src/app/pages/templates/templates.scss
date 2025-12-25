@@ -214,6 +214,7 @@ button.ghost {
   background: #fffaf4;
   gap: 1rem;
   cursor: pointer;
+  position: relative;
 }
 
 .template-item h3 {
@@ -238,10 +239,10 @@ button.ghost {
   color: var(--color-muted);
 }
 
-.template-actions {
-  display: grid;
-  justify-items: end;
-  gap: 0.4rem;
+.delete {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
 }
 
 .template-item .question-list {
