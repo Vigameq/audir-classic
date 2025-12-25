@@ -18,6 +18,10 @@ export class Settings {
   protected newDepartment = '';
   protected newSite = '';
   protected newRegion = '';
+  protected showResponseModal = false;
+  protected responseName = '';
+  protected responseType = '';
+  protected responses: { name: string; type: string }[] = [];
 
   protected get departments(): string[] {
     return this.departmentService.departments();
@@ -72,6 +76,26 @@ export class Settings {
 
   protected removeRegion(name: string): void {
     this.regionService.removeRegion(name);
+  }
+
+  protected openResponseModal(): void {
+    this.showResponseModal = true;
+  }
+
+  protected closeResponseModal(): void {
+    this.showResponseModal = false;
+    this.responseName = '';
+    this.responseType = '';
+  }
+
+  protected addResponse(): void {
+    const name = this.responseName.trim();
+    const type = this.responseType.trim();
+    if (!name || !type) {
+      return;
+    }
+    this.responses = [{ name, type }, ...this.responses];
+    this.closeResponseModal();
   }
 
 }

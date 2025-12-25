@@ -72,24 +72,36 @@
     <article class="settings-card">
       <h2>Response Type</h2>
       <p>Configure default response options.</p>
-      <div class="response-grid">
-        <label class="field">
-          Response 1
-          <select>
-            <option>Yes</option>
-            <option>No</option>
-            <option>Maybe</option>
-          </select>
-        </label>
-        <label class="field">
-          Response 2
-          <select>
-            <option>Compliant</option>
-            <option>Non-compliance</option>
-            <option>Maybe</option>
-          </select>
-        </label>
+      <button class="ghost" type="button" (click)="openResponseModal()">Add response</button>
+      <div class="response-list" *ngIf="responses.length">
+        <div class="response-item" *ngFor="let response of responses">
+          <strong>{{ response.name }}</strong>
+          <span class="tag">{{ response.type }}</span>
+        </div>
       </div>
     </article>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showResponseModal">
+    <div class="modal">
+      <header>
+        <h2>Add response</h2>
+        <button class="icon" type="button" (click)="closeResponseModal()">Close</button>
+      </header>
+      <div class="modal-body">
+        <label class="field">
+          Response name
+          <input type="text" [(ngModel)]="responseName" placeholder="Response name" />
+        </label>
+        <label class="field">
+          Response type
+          <input type="text" [(ngModel)]="responseType" placeholder="Type tag" />
+        </label>
+      </div>
+      <footer>
+        <button class="ghost" type="button" (click)="closeResponseModal()">Cancel</button>
+        <button class="primary" type="button" (click)="addResponse()">Add</button>
+      </footer>
+    </div>
   </div>
 </section>
