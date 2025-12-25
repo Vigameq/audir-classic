@@ -9,23 +9,19 @@
 
   <div class="settings-grid">
     <article class="settings-card wide">
-      <h2>Departments</h2>
-      <p>Create and manage departments used across the platform.</p>
-      <form class="inline-form" #departmentForm="ngForm" (ngSubmit)="addDepartment(departmentForm)">
-        <input
-          type="text"
-          name="department"
-          [(ngModel)]="newDepartment"
-          placeholder="Add department name"
-          required
-        />
-        <button class="primary" type="submit">Add</button>
-      </form>
-      <div class="tag-list">
-        <span class="tag" *ngFor="let department of departments">
-          {{ department }}
-          <button type="button" class="remove" (click)="removeDepartment(department)">×</button>
-        </span>
+      <h2>Response Type</h2>
+      <p>Configure default response options.</p>
+      <button class="primary" type="button" (click)="openResponseModal()">Add response</button>
+      <div class="response-list" *ngIf="responses.length">
+        <div class="response-item" *ngFor="let response of responses">
+          <strong>{{ response.name }}</strong>
+          <div class="tag-list">
+            <span class="tag" *ngFor="let tag of response.types">{{ tag }}</span>
+          </div>
+          <button class="ghost small" type="button" (click)="removeResponse(response.name)">
+            Delete
+          </button>
+        </div>
       </div>
     </article>
 
@@ -70,16 +66,23 @@
       </div>
     </article>
     <article class="settings-card">
-      <h2>Response Type</h2>
-      <p>Configure default response options.</p>
-      <button class="ghost" type="button" (click)="openResponseModal()">Add response</button>
-      <div class="response-list" *ngIf="responses.length">
-        <div class="response-item" *ngFor="let response of responses">
-          <strong>{{ response.name }}</strong>
-          <div class="tag-list">
-            <span class="tag" *ngFor="let tag of response.types">{{ tag }}</span>
-          </div>
-        </div>
+      <h2>Departments</h2>
+      <p>Create and manage departments used across the platform.</p>
+      <form class="inline-form" #departmentForm="ngForm" (ngSubmit)="addDepartment(departmentForm)">
+        <input
+          type="text"
+          name="department"
+          [(ngModel)]="newDepartment"
+          placeholder="Add department name"
+          required
+        />
+        <button class="primary" type="submit">Add</button>
+      </form>
+      <div class="tag-list">
+        <span class="tag" *ngFor="let department of departments">
+          {{ department }}
+          <button type="button" class="remove" (click)="removeDepartment(department)">×</button>
+        </span>
       </div>
     </article>
   </div>
