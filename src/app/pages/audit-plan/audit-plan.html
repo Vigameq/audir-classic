@@ -70,7 +70,10 @@
             <label>Auditor Name</label>
             <select name="auditorName" [(ngModel)]="auditForm.auditorName">
               <option value="">Select auditor</option>
-              <option *ngFor="let auditor of auditors" [value]="auditor.email">
+              <option
+                *ngFor="let auditor of auditors"
+                [value]="auditor.first_name + ' ' + auditor.last_name"
+              >
                 {{ auditor.first_name }} {{ auditor.last_name }}
               </option>
             </select>

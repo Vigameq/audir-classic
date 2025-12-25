@@ -1,0 +1,47 @@
+<section class="audit-perform">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Audit execution</p>
+      <h1>Audit perform</h1>
+      <p class="subtitle">Review and execute all created audit plans.</p>
+    </div>
+    <div class="header-actions">
+      <button class="ghost">Export</button>
+      <button class="primary">New audit</button>
+    </div>
+  </header>
+
+  <section class="panel wide">
+    <div class="panel-header">
+      <h2>Created audits</h2>
+      <span class="count">{{ audits.length }} total</span>
+    </div>
+    <div class="table-row heading">
+      <span>Dates</span>
+      <span>Audit type</span>
+      <span>Subtype</span>
+      <span>Auditor</span>
+      <span>Department</span>
+      <span>Country</span>
+      <span>City</span>
+      <span>Site</span>
+      <span>Region</span>
+      <span>Note</span>
+    </div>
+    <div class="table-row" *ngFor="let audit of audits">
+      <span>{{ audit.startDate }} → {{ audit.endDate }}</span>
+      <span>{{ audit.auditType }}</span>
+      <span>{{ audit.auditSubtype || '—' }}</span>
+      <span>{{ audit.auditorName || '—' }}</span>
+      <span>{{ audit.department || '—' }}</span>
+      <span>{{ audit.country || '—' }}</span>
+      <span>{{ audit.locationCity || '—' }}</span>
+      <span>{{ audit.site || '—' }}</span>
+      <span>{{ audit.region || '—' }}</span>
+      <span>{{ audit.auditNote || '—' }}</span>
+    </div>
+    <div class="empty" *ngIf="!audits.length">
+      No audits created yet. Create one in Audit Plan.
+    </div>
+  </section>
+</section>

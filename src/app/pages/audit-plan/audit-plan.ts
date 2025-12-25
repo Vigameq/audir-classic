@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
 import { SiteService } from '../../services/site.service';
@@ -13,6 +14,7 @@ import { User, UserService } from '../../services/user.service';
   styleUrl: './audit-plan.scss',
 })
 export class AuditPlan implements OnInit {
+  private readonly auditPlanService = inject(AuditPlanService);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
@@ -213,6 +215,19 @@ export class AuditPlan implements OnInit {
     if (form.invalid) {
       return;
     }
+    this.auditPlanService.addPlan({
+      startDate: this.auditForm.startDate,
+      endDate: this.auditForm.endDate,
+      auditType: this.auditForm.auditType,
+      auditSubtype: this.auditForm.auditSubtype,
+      auditorName: this.auditForm.auditorName,
+      department: this.auditForm.department,
+      locationCity: this.auditForm.locationCity,
+      site: this.auditForm.site,
+      country: this.auditForm.country,
+      region: this.auditForm.region,
+      auditNote: this.auditForm.auditNote,
+    });
     this.cancel(form);
   }
 }
