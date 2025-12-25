@@ -175,8 +175,16 @@
         <strong>{{ auditForm.auditType || '—' }}</strong>
       </div>
       <div class="summary-row">
+        <span>Audit subtype</span>
+        <strong>{{ auditForm.auditSubtype || '—' }}</strong>
+      </div>
+      <div class="summary-row">
         <span>Auditor</span>
         <strong>{{ auditForm.auditorName || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Department</span>
+        <strong>{{ auditForm.department || '—' }}</strong>
       </div>
       <div class="summary-row">
         <span>Dates</span>
@@ -185,20 +193,28 @@
         </strong>
       </div>
       <div class="summary-row">
-        <span>Location</span>
-        <strong>
-          {{ auditForm.locationCity || '—' }} {{ auditForm.country || '' }}
-        </strong>
+        <span>Country</span>
+        <strong>{{ auditForm.country || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>City</span>
+        <strong>{{ auditForm.locationCity || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Site</span>
+        <strong>{{ auditForm.site || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Region</span>
+        <strong>{{ auditForm.region || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Audit note</span>
+        <strong>{{ auditForm.auditNote || '—' }}</strong>
       </div>
       <div class="summary-row">
         <span>Status</span>
         <strong>Draft</strong>
-      </div>
-      <div class="summary-actions">
-        <button class="ghost" type="button" (click)="cancel(planForm)">Clear</button>
-        <button class="primary" type="button" (click)="createAudit(planForm)">
-          Create Audit
-        </button>
       </div>
     </aside>
   </div>
