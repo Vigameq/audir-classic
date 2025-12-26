@@ -77,17 +77,7 @@
           </div>
           <div class="meta-block note-cell">
             <span>Note</span>
-            <button
-              class="ghost small"
-              type="button"
-              (mouseenter)="noteHover = audit.id"
-              (mouseleave)="noteHover = null"
-            >
-              View note
-            </button>
-            <span class="note-tooltip" *ngIf="noteHover === audit.id">
-              {{ audit.auditNote || 'No note provided' }}
-            </span>
+            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
           </div>
         </div>
       </article>
