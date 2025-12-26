@@ -96,24 +96,70 @@ button.small {
   font-size: 0.85rem;
 }
 
-.table-row {
+.audit-grid {
   display: grid;
-  grid-template-columns: 1fr 1.1fr 2fr 1.4fr 1.2fr 1.2fr 1.3fr 1fr 1fr 1fr 1fr 2fr 1fr;
-  gap: 0.5rem;
-  padding: 0.7rem 0.5rem;
-  border-bottom: 1px solid rgba(20, 10, 0, 0.06);
-  font-size: 0.9rem;
+  gap: 1rem;
 }
 
-.table-row.heading {
-  font-size: 0.75rem;
+.audit-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  padding: 1.25rem 1.4rem;
+  background: linear-gradient(120deg, #ffffff 0%, #ffffff 70%, #fff2df 100%);
+  display: grid;
+  gap: 1rem;
+}
+
+.audit-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.audit-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.audit-label {
+  margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
   color: var(--color-muted);
 }
 
-.table-row:last-child {
-  border-bottom: none;
+.audit-meta,
+.audit-footer {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.audit-footer {
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(20, 10, 0, 0.06);
+}
+
+.meta-block {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.meta-block strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.meta-block em {
+  font-style: normal;
+  font-size: 0.8rem;
+  color: var(--color-muted);
 }
 
 .empty {
@@ -132,11 +178,14 @@ button.small {
 .note-cell {
   position: relative;
   display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
 }
 
 .note-tooltip {
   position: absolute;
-  top: 2.2rem;
+  top: 2.4rem;
   left: 0;
   z-index: 5;
   min-width: 200px;
@@ -358,7 +407,8 @@ button.small {
 }
 
 @media (max-width: 720px) {
-  .table-row {
-    grid-template-columns: 1fr;
+  .audit-card-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
