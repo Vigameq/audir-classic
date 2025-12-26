@@ -26,6 +26,12 @@ If your `users` table is missing onboarding fields, run:
 -- backend/migrations/001_add_user_fields.sql
 ```
 
+Create audit and settings tables with:
+
+```sql
+-- backend/migrations/002_create_audit_core.sql
+```
+
 ## Auth
 
 - `POST /auth/login` (form data: username, password)
