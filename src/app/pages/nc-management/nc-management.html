@@ -43,7 +43,25 @@
       <h2>Flagged questions</h2>
       <span class="count">12 flagged</span>
     </div>
-    <div class="nc-grid">
+    <div class="nc-layout">
+      <aside class="rule-card">
+        <div class="rule-header">
+          <div>
+            <p class="eyebrow">Negative response rules</p>
+            <h3>Responses treated as NC</h3>
+          </div>
+        </div>
+        <p class="rule-subtitle">
+          Any response below will surface in the NC list automatically.
+        </p>
+        <div class="rule-list" *ngIf="responseNames.length; else noResponses">
+          <span class="tag" *ngFor="let name of responseNames">{{ name }}</span>
+        </div>
+        <ng-template #noResponses>
+          <p class="empty muted">No response types configured yet.</p>
+        </ng-template>
+      </aside>
+      <div class="nc-grid">
       <article class="nc-card">
         <div class="nc-card-header">
           <div>
@@ -169,6 +187,7 @@
           <button class="primary small">Assign owner</button>
         </div>
       </article>
+      </div>
     </div>
   </section>
 </section>

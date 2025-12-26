@@ -71,6 +71,56 @@
   font-size: 0.85rem;
 }
 
+.nc-layout {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  align-items: start;
+}
+
+.rule-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  padding: 1.2rem;
+  background: #fffaf4;
+  display: grid;
+  gap: 0.75rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.rule-header h3 {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+}
+
+.rule-subtitle {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.rule-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 154, 0, 0.12);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.empty.muted {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
 .nc-grid {
   display: grid;
   gap: 1rem;
@@ -203,6 +253,14 @@ button.small {
 }
 
 @media (max-width: 720px) {
+  .nc-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .rule-card {
+    position: static;
+  }
+
   .nc-card-header {
     align-items: flex-start;
     flex-direction: column;
