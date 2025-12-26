@@ -19,17 +19,6 @@
             <p class="audit-label">Audit code</p>
             <p class="code">{{ audit.code }}</p>
           </div>
-          <div class="audit-actions">
-            <button
-              class="ghost small"
-              type="button"
-              (click)="downloadQr(audit)"
-              [disabled]="isQrGenerating[audit.id]"
-            >
-              {{ isQrGenerating[audit.id] ? 'Generating…' : 'Download QR' }}
-            </button>
-            <a class="primary small" [routerLink]="['/audit-perform', audit.code]">Open</a>
-          </div>
         </div>
         <div class="audit-meta">
           <div class="meta-block">
