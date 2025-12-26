@@ -40,6 +40,17 @@ export class AuditPlanService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
 
+  updatePlan(
+    planId: string,
+    updates: Partial<Omit<AuditPlanRecord, 'id' | 'code' | 'createdAt'>>
+  ): void {
+    const next = this.plansSignal().map((plan) =>
+      plan.id === planId ? { ...plan, ...updates } : plan
+    );
+    this.plansSignal.set(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
   private loadPlans(): AuditPlanRecord[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {

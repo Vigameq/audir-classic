@@ -19,6 +19,7 @@
             <p class="audit-label">Audit code</p>
             <p class="code">{{ audit.code }}</p>
           </div>
+          <button class="ghost small" type="button" (click)="openEdit(audit)">Edit</button>
         </div>
         <div class="audit-meta">
           <div class="meta-block">
@@ -56,4 +57,105 @@
       No audits created yet. Create one in Audit Plan.
     </div>
   </section>
+
+  <div class="modal-backdrop" *ngIf="activeAudit">
+    <form class="modal" #editFormRef="ngForm" (ngSubmit)="saveEdit(editFormRef)">
+      <header>
+        <h2>Edit audit</h2>
+        <button class="ghost small" type="button" (click)="closeEdit(editFormRef)">Close</button>
+      </header>
+      <p class="modal-subtitle">Audit type and subtype are read-only.</p>
+      <div class="form-grid">
+        <label>
+          Start date
+          <input type="date" name="startDate" [(ngModel)]="editForm.startDate" required />
+        </label>
+        <label>
+          End date
+          <input type="date" name="endDate" [(ngModel)]="editForm.endDate" required />
+        </label>
+        <label>
+          Audit type
+          <input type="text" name="auditType" [(ngModel)]="editForm.auditType" disabled />
+        </label>
+        <label>
+          Audit subtype
+          <input type="text" name="auditSubtype" [(ngModel)]="editForm.auditSubtype" disabled />
+        </label>
+        <label>
+          Response type
+          <select name="responseType" [(ngModel)]="editForm.responseType">
+            <option value="">Select response type</option>
+            <option *ngFor="let response of responses" [value]="response">
+              {{ response }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Auditor
+          <select name="auditorName" [(ngModel)]="editForm.auditorName">
+            <option value="">Select auditor</option>
+            <option
+              *ngFor="let auditor of auditors"
+              [value]="auditor.first_name + ' ' + auditor.last_name"
+            >
+              {{ auditor.first_name }} {{ auditor.last_name }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Department
+          <select name="department" [(ngModel)]="editForm.department">
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments" [value]="department">
+              {{ department }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Country
+          <select name="country" [(ngModel)]="editForm.country">
+            <option value="">Select country</option>
+            <option value="India">India</option>
+            <option value="USA">USA</option>
+            <option value="Canada">Canada</option>
+          </select>
+        </label>
+        <label>
+          City
+          <select name="locationCity" [(ngModel)]="editForm.locationCity">
+            <option value="">Select city</option>
+            <option *ngFor="let city of cities" [value]="city">{{ city }}</option>
+          </select>
+        </label>
+        <label>
+          Site
+          <select name="site" [(ngModel)]="editForm.site">
+            <option value="">Select site</option>
+            <option *ngFor="let site of sites" [value]="site">{{ site }}</option>
+          </select>
+        </label>
+        <label>
+          Region
+          <select name="region" [(ngModel)]="editForm.region">
+            <option value="">Select region</option>
+            <option *ngFor="let region of regions" [value]="region">{{ region }}</option>
+          </select>
+        </label>
+        <label class="full">
+          Audit note
+          <textarea
+            rows="4"
+            maxlength="1000"
+            name="auditNote"
+            [(ngModel)]="editForm.auditNote"
+          ></textarea>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="ghost" type="button" (click)="closeEdit(editFormRef)">Cancel</button>
+        <button class="primary" type="submit">Save changes</button>
+      </div>
+    </form>
+  </div>
 </section>
