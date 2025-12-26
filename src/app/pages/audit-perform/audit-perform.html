@@ -54,7 +54,19 @@
       <span>{{ audit.locationCity || '—' }}</span>
       <span>{{ audit.site || '—' }}</span>
       <span>{{ audit.region || '—' }}</span>
-      <span>{{ audit.auditNote || '—' }}</span>
+      <span class="note-cell">
+        <button
+          class="ghost small"
+          type="button"
+          (mouseenter)="noteHover = audit.id"
+          (mouseleave)="noteHover = null"
+        >
+          View note
+        </button>
+        <span class="note-tooltip" *ngIf="noteHover === audit.id">
+          {{ audit.auditNote || 'No note provided' }}
+        </span>
+      </span>
       <span>
         <button class="primary small" type="button" (click)="openPerform(audit)">Perform</button>
       </span>

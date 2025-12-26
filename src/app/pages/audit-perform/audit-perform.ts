@@ -50,6 +50,7 @@ export class AuditPerform {
   protected noteWords: number[] = [];
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
+  protected noteHover: string | null = null;
 
   protected get totalQuestions(): number {
     return this.activeTemplate?.questions.length ?? 0;

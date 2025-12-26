@@ -129,6 +129,27 @@ button.small {
   color: #7a4300;
 }
 
+.note-cell {
+  position: relative;
+  display: inline-flex;
+}
+
+.note-tooltip {
+  position: absolute;
+  top: 2.2rem;
+  left: 0;
+  z-index: 5;
+  min-width: 200px;
+  max-width: 240px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  border: 1px solid rgba(20, 10, 0, 0.12);
+  box-shadow: 0 16px 32px rgba(20, 10, 0, 0.15);
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
 .drawer-backdrop {
   position: fixed;
   inset: 0;
