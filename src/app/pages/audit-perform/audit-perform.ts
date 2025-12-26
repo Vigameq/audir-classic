@@ -48,8 +48,6 @@ export class AuditPerform {
   protected responseOptions: string[] = [];
   protected responseSelections: string[] = [];
   protected noteWords: number[] = [];
-  protected noteTexts: string[] = [];
-  protected noteOpen: boolean[] = [];
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
 
@@ -77,12 +75,6 @@ export class AuditPerform {
     this.noteWords = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(0)
       : [];
-    this.noteTexts = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.noteOpen = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill(false)
-      : [];
     this.ncAssignments = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
@@ -97,8 +89,6 @@ export class AuditPerform {
     this.responseOptions = [];
     this.responseSelections = [];
     this.noteWords = [];
-    this.noteTexts = [];
-    this.noteOpen = [];
     this.ncAssignments = [];
     this.savedQuestions = [];
   }
@@ -121,14 +111,5 @@ export class AuditPerform {
       return 0;
     }
     return trimmed.split(/\s+/).length;
-  }
-
-  protected toggleNote(index: number): void {
-    this.noteOpen[index] = !this.noteOpen[index];
-  }
-
-  protected updateNote(index: number, value: string): void {
-    this.noteTexts[index] = value;
-    this.noteWords[index] = this.countWords(value);
   }
 }
