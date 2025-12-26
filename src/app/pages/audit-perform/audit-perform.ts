@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import QRCode from 'qrcode';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { ResponseService } from '../../services/response.service';
@@ -12,11 +14,13 @@ import { TemplateRecord, TemplateService } from '../../services/template.service
   templateUrl: './audit-perform.html',
   styleUrl: './audit-perform.scss',
 })
-export class AuditPerform {
+export class AuditPerform implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
   private readonly templateService = inject(TemplateService);
   private readonly responseService = inject(ResponseService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected get audits() {
     const audits = this.auditPlanService.plans();
@@ -51,6 +55,7 @@ export class AuditPerform {
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
   protected noteHover: string | null = null;
+  protected isQrGenerating: Record<string, boolean> = {};
 
   protected get totalQuestions(): number {
     return this.activeTemplate?.questions.length ?? 0;
@@ -63,8 +68,22 @@ export class AuditPerform {
   protected filterEnd = '';
   protected sortOrder: 'asc' | 'desc' = 'desc';
 
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      const code = params.get('code');
+      if (!code) {
+        return;
+      }
+      const audit = this.auditPlanService.plans().find((item) => item.code === code);
+      if (audit) {
+        this.openPerform(audit);
+      }
+    });
+  }
+
   protected openPerform(audit: AuditPlanRecord): void {
     this.activeAudit = audit;
+    this.router.navigate(['/audit-perform', audit.code], { replaceUrl: true });
     this.activeTemplate =
       this.templateService.templates().find((template) => template.name === audit.auditType) ??
       null;
@@ -92,6 +111,7 @@ export class AuditPerform {
     this.noteWords = [];
     this.ncAssignments = [];
     this.savedQuestions = [];
+    this.router.navigate(['/audit-perform'], { replaceUrl: true });
   }
 
   protected get departments(): string[] {
@@ -112,5 +132,22 @@ export class AuditPerform {
       return 0;
     }
     return trimmed.split(/\s+/).length;
+  }
+
+  protected async downloadQr(audit: AuditPlanRecord): Promise<void> {
+    if (this.isQrGenerating[audit.id]) {
+      return;
+    }
+    this.isQrGenerating[audit.id] = true;
+    try {
+      const url = `${window.location.origin}/audit-perform/${audit.code}`;
+      const dataUrl = await QRCode.toDataURL(url, { margin: 1, width: 320 });
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `audit-${audit.code}.png`;
+      link.click();
+    } finally {
+      this.isQrGenerating[audit.id] = false;
+    }
   }
 }

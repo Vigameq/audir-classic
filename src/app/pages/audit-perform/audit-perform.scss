@@ -98,7 +98,7 @@ button.small {
 
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.4fr 1.2fr 1.2fr 1.3fr 1fr 1fr 1fr 1fr 2fr 1fr;
+  grid-template-columns: 1fr 1.1fr 2fr 1.4fr 1.2fr 1.2fr 1.3fr 1fr 1fr 1fr 1fr 2fr 1fr;
   gap: 0.5rem;
   padding: 0.7rem 0.5rem;
   border-bottom: 1px solid rgba(20, 10, 0, 0.06);
@@ -163,11 +163,13 @@ button.small {
   background: #ffffff;
   width: min(90vw, 1100px);
   height: 100%;
+  max-height: 100vh;
   padding: 2rem;
   box-shadow: -20px 0 50px rgba(20, 10, 0, 0.2);
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 1.5rem;
+  overflow: hidden;
 }
 
 .drawer-header {
@@ -192,6 +194,7 @@ button.small {
   display: grid;
   gap: 1rem;
   overflow: auto;
+  min-height: 0;
 }
 
 .drawer-content h3 {

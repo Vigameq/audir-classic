@@ -31,6 +31,7 @@
     </div>
     <div class="table-row heading">
       <span>Audit code</span>
+      <span>QR</span>
       <span>Dates</span>
       <span>Audit type</span>
       <span>Subtype</span>
@@ -45,6 +46,16 @@
     </div>
     <div class="table-row" *ngFor="let audit of audits">
       <span class="code">{{ audit.code }}</span>
+      <span>
+        <button
+          class="ghost small"
+          type="button"
+          (click)="downloadQr(audit)"
+          [disabled]="isQrGenerating[audit.id]"
+        >
+          {{ isQrGenerating[audit.id] ? 'Generating…' : 'Download' }}
+        </button>
+      </span>
       <span>{{ audit.startDate }} → {{ audit.endDate }}</span>
       <span>{{ audit.auditType }}</span>
       <span>{{ audit.auditSubtype || '—' }}</span>
