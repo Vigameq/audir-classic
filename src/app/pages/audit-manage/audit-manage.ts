@@ -233,4 +233,14 @@ export class AuditManage implements OnInit {
     });
     this.closeEdit(form);
   }
+
+  protected deleteAudit(audit: AuditPlanRecord): void {
+    if (!confirm('Delete this audit? This cannot be undone.')) {
+      return;
+    }
+    if (this.activeAudit?.id === audit.id) {
+      this.activeAudit = null;
+    }
+    this.auditPlanService.deletePlan(audit.id);
+  }
 }

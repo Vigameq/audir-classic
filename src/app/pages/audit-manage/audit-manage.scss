@@ -67,6 +67,12 @@ button.ghost {
   border-color: rgba(255, 154, 0, 0.35);
 }
 
+button.ghost.danger {
+  border-color: rgba(202, 71, 45, 0.4);
+  background: #fff2ef;
+  color: #9f2f20;
+}
+
 button.small,
 .primary.small {
   padding: 0.35rem 0.85rem;
@@ -112,6 +118,12 @@ button.small,
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 

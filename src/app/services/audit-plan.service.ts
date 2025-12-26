@@ -51,6 +51,12 @@ export class AuditPlanService {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
 
+  deletePlan(planId: string): void {
+    const next = this.plansSignal().filter((plan) => plan.id !== planId);
+    this.plansSignal.set(next);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
   private loadPlans(): AuditPlanRecord[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
