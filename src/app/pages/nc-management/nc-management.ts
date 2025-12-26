@@ -1,17 +1,11 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
-import { ResponseService } from '../../services/response.service';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-nc-management',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './nc-management.html',
   styleUrl: './nc-management.scss',
 })
 export class NcManagement {
-  private readonly responseService = inject(ResponseService);
 
-  protected get responseNames(): string[] {
-    return this.responseService.responses().map((response) => response.name);
-  }
 }
