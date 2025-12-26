@@ -131,15 +131,23 @@
                 </div>
               </div>
               <div class="note-row">
-                <label>Auditor note</label>
-                <textarea
-                  rows="3"
-                  maxlength="1000"
-                  placeholder="Add up to 1000 words"
-                  (input)="noteWords[i] = countWords(note.value)"
-                  #note
-                ></textarea>
-                <span class="note-count">{{ noteWords[i] }}/1000 words</span>
+                <button class="ghost small" type="button" (click)="toggleNote(i)">
+                  {{ noteTexts[i] ? 'View note' : 'Add note' }}
+                </button>
+                <div class="note-popover" *ngIf="noteOpen[i]">
+                  <div class="note-header">
+                    <span>Auditor note</span>
+                    <button class="ghost small" type="button" (click)="toggleNote(i)">Close</button>
+                  </div>
+                  <textarea
+                    rows="4"
+                    maxlength="1000"
+                    placeholder="Add up to 1000 words"
+                    [ngModel]="noteTexts[i]"
+                    (ngModelChange)="updateNote(i, $event)"
+                  ></textarea>
+                  <span class="note-count">{{ noteWords[i] }}/1000 words</span>
+                </div>
               </div>
             </div>
             <div class="question-actions">
