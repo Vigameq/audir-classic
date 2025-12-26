@@ -6,7 +6,7 @@
       <div class="brand-subtitle">Enterprise audit workspace</div>
     </div>
   </div>
-  <div class="nav-shell" *ngIf="auth.isLoggedIn()">
+  <div class="nav-shell">
     <nav class="app-nav">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
       <a routerLink="/audit-plan" routerLinkActive="active">Audit Plan</a>
@@ -21,7 +21,9 @@
       <a routerLink="/manager" routerLinkActive="active">Manager</a>
       <a routerLink="/super-admin" routerLinkActive="active">Super Admin</a>
     </nav>
-    <button class="logout" type="button" (click)="auth.logout()">Logout</button>
+    <button class="logout" type="button" (click)="auth.logout()" *ngIf="auth.isLoggedIn()">
+      Logout
+    </button>
   </div>
 </header>
 
