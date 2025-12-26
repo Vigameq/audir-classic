@@ -1,6 +1,70 @@
-<section class="page">
-  <div class="page-header">
-    <h1>Audit manage</h1>
-    <p>Track active audits, owners, and overall status.</p>
-  </div>
+<section class="audit-manage">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Audit oversight</p>
+      <h1>Audit manage</h1>
+      <p class="subtitle">Track and organize all created audits.</p>
+    </div>
+  </header>
+
+  <section class="panel wide">
+    <div class="panel-header">
+      <h2>All audits</h2>
+      <span class="count">{{ audits.length }} total</span>
+    </div>
+    <div class="audit-grid" *ngIf="audits.length">
+      <article class="audit-card" *ngFor="let audit of audits">
+        <div class="audit-card-header">
+          <div>
+            <p class="audit-label">Audit code</p>
+            <p class="code">{{ audit.code }}</p>
+          </div>
+          <div class="audit-actions">
+            <button
+              class="ghost small"
+              type="button"
+              (click)="downloadQr(audit)"
+              [disabled]="isQrGenerating[audit.id]"
+            >
+              {{ isQrGenerating[audit.id] ? 'Generating…' : 'Download QR' }}
+            </button>
+            <a class="primary small" [routerLink]="['/audit-perform', audit.code]">Open</a>
+          </div>
+        </div>
+        <div class="audit-meta">
+          <div class="meta-block">
+            <span>Dates</span>
+            <strong>{{ audit.startDate }} → {{ audit.endDate }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Audit type</span>
+            <strong>{{ audit.auditType }}</strong>
+            <em>{{ audit.auditSubtype || '—' }}</em>
+          </div>
+          <div class="meta-block">
+            <span>Auditor</span>
+            <strong>{{ audit.auditorName || '—' }}</strong>
+          </div>
+        </div>
+        <div class="audit-footer">
+          <div class="meta-block">
+            <span>Department</span>
+            <strong>{{ audit.department || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Location</span>
+            <strong>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</strong>
+            <em>{{ audit.site || '—' }} · {{ audit.region || '—' }}</em>
+          </div>
+          <div class="meta-block note-cell">
+            <span>Note</span>
+            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="empty" *ngIf="!audits.length">
+      No audits created yet. Create one in Audit Plan.
+    </div>
+  </section>
 </section>
