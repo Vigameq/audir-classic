@@ -322,6 +322,12 @@ button.ghost {
   cursor: pointer;
 }
 
+.file-name {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

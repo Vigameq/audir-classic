@@ -56,6 +56,7 @@
           Choose file
           <input type="file" accept=".xlsx" (change)="onFileSelected($event)" />
         </button>
+        <p class="file-name" *ngIf="selectedFileName">{{ selectedFileName }}</p>
         <div class="note">
           <label>Template name (optional)</label>
           <input

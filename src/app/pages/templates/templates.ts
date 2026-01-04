@@ -23,6 +23,7 @@ export class Templates {
   protected templateName = '';
   protected createError = '';
   protected expandedTemplateId: string | null = null;
+  protected selectedFileName = '';
 
   protected get questions(): string[] {
     return this.templateService.questions();
@@ -38,6 +39,7 @@ export class Templates {
       return;
     }
     const file = input.files[0];
+    this.selectedFileName = file.name;
     this.importError = '';
     this.isImporting = true;
     try {
@@ -76,6 +78,7 @@ export class Templates {
   protected closeImportModal(): void {
     this.showImportModal = false;
     this.createError = '';
+    this.selectedFileName = '';
   }
 
   protected updateNoteChars(value: string): void {
@@ -115,6 +118,7 @@ export class Templates {
     this.importNote = '';
     this.noteChars = 0;
     this.tags = [];
+    this.selectedFileName = '';
     this.createError = '';
     this.showImportModal = false;
   }
