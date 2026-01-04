@@ -49,4 +49,8 @@ export class NcManagement {
   protected submitNc(): void {
     // no-op for now
   }
+
+  protected saveNc(): void {
+    // no-op for now
+  }
 }
