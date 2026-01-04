@@ -52,9 +52,11 @@
 
 .app-nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  font-size: 0.95rem;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .nav-shell {
@@ -64,20 +66,35 @@
   gap: 1rem;
 }
 
+.nav-surface {
+  background: #ffffff;
+  border: 1px solid rgba(255, 154, 0, 0.25);
+  padding: 0.35rem;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(255, 154, 0, 0.12);
+  max-width: min(60vw, 920px);
+}
+
+.app-nav::-webkit-scrollbar {
+  display: none;
+}
+
 .app-nav a {
   text-decoration: none;
-  color: var(--color-ink);
-  padding: 0.45rem 0.9rem;
+  color: var(--color-muted);
+  padding: 0.4rem 0.85rem;
   border-radius: 999px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .app-nav a:hover,
 .app-nav a.active {
   border-color: var(--color-accent);
-  background: rgba(255, 154, 0, 0.12);
-  color: var(--color-ink-strong);
+  background: var(--color-accent);
+  color: #1a1406;
+  box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
 }
 
 .logout {
@@ -98,4 +115,10 @@
 
 .app-main {
   padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+@media (max-width: 900px) {
+  .nav-surface {
+    max-width: 100%;
+  }
 }
