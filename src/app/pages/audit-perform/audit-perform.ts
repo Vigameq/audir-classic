@@ -54,6 +54,7 @@ export class AuditPerform implements OnInit {
   protected noteWords: number[] = [];
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
+  protected evidenceFiles: string[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
 
@@ -101,6 +102,9 @@ export class AuditPerform implements OnInit {
     this.savedQuestions = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(false)
       : [];
+    this.evidenceFiles = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
   }
 
   protected closePerform(): void {
@@ -111,6 +115,7 @@ export class AuditPerform implements OnInit {
     this.noteWords = [];
     this.ncAssignments = [];
     this.savedQuestions = [];
+    this.evidenceFiles = [];
     this.router.navigate(['/audit-perform'], { replaceUrl: true });
   }
 
@@ -124,6 +129,13 @@ export class AuditPerform implements OnInit {
 
   protected submitQuestion(): void {
     // no-op for now
+  }
+
+  protected onEvidenceSelected(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.evidenceFiles[index] = file ? file.name : '';
+    input.value = '';
   }
 
   protected countWords(value: string): number {

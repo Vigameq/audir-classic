@@ -345,6 +345,23 @@ button.small {
   gap: 0.5rem;
 }
 
+.file-trigger {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-trigger input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.evidence-name {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
 .nc-row {
   display: grid;
   gap: 0.4rem;

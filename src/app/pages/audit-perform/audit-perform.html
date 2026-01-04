@@ -149,9 +149,15 @@
               <div class="evidence-row">
                 <span>Attach evidence</span>
                 <div class="evidence-actions">
-                  <button class="ghost small" type="button">Upload file</button>
+                  <label class="ghost small file-trigger">
+                    Upload file
+                    <input type="file" (change)="onEvidenceSelected(i, $event)" />
+                  </label>
                   <button class="ghost small" type="button">Take photo</button>
                 </div>
+                <span class="evidence-name" *ngIf="evidenceFiles[i]">
+                  {{ evidenceFiles[i] }}
+                </span>
               </div>
               <div class="note-row">
                 <label>Auditor note</label>
