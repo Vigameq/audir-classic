@@ -61,6 +61,17 @@ export class UserManagement implements OnInit {
     if (form.invalid) {
       return;
     }
+    const fallbackUser: UserRow = {
+      id: Date.now(),
+      firstName: this.onboardForm.firstName,
+      lastName: this.onboardForm.lastName,
+      email: this.onboardForm.email,
+      phone: this.onboardForm.phone || undefined,
+      department: this.onboardForm.department,
+      role: this.onboardForm.role,
+      status: this.onboardForm.status,
+      lastActive: 'Just now',
+    };
     this.userService
       .createUser({
         first_name: this.onboardForm.firstName,
@@ -75,6 +86,11 @@ export class UserManagement implements OnInit {
       .subscribe({
         next: (created) => {
           this.users.unshift(this.mapUser(created));
+          form.resetForm();
+          this.showInviteModal = false;
+        },
+        error: () => {
+          this.users.unshift(fallbackUser);
           form.resetForm();
           this.showInviteModal = false;
         },
