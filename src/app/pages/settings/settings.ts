@@ -24,6 +24,8 @@ export class Settings {
   protected responseName = '';
   protected responseTypeInput = '';
   protected responseTypes: string[] = [];
+  protected responseNegativeTypes: string[] = [];
+  protected responseTypeNegative = false;
   protected get responses(): ResponseDefinition[] {
     return this.responseService.responses();
   }
@@ -92,6 +94,8 @@ export class Settings {
     this.responseName = '';
     this.responseTypeInput = '';
     this.responseTypes = [];
+    this.responseNegativeTypes = [];
+    this.responseTypeNegative = false;
   }
 
   protected addResponse(): void {
@@ -99,7 +103,11 @@ export class Settings {
     if (!name || !this.responseTypes.length) {
       return;
     }
-    this.responseService.addResponse({ name, types: [...this.responseTypes] });
+    this.responseService.addResponse({
+      name,
+      types: [...this.responseTypes],
+      negativeTypes: [...this.responseNegativeTypes],
+    });
     this.closeResponseModal();
   }
 
@@ -113,15 +121,28 @@ export class Settings {
       return;
     }
     this.responseTypes = [...this.responseTypes, value];
+    if (this.responseTypeNegative) {
+      this.responseNegativeTypes = [...this.responseNegativeTypes, value];
+      this.responseTypeNegative = false;
+    }
     this.responseTypeInput = '';
   }
 
   protected removeResponseType(value: string): void {
     this.responseTypes = this.responseTypes.filter((item) => item !== value);
+    this.responseNegativeTypes = this.responseNegativeTypes.filter((item) => item !== value);
   }
 
   public removeResponse(name: string): void {
     this.responseService.removeResponse(name);
+  }
+
+  protected isNegativeTag(response: ResponseDefinition, tag: string): boolean {
+    return response.negativeTypes?.includes(tag);
+  }
+
+  protected isNegativeTagDraft(tag: string): boolean {
+    return this.responseNegativeTypes.includes(tag);
   }
 
 }

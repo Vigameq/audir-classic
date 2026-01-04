@@ -92,6 +92,11 @@
   gap: 0.35rem;
 }
 
+.tag.negative {
+  background: rgba(202, 71, 45, 0.15);
+  color: #9f2f20;
+}
+
 .tag .remove {
   border: none;
   background: rgba(255, 154, 0, 0.25);
@@ -132,6 +137,19 @@
 
 .response-item strong {
   font-weight: 600;
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-right: 0.5rem;
+}
+
+.checkbox input {
+  accent-color: var(--color-accent);
 }
 
 .modal-backdrop {

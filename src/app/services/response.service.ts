@@ -3,6 +3,7 @@ import { Injectable, signal } from '@angular/core';
 export type ResponseDefinition = {
   name: string;
   types: string[];
+  negativeTypes: string[];
 };
 
 const STORAGE_KEY = 'audir_responses';
@@ -33,7 +34,11 @@ export class ResponseService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed as ResponseDefinition[];
+        return parsed.map((entry) => ({
+          name: String(entry?.name ?? ''),
+          types: Array.isArray(entry?.types) ? entry.types : [],
+          negativeTypes: Array.isArray(entry?.negativeTypes) ? entry.negativeTypes : [],
+        }));
       }
     } catch {
       return [];

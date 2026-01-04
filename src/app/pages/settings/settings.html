@@ -16,7 +16,9 @@
         <div class="response-item" *ngFor="let response of responses">
           <strong>{{ response.name }}</strong>
           <div class="tag-list">
-            <span class="tag" *ngFor="let tag of response.types">{{ tag }}</span>
+            <span class="tag" *ngFor="let tag of response.types" [class.negative]="isNegativeTag(response, tag)">
+              {{ tag }}
+            </span>
           </div>
           <button class="ghost small" type="button" (click)="removeResponse(response.name)">
             Delete
@@ -107,10 +109,14 @@
               placeholder="Type tag"
               name="responseTypeInput"
             />
+            <label class="checkbox">
+              <input type="checkbox" [(ngModel)]="responseTypeNegative" name="responseTypeNegative" />
+              Mark negative
+            </label>
             <button class="ghost" type="button" (click)="addResponseType()">Add tag</button>
           </div>
           <div class="tag-list" *ngIf="responseTypes.length">
-            <span class="tag" *ngFor="let tag of responseTypes">
+            <span class="tag" *ngFor="let tag of responseTypes" [class.negative]="isNegativeTagDraft(tag)">
               {{ tag }}
               <button type="button" class="remove" (click)="removeResponseType(tag)">×</button>
             </span>
