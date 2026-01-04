@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthState } from './auth-state';
 
 @Component({
@@ -11,4 +11,9 @@ import { AuthState } from './auth-state';
 })
 export class App {
   protected readonly auth = inject(AuthState);
+  private readonly router = inject(Router);
+
+  protected get showNav(): boolean {
+    return !this.router.url.startsWith('/login');
+  }
 }

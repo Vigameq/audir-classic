@@ -6,7 +6,7 @@
       <div class="brand-subtitle">Enterprise audit workspace</div>
     </div>
   </div>
-  <div class="nav-shell">
+  <div class="nav-shell" *ngIf="showNav">
     <nav class="app-nav">
       <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
       <a routerLink="/audit-plan" routerLinkActive="active">Audit Plan</a>
