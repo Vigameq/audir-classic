@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
+import { NcRecord, NcService } from '../../services/nc.service';
 import { RegionService } from '../../services/region.service';
 import { ResponseService } from '../../services/response.service';
 import { SiteService } from '../../services/site.service';
@@ -16,6 +17,7 @@ import { User, UserService } from '../../services/user.service';
 })
 export class AuditManage implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
+  private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
@@ -38,6 +40,8 @@ export class AuditManage implements OnInit {
     auditNote: '',
     responseType: '',
   };
+  protected viewAudit: AuditPlanRecord | null = null;
+  protected viewResponses: NcRecord[] = [];
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
@@ -232,6 +236,18 @@ export class AuditManage implements OnInit {
       responseType: this.editForm.responseType,
     });
     this.closeEdit(form);
+  }
+
+  protected openView(audit: AuditPlanRecord): void {
+    this.viewAudit = audit;
+    this.viewResponses = this.ncService
+      .records()
+      .filter((record) => record.auditCode === audit.code);
+  }
+
+  protected closeView(): void {
+    this.viewAudit = null;
+    this.viewResponses = [];
   }
 
   protected deleteAudit(audit: AuditPlanRecord): void {
