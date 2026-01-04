@@ -59,6 +59,28 @@ button.small {
   font-size: 0.8rem;
 }
 
+.file-trigger {
+  font: inherit;
+  border: 1px solid transparent;
+  padding: 0.6rem 1.3rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-trigger.ghost {
+  background: #fff6eb;
+  border-color: rgba(255, 154, 0, 0.35);
+}
+
+.file-trigger.small {
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+}
+
 .filter {
   display: grid;
   gap: 0.35rem;
