@@ -17,9 +17,6 @@
       <a routerLink="/templates" routerLinkActive="active">Templates</a>
       <a routerLink="/user-management" routerLinkActive="active">User Management</a>
       <a routerLink="/settings" routerLinkActive="active">Settings</a>
-      <a routerLink="/auditor" routerLinkActive="active">Auditor</a>
-      <a routerLink="/manager" routerLinkActive="active">Manager</a>
-      <a routerLink="/super-admin" routerLinkActive="active">Super Admin</a>
     </nav>
     <button class="logout" type="button" (click)="logout()" *ngIf="auth.isLoggedIn()">
       Logout
