@@ -68,7 +68,7 @@
         <h2>Onboard user</h2>
         <button class="icon" type="button" (click)="closeInvite()">Close</button>
       </header>
-      <form class="modal-form" #onboardFormRef="ngForm">
+      <form class="modal-form" #onboardFormRef="ngForm" (ngSubmit)="onboardUser(onboardFormRef)">
         <div class="field">
           <label>First name <span class="req">*</span></label>
           <input
@@ -155,9 +155,8 @@
         <button class="ghost" type="button" (click)="closeInvite()">Cancel</button>
         <button
           class="primary"
-          type="button"
+          type="submit"
           [disabled]="onboardFormRef.invalid"
-          (click)="onboardUser(onboardFormRef)"
         >
           Onboard user
         </button>
