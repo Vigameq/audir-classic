@@ -16,4 +16,9 @@ export class App {
   protected get showNav(): boolean {
     return !this.router.url.startsWith('/login');
   }
+
+  protected logout(): void {
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
 }

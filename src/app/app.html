@@ -21,7 +21,7 @@
       <a routerLink="/manager" routerLinkActive="active">Manager</a>
       <a routerLink="/super-admin" routerLinkActive="active">Super Admin</a>
     </nav>
-    <button class="logout" type="button" (click)="auth.logout()" *ngIf="auth.isLoggedIn()">
+    <button class="logout" type="button" (click)="logout()" *ngIf="auth.isLoggedIn()">
       Logout
     </button>
   </div>
