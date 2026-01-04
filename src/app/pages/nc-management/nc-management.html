@@ -80,7 +80,9 @@
           </div>
         </div>
         <div class="nc-actions">
-          <button class="primary small" disabled>Perform NC</button>
+          <button class="primary small" type="button" (click)="openRecord(record)">
+            Perform NC
+          </button>
         </div>
       </article>
     </div>
@@ -88,4 +90,50 @@
       <div class="empty">No submitted negative responses yet.</div>
     </ng-template>
   </section>
+
+  <div class="drawer-backdrop" *ngIf="activeRecord">
+    <aside class="drawer">
+      <header class="drawer-header">
+        <div>
+          <h2>Perform NC</h2>
+          <p class="subtitle">
+            {{ activeRecord.auditCode }} · {{ activeRecord.auditType }} ·
+            {{ activeRecord.auditSubtype }} ·
+            {{ activeRecord.startDate }} → {{ activeRecord.endDate }}
+          </p>
+        </div>
+        <button class="ghost small" type="button" (click)="closeRecord()">Close</button>
+      </header>
+      <section class="drawer-content">
+        <div class="detail-card">
+          <div class="detail-row">
+            <span>Question</span>
+            <strong>{{ activeRecord.question }}</strong>
+          </div>
+          <div class="detail-grid">
+            <div>
+              <span>Response</span>
+              <strong>{{ activeRecord.response }}</strong>
+            </div>
+            <div>
+              <span>Assigned NC</span>
+              <strong>{{ activeRecord.assignedNc || '—' }}</strong>
+            </div>
+            <div>
+              <span>Auditor</span>
+              <strong>{{ activeRecord.auditorName || '—' }}</strong>
+            </div>
+            <div>
+              <span>Submitted</span>
+              <strong>{{ activeRecord.createdAt | date:'medium' }}</strong>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span>Auditor note</span>
+            <strong>{{ activeRecord.note || '—' }}</strong>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
 </section>

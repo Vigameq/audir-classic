@@ -213,6 +213,89 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 6, 2, 0.4);
+  display: grid;
+  justify-items: end;
+  z-index: 40;
+}
+
+.drawer {
+  background: #ffffff;
+  width: min(90vw, 1100px);
+  height: 100%;
+  max-height: 100vh;
+  padding: 2rem;
+  box-shadow: -20px 0 50px rgba(20, 10, 0, 0.2);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(20, 10, 0, 0.08);
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.drawer-content {
+  display: grid;
+  gap: 1rem;
+  overflow: auto;
+  min-height: 0;
+}
+
+.detail-card {
+  border-radius: 1.2rem;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  padding: 1.5rem;
+  background: #fffaf4;
+  display: grid;
+  gap: 1rem;
+}
+
+.detail-row {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.detail-row strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.detail-grid strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .nc-card-header {
     align-items: flex-start;

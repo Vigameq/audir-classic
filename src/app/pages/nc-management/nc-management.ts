@@ -10,8 +10,17 @@ import { NcRecord, NcService } from '../../services/nc.service';
 })
 export class NcManagement {
   private readonly ncService = inject(NcService);
+  protected activeRecord: NcRecord | null = null;
 
   protected get ncRecords(): NcRecord[] {
     return this.ncService.records();
+  }
+
+  protected openRecord(record: NcRecord): void {
+    this.activeRecord = record;
+  }
+
+  protected closeRecord(): void {
+    this.activeRecord = null;
   }
 }
