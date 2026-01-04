@@ -41,131 +41,51 @@
   <section class="panel wide">
     <div class="panel-header">
       <h2>Flagged questions</h2>
-      <span class="count">12 flagged</span>
+      <span class="count">{{ ncRecords.length }} flagged</span>
     </div>
-    <div class="nc-grid">
-      <article class="nc-card">
+    <div class="nc-grid" *ngIf="ncRecords.length; else emptyState">
+      <article class="nc-card" *ngFor="let record of ncRecords">
         <div class="nc-card-header">
           <div>
             <p class="audit-label">Audit</p>
-            <p class="code">HBP87K · ISO 9001 · Site 2</p>
+            <p class="code">
+              {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
+            </p>
+            <p class="meta">{{ record.startDate }} → {{ record.endDate }}</p>
           </div>
-          <span class="status-pill high">Open · High</span>
+          <span class="status-pill medium">Submitted</span>
         </div>
         <div class="nc-body">
           <div class="question-block">
             <span>Question</span>
-            <strong>Are vendor access logs reviewed weekly?</strong>
+            <strong>{{ record.question }}</strong>
           </div>
           <div class="meta-row">
             <div class="meta-block">
               <span>Response</span>
-              <strong>Non-compliant</strong>
+              <strong>{{ record.response }}</strong>
             </div>
             <div class="meta-block">
               <span>Assigned NC</span>
-              <strong>Infrastructure</strong>
+              <strong>{{ record.assignedNc || '—' }}</strong>
             </div>
             <div class="meta-block">
               <span>Auditor</span>
-              <strong>Asha Menon</strong>
-            </div>
-            <div class="meta-block">
-              <span>Due</span>
-              <strong>Jan 18, 2026</strong>
+              <strong>{{ record.auditorName || '—' }}</strong>
             </div>
           </div>
           <div class="note-block">
             <span>Auditor note</span>
-            <p>Weekly sign-off missing for two consecutive weeks.</p>
+            <p>{{ record.note || '—' }}</p>
           </div>
         </div>
         <div class="nc-actions">
-          <button class="primary small">Submit NC</button>
-        </div>
-      </article>
-
-      <article class="nc-card">
-        <div class="nc-card-header">
-          <div>
-            <p class="audit-label">Audit</p>
-            <p class="code">965CCJ · ISO 27001 · Site 1</p>
-          </div>
-          <span class="status-pill medium">In review · Medium</span>
-        </div>
-        <div class="nc-body">
-          <div class="question-block">
-            <span>Question</span>
-            <strong>Is MFA enforced for privileged accounts?</strong>
-          </div>
-          <div class="meta-row">
-            <div class="meta-block">
-              <span>Response</span>
-              <strong>No</strong>
-            </div>
-            <div class="meta-block">
-              <span>Assigned NC</span>
-              <strong>Engineering</strong>
-            </div>
-            <div class="meta-block">
-              <span>Auditor</span>
-              <strong>Priya Shah</strong>
-            </div>
-            <div class="meta-block">
-              <span>Due</span>
-              <strong>Feb 05, 2026</strong>
-            </div>
-          </div>
-          <div class="note-block">
-            <span>Auditor note</span>
-            <p>Pending enforcement for new admin accounts.</p>
-          </div>
-        </div>
-        <div class="nc-actions">
-          <button class="primary small">Resolve</button>
-        </div>
-      </article>
-
-      <article class="nc-card">
-        <div class="nc-card-header">
-          <div>
-            <p class="audit-label">Audit</p>
-            <p class="code">3JK9RM · ISO 27001 · Site 3</p>
-          </div>
-          <span class="status-pill low">Open · Low</span>
-        </div>
-        <div class="nc-body">
-          <div class="question-block">
-            <span>Question</span>
-            <strong>Is evidence archived for 12 months?</strong>
-          </div>
-          <div class="meta-row">
-            <div class="meta-block">
-              <span>Response</span>
-              <strong>Non-compliant</strong>
-            </div>
-            <div class="meta-block">
-              <span>Assigned NC</span>
-              <strong>Compliance</strong>
-            </div>
-            <div class="meta-block">
-              <span>Auditor</span>
-              <strong>Aman Rao</strong>
-            </div>
-            <div class="meta-block">
-              <span>Due</span>
-              <strong>Jan 30, 2026</strong>
-            </div>
-          </div>
-          <div class="note-block">
-            <span>Auditor note</span>
-            <p>Older evidence located in local drives only.</p>
-          </div>
-        </div>
-        <div class="nc-actions">
-          <button class="primary small">Assign owner</button>
+          <button class="primary small" disabled>Submitted</button>
         </div>
       </article>
     </div>
+    <ng-template #emptyState>
+      <div class="empty">No submitted negative responses yet.</div>
+    </ng-template>
   </section>
 </section>

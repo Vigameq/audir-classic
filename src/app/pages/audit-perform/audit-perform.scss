@@ -347,6 +347,13 @@ button.small {
   background: #ffffff;
 }
 
+.inline-fields select:disabled {
+  background: #f7f4f0;
+  color: var(--color-muted);
+  border-color: rgba(20, 10, 0, 0.1);
+  cursor: not-allowed;
+}
+
 .question-body {
   display: grid;
   gap: 0.7rem;

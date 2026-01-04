@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import QRCode from 'qrcode';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
+import { NcService } from '../../services/nc.service';
 import { ResponseService } from '../../services/response.service';
 import { TemplateRecord, TemplateService } from '../../services/template.service';
 
@@ -19,6 +20,7 @@ export class AuditPerform implements OnInit {
   private readonly templateService = inject(TemplateService);
   private readonly responseService = inject(ResponseService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly ncService = inject(NcService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -50,11 +52,13 @@ export class AuditPerform implements OnInit {
   protected activeAudit: AuditPlanRecord | null = null;
   protected activeTemplate: TemplateRecord | null = null;
   protected responseOptions: string[] = [];
+  protected negativeResponseOptions: string[] = [];
   protected responseSelections: string[] = [];
   protected noteWords: number[] = [];
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
   protected evidenceFiles: string[] = [];
+  protected noteEntries: string[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
 
@@ -92,6 +96,7 @@ export class AuditPerform implements OnInit {
       .responses()
       .find((item) => item.name === audit.responseType);
     this.responseOptions = response?.types ?? [];
+    this.negativeResponseOptions = response?.negativeTypes ?? [];
     this.responseSelections = [];
     this.noteWords = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(0)
@@ -105,17 +110,22 @@ export class AuditPerform implements OnInit {
     this.evidenceFiles = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
+    this.noteEntries = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
   }
 
   protected closePerform(): void {
     this.activeAudit = null;
     this.activeTemplate = null;
     this.responseOptions = [];
+    this.negativeResponseOptions = [];
     this.responseSelections = [];
     this.noteWords = [];
     this.ncAssignments = [];
     this.savedQuestions = [];
     this.evidenceFiles = [];
+    this.noteEntries = [];
     this.router.navigate(['/audit-perform'], { replaceUrl: true });
   }
 
@@ -127,8 +137,43 @@ export class AuditPerform implements OnInit {
     this.savedQuestions[index] = true;
   }
 
-  protected submitQuestion(): void {
-    // no-op for now
+  protected submitQuestion(index: number): void {
+    if (!this.activeAudit || !this.activeTemplate) {
+      return;
+    }
+    if (!this.isNegativeSelection(index)) {
+      return;
+    }
+    const response = this.responseSelections[index];
+    if (!response) {
+      return;
+    }
+    this.ncService.addRecord({
+      id: crypto.randomUUID(),
+      auditCode: this.activeAudit.code,
+      auditType: this.activeAudit.auditType,
+      auditSubtype: this.activeAudit.auditSubtype || '—',
+      startDate: this.activeAudit.startDate,
+      endDate: this.activeAudit.endDate,
+      auditorName: this.activeAudit.auditorName || '—',
+      question: this.activeTemplate.questions[index] ?? '',
+      response,
+      assignedNc: this.ncAssignments[index] || '—',
+      note: this.noteEntries[index] || '',
+      createdAt: new Date().toISOString(),
+    });
+    this.savedQuestions[index] = true;
+  }
+
+  protected isNegativeSelection(index: number): boolean {
+    const selected = this.responseSelections[index];
+    return !!selected && this.negativeResponseOptions.includes(selected);
+  }
+
+  protected onResponseChange(index: number): void {
+    if (!this.isNegativeSelection(index)) {
+      this.ncAssignments[index] = '';
+    }
   }
 
   protected onEvidenceSelected(index: number, event: Event): void {

@@ -106,6 +106,12 @@
   color: #7a4300;
 }
 
+.meta {
+  margin: 0.35rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
 .status-pill {
   padding: 0.35rem 0.8rem;
   border-radius: 999px;
@@ -200,6 +206,11 @@ button.ghost {
 button.small {
   padding: 0.35rem 0.85rem;
   font-size: 0.8rem;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 720px) {
