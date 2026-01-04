@@ -27,6 +27,15 @@
           required
         />
       </label>
+      <label>
+        Role
+        <select name="role" [(ngModel)]="role" required>
+          <option value="">Select role</option>
+          <option>Auditor</option>
+          <option>Manager</option>
+          <option>Super Admin</option>
+        </select>
+      </label>
       <button type="submit" class="primary">Sign in</button>
       <button type="button" class="ghost">Request access</button>
       <p class="error" *ngIf="loginError">{{ loginError }}</p>

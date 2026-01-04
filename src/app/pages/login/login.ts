@@ -17,6 +17,7 @@ export class Login {
   protected email = '';
   protected password = '';
   protected loginError = '';
+  protected role = '';
 
   protected signIn(): void {
     this.loginError = '';
