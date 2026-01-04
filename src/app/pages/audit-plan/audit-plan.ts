@@ -41,6 +41,12 @@ export class AuditPlan implements OnInit {
     responseType: '',
   };
   protected auditors: User[] = [];
+  protected showSuccessModal = false;
+  protected successSummary = {
+    dateRange: '',
+    auditType: '',
+    auditSubtype: '',
+  };
 
   protected get auditTypes(): string[] {
     return this.templateService.templates().map((template) => template.name);
@@ -220,6 +226,11 @@ export class AuditPlan implements OnInit {
     if (form.invalid) {
       return;
     }
+    this.successSummary = {
+      dateRange: `${this.auditForm.startDate} → ${this.auditForm.endDate}`,
+      auditType: this.auditForm.auditType,
+      auditSubtype: this.auditForm.auditSubtype || '—',
+    };
     this.auditPlanService.addPlan({
       startDate: this.auditForm.startDate,
       endDate: this.auditForm.endDate,
@@ -235,5 +246,10 @@ export class AuditPlan implements OnInit {
       responseType: this.auditForm.responseType,
     });
     this.cancel(form);
+    this.showSuccessModal = true;
+  }
+
+  protected closeSuccessModal(): void {
+    this.showSuccessModal = false;
   }
 }

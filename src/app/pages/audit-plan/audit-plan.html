@@ -236,3 +236,30 @@
     </aside>
   </div>
 </section>
+
+<div class="modal-backdrop" *ngIf="showSuccessModal">
+  <div class="modal">
+    <header>
+      <h2>Audit created</h2>
+      <button class="ghost small" type="button" (click)="closeSuccessModal()">Close</button>
+    </header>
+    <p class="modal-subtitle">The audit has been created successfully.</p>
+    <div class="modal-summary">
+      <div>
+        <span>Dates</span>
+        <strong>{{ successSummary.dateRange }}</strong>
+      </div>
+      <div>
+        <span>Audit type</span>
+        <strong>{{ successSummary.auditType }}</strong>
+      </div>
+      <div>
+        <span>Audit subtype</span>
+        <strong>{{ successSummary.auditSubtype }}</strong>
+      </div>
+    </div>
+    <footer>
+      <button class="primary" type="button" (click)="closeSuccessModal()">Done</button>
+    </footer>
+  </div>
+</div>
