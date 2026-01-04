@@ -133,6 +133,40 @@
             <strong>{{ activeRecord.note || '—' }}</strong>
           </div>
         </div>
+        <div class="response-card">
+          <h3>NC response</h3>
+          <div class="response-grid">
+            <label>
+              Root Cause
+              <textarea rows="2" [(ngModel)]="ncResponse.rootCause"></textarea>
+            </label>
+            <label>
+              Containment Action
+              <textarea rows="2" [(ngModel)]="ncResponse.containmentAction"></textarea>
+            </label>
+            <label>
+              Corrective Action
+              <textarea rows="2" [(ngModel)]="ncResponse.correctiveAction"></textarea>
+            </label>
+            <label>
+              Preventive Action
+              <textarea rows="2" [(ngModel)]="ncResponse.preventiveAction"></textarea>
+            </label>
+          </div>
+          <div class="response-actions">
+            <label class="ghost small file-trigger">
+              Attach evidence
+              <input type="file" (change)="onEvidenceSelected($event)" />
+            </label>
+            <span class="evidence-name" *ngIf="ncResponse.evidenceFile">
+              {{ ncResponse.evidenceFile }}
+            </span>
+            <div class="response-buttons">
+              <button class="primary" type="button" (click)="submitNc()">Submit</button>
+              <button class="ghost" type="button" (click)="closeRecord()">Cancel</button>
+            </div>
+          </div>
+        </div>
       </section>
     </aside>
   </div>
