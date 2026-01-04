@@ -17,8 +17,6 @@ export class Templates {
   protected importError = '';
   protected importNote = '';
   protected noteChars = 0;
-  protected tagInput = '';
-  protected tags: string[] = [];
   protected showImportModal = false;
   protected templateName = '';
   protected createError = '';
@@ -85,22 +83,6 @@ export class Templates {
     this.noteChars = value.length;
   }
 
-  protected addTag(): void {
-    const value = this.tagInput.trim();
-    if (!value) {
-      return;
-    }
-    if (this.tags.length >= 3 || this.tags.includes(value)) {
-      this.tagInput = '';
-      return;
-    }
-    this.tags = [...this.tags, value];
-    this.tagInput = '';
-  }
-
-  protected removeTag(tag: string): void {
-    this.tags = this.tags.filter((item) => item !== tag);
-  }
 
   protected createTemplate(): void {
     if (!this.questions.length) {
@@ -111,13 +93,12 @@ export class Templates {
     this.templateService.createTemplate({
       name,
       note: this.importNote.trim(),
-      tags: this.tags,
+      tags: [],
       questions: this.questions,
     });
     this.templateName = '';
     this.importNote = '';
     this.noteChars = 0;
-    this.tags = [];
     this.selectedFileName = '';
     this.createError = '';
     this.showImportModal = false;

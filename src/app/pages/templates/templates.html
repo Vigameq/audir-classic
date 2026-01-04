@@ -81,30 +81,6 @@
             <span [class.limit]="noteChars >= 100">{{ noteChars }}/100</span>
           </div>
         </div>
-        <div class="tags">
-          <label>Tags (up to 3)</label>
-          <div class="tag-input">
-            <input
-              type="text"
-              name="tagInput"
-              [(ngModel)]="tagInput"
-              placeholder="Add a tag"
-              [disabled]="tags.length >= 3"
-            />
-            <button class="ghost" type="button" (click)="addTag()" [disabled]="tags.length >= 3">
-              Add tag
-            </button>
-          </div>
-          <div class="note-meta">
-            <span>{{ tags.length }}/3 tags used</span>
-          </div>
-          <div class="tag-list" *ngIf="tags.length">
-            <span class="tag" *ngFor="let tag of tags">
-              {{ tag }}
-              <button type="button" class="remove" (click)="removeTag(tag)">×</button>
-            </span>
-          </div>
-        </div>
         <p class="error" *ngIf="createError">{{ createError }}</p>
       </div>
       <footer>
