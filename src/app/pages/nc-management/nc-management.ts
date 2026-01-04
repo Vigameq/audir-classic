@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { NcRecord, NcService } from '../../services/nc.service';
 
 @Component({
   selector: 'app-nc-management',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './nc-management.html',
   styleUrl: './nc-management.scss',
 })
