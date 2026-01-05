@@ -5,40 +5,120 @@
     <p class="subtitle">Snapshot of audit readiness and active plans.</p>
   </header>
 
-  <div class="metrics">
-    <article>
-      <span>Active audits</span>
-      <strong>6</strong>
-    </article>
-    <article>
-      <span>Open findings</span>
-      <strong>18</strong>
-    </article>
-    <article>
-      <span>Plans due</span>
-      <strong>4</strong>
-    </article>
-  </div>
+  <section *ngIf="isAuditor; else defaultDashboard" class="auditor-dashboard">
+    <div class="metrics">
+      <article>
+        <span>Planned audits</span>
+        <strong>{{ auditorSummary.planned }}</strong>
+      </article>
+      <article>
+        <span>Completed audits</span>
+        <strong>{{ auditorSummary.completed }}</strong>
+      </article>
+      <article>
+        <span>Open findings</span>
+        <strong>{{ auditorSummary.openFindings }}</strong>
+      </article>
+    </div>
 
-  <section class="panel">
-    <div class="panel-header">
-      <h2>Upcoming milestones</h2>
-      <button class="ghost">View calendar</button>
-    </div>
-    <div class="panel-row">
-      <span>Access reviews</span>
-      <span>Sep 28</span>
-      <span class="status">In progress</span>
-    </div>
-    <div class="panel-row">
-      <span>Change management</span>
-      <span>Oct 02</span>
-      <span class="status">Planned</span>
-    </div>
-    <div class="panel-row">
-      <span>Vendor assessment</span>
-      <span>Oct 05</span>
-      <span class="status">Planned</span>
-    </div>
+    <section class="panel split">
+      <div>
+        <div class="panel-header">
+          <h2>Assigned audits</h2>
+        </div>
+        <div class="audit-list">
+          <article class="audit-row" *ngFor="let audit of assignedAudits">
+            <div>
+              <strong>{{ audit.type }}</strong>
+              <p>{{ audit.subtype }} · {{ audit.code }}</p>
+            </div>
+            <div>
+              <span>{{ audit.dateRange }}</span>
+              <span class="status">{{ audit.status }}</span>
+            </div>
+          </article>
+        </div>
+      </div>
+      <div>
+        <div class="panel-header">
+          <h2>Planned vs completed</h2>
+        </div>
+        <div class="chart">
+          <div class="chart-row">
+            <span>Planned</span>
+            <div class="bar">
+              <span class="fill planned" [style.width.%]="30"></span>
+            </div>
+            <strong>{{ auditorSummary.planned }}</strong>
+          </div>
+          <div class="chart-row">
+            <span>Completed</span>
+            <div class="bar">
+              <span class="fill completed" [style.width.%]="70"></span>
+            </div>
+            <strong>{{ auditorSummary.completed }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Planned audit calendar</h2>
+        <span class="month">{{ calendarMonth }}</span>
+      </div>
+      <div class="calendar">
+        <span
+          class="day"
+          *ngFor="let day of calendarDays"
+          [class.highlight]="calendarHighlights.has(day)"
+        >
+          {{ day }}
+        </span>
+      </div>
+      <div class="legend">
+        <span class="dot"></span>
+        <span>Planned audit dates</span>
+      </div>
+    </section>
   </section>
+
+  <ng-template #defaultDashboard>
+    <div class="metrics">
+      <article>
+        <span>Active audits</span>
+        <strong>6</strong>
+      </article>
+      <article>
+        <span>Open findings</span>
+        <strong>18</strong>
+      </article>
+      <article>
+        <span>Plans due</span>
+        <strong>4</strong>
+      </article>
+    </div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Upcoming milestones</h2>
+        <button class="ghost">View calendar</button>
+      </div>
+      <div class="panel-row">
+        <span>Access reviews</span>
+        <span>Sep 28</span>
+        <span class="status">In progress</span>
+      </div>
+      <div class="panel-row">
+        <span>Change management</span>
+        <span>Oct 02</span>
+        <span class="status">Planned</span>
+      </div>
+      <div class="panel-row">
+        <span>Vendor assessment</span>
+        <span>Oct 05</span>
+        <span class="status">Planned</span>
+      </div>
+    </section>
+  </ng-template>
 </section>

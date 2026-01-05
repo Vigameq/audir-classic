@@ -67,6 +67,132 @@ h1 {
   border-bottom: none;
 }
 
+.auditor-dashboard {
+  display: grid;
+  gap: 2rem;
+}
+
+.panel.split {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.audit-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.audit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  background: #fffaf4;
+}
+
+.audit-row p {
+  margin: 0.3rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.audit-row .status {
+  display: inline-flex;
+  margin-top: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 154, 0, 0.15);
+  color: #7a4300;
+  font-size: 0.75rem;
+}
+
+.chart {
+  display: grid;
+  gap: 1rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 0.8fr 2fr 0.5fr;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.chart-row strong {
+  text-align: right;
+  color: var(--color-ink);
+}
+
+.bar {
+  height: 0.5rem;
+  background: rgba(255, 154, 0, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.fill.planned {
+  background: rgba(255, 154, 0, 0.6);
+}
+
+.fill.completed {
+  background: rgba(255, 154, 0, 0.95);
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(40px, 1fr));
+  gap: 0.5rem;
+}
+
+.day {
+  padding: 0.6rem 0;
+  text-align: center;
+  border-radius: 0.8rem;
+  background: #ffffff;
+  border: 1px solid rgba(20, 10, 0, 0.06);
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.day.highlight {
+  background: rgba(255, 154, 0, 0.2);
+  border-color: rgba(255, 154, 0, 0.6);
+  color: #7a4300;
+  font-weight: 600;
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.legend .dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: rgba(255, 154, 0, 0.6);
+}
+
+.month {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
 .status {
   background: rgba(255, 154, 0, 0.1);
   color: #7a4300;
