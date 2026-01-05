@@ -15,6 +15,21 @@ export class Dashboard {
     completed: 14,
     openFindings: 9,
   };
+  protected readonly managerSummary = {
+    totalAudits: 28,
+    completedAudits: 19,
+    totalAuditors: 8,
+    totalTemplates: 12,
+    totalRegions: 6,
+    totalLocations: 18,
+  };
+  protected readonly auditorAssignments = [
+    { name: 'Asha Menon', assigned: 5 },
+    { name: 'Priya Shah', assigned: 4 },
+    { name: 'Aman Rao', assigned: 3 },
+    { name: 'Ravi Kumar', assigned: 6 },
+    { name: 'Neha Patel', assigned: 2 },
+  ];
   protected readonly assignedAudits = [
     {
       code: 'HBP87K',
@@ -41,6 +56,7 @@ export class Dashboard {
   protected readonly calendarMonth = 'January 2026';
   protected readonly calendarDays = Array.from({ length: 31 }, (_, index) => index + 1);
   protected readonly calendarHighlights = new Set([8, 15, 22, 24]);
+  protected readonly managerCalendarHighlights = new Set([2, 5, 8, 11, 15, 18, 22, 25, 28]);
 
   protected get dashboardTitle(): string {
     const role = this.auth.role();
@@ -58,5 +74,9 @@ export class Dashboard {
 
   protected get isAuditor(): boolean {
     return this.auth.role() === 'Auditor';
+  }
+
+  protected get isManager(): boolean {
+    return this.auth.role() === 'Manager';
   }
 }
