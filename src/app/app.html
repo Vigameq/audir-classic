@@ -9,15 +9,57 @@
   <div class="nav-shell" *ngIf="showNav">
     <div class="nav-surface">
       <nav class="app-nav">
-        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-        <a routerLink="/audit-plan" routerLinkActive="active">Audit Plan</a>
-        <a routerLink="/audit-manage" routerLinkActive="active">Audit Manage</a>
-        <a routerLink="/audit-perform" routerLinkActive="active">Audit Perform</a>
-        <a routerLink="/nc-management" routerLinkActive="active">NC Management</a>
-        <a routerLink="/templates" routerLinkActive="active">Templates</a>
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Dashboard
+        </a>
+        <a
+          routerLink="/audit-plan"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Audit Plan
+        </a>
+        <a
+          routerLink="/audit-manage"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Audit Manage
+        </a>
+        <a
+          routerLink="/audit-perform"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Audit Perform
+        </a>
+        <a
+          routerLink="/nc-management"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          NC Management
+        </a>
+        <a
+          routerLink="/templates"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Templates
+        </a>
         <a routerLink="/reports" routerLinkActive="active">Reports</a>
         <a routerLink="/user-management" routerLinkActive="active">User Management</a>
-        <a routerLink="/settings" routerLinkActive="active">Settings</a>
+        <a
+          routerLink="/settings"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Super Admin'"
+        >
+          Settings
+        </a>
       </nav>
     </div>
     <button class="logout" type="button" (click)="logout()" *ngIf="auth.isLoggedIn()">
