@@ -21,7 +21,7 @@ export class Login {
 
   protected signIn(): void {
     this.loginError = '';
-    this.auth.login('dev-token');
+    this.auth.login('dev-token', this.role);
     this.router.navigate(['/dashboard']);
   }
 }
