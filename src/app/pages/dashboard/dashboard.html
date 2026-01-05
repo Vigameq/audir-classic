@@ -149,13 +149,21 @@
       <section class="panel">
         <div class="panel-header">
           <h2>Audit calendar</h2>
-          <span class="month">{{ calendarMonth }}</span>
+          <select
+            class="month-select"
+            [(ngModel)]="selectedManagerMonth"
+            *ngIf="isManager"
+          >
+            <option *ngFor="let month of managerCalendars" [ngValue]="month">
+              {{ month.label }}
+            </option>
+          </select>
         </div>
         <div class="calendar">
           <span
             class="day"
-            *ngFor="let day of calendarDays"
-            [class.highlight]="managerCalendarHighlights.has(day)"
+            *ngFor="let day of getDays(selectedManagerMonth.days)"
+            [class.highlight]="selectedManagerMonth.highlights.includes(day)"
           >
             {{ day }}
           </span>

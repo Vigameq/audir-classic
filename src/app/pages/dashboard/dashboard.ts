@@ -62,7 +62,6 @@ export class Dashboard {
   protected readonly calendarMonth = 'January 2026';
   protected readonly calendarDays = Array.from({ length: 31 }, (_, index) => index + 1);
   protected readonly calendarHighlights = new Set([8, 15, 22, 24]);
-  protected readonly managerCalendarHighlights = new Set([2, 5, 8, 11, 15, 18, 22, 25, 28]);
   protected readonly auditorCalendars = [
     { label: 'January 2026', days: 31, highlights: [8, 15, 22, 24] },
     { label: 'February 2026', days: 28, highlights: [3, 12, 19, 26] },
@@ -78,6 +77,21 @@ export class Dashboard {
     { label: 'December 2026', days: 31, highlights: [2, 8, 15, 23] },
   ];
   protected selectedAuditorMonth = this.auditorCalendars[0];
+  protected readonly managerCalendars = [
+    { label: 'January 2026', days: 31, highlights: [2, 5, 8, 11, 15, 18, 22, 25, 28] },
+    { label: 'February 2026', days: 28, highlights: [1, 4, 9, 13, 17, 21, 26] },
+    { label: 'March 2026', days: 31, highlights: [3, 7, 12, 16, 20, 24, 29] },
+    { label: 'April 2026', days: 30, highlights: [2, 6, 10, 14, 18, 22, 27] },
+    { label: 'May 2026', days: 31, highlights: [1, 5, 9, 13, 17, 21, 26] },
+    { label: 'June 2026', days: 30, highlights: [3, 8, 12, 16, 20, 24, 28] },
+    { label: 'July 2026', days: 31, highlights: [2, 6, 10, 15, 19, 23, 27] },
+    { label: 'August 2026', days: 31, highlights: [4, 9, 13, 18, 22, 26, 30] },
+    { label: 'September 2026', days: 30, highlights: [1, 6, 10, 15, 19, 23, 28] },
+    { label: 'October 2026', days: 31, highlights: [2, 7, 11, 16, 20, 24, 29] },
+    { label: 'November 2026', days: 30, highlights: [3, 8, 12, 17, 21, 25, 29] },
+    { label: 'December 2026', days: 31, highlights: [1, 5, 9, 14, 18, 22, 27] },
+  ];
+  protected selectedManagerMonth = this.managerCalendars[0];
 
   protected get dashboardTitle(): string {
     const role = this.auth.role();
