@@ -62,6 +62,21 @@ export class Dashboard {
   protected readonly calendarDays = Array.from({ length: 31 }, (_, index) => index + 1);
   protected readonly calendarHighlights = new Set([8, 15, 22, 24]);
   protected readonly managerCalendarHighlights = new Set([2, 5, 8, 11, 15, 18, 22, 25, 28]);
+  protected readonly auditorCalendars = [
+    { label: 'January 2026', days: 31, highlights: [8, 15, 22, 24] },
+    { label: 'February 2026', days: 28, highlights: [3, 12, 19, 26] },
+    { label: 'March 2026', days: 31, highlights: [5, 11, 18, 27] },
+    { label: 'April 2026', days: 30, highlights: [2, 9, 16, 23] },
+    { label: 'May 2026', days: 31, highlights: [6, 14, 21, 29] },
+    { label: 'June 2026', days: 30, highlights: [4, 13, 20, 28] },
+    { label: 'July 2026', days: 31, highlights: [7, 15, 22, 30] },
+    { label: 'August 2026', days: 31, highlights: [5, 12, 19, 27] },
+    { label: 'September 2026', days: 30, highlights: [3, 10, 17, 25] },
+    { label: 'October 2026', days: 31, highlights: [1, 9, 16, 24] },
+    { label: 'November 2026', days: 30, highlights: [4, 11, 18, 26] },
+    { label: 'December 2026', days: 31, highlights: [2, 8, 15, 23] },
+  ];
+  protected selectedAuditorMonth = this.auditorCalendars[0];
 
   protected get dashboardTitle(): string {
     const role = this.auth.role();
@@ -87,5 +102,9 @@ export class Dashboard {
 
   protected get isSuperAdmin(): boolean {
     return this.auth.role() === 'Super Admin';
+  }
+
+  protected getDays(total: number): number[] {
+    return Array.from({ length: total }, (_, index) => index + 1);
   }
 }

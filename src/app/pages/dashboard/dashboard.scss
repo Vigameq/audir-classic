@@ -259,6 +259,15 @@ h1 {
   font-size: 0.85rem;
 }
 
+.month-select {
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(20, 10, 0, 0.12);
+  background: #ffffff;
+  color: var(--color-ink);
+}
+
 .status {
   background: rgba(255, 154, 0, 0.1);
   color: #7a4300;
