@@ -23,6 +23,11 @@ export class Dashboard {
     totalRegions: 6,
     totalLocations: 18,
   };
+  protected readonly superAdminSummary = {
+    totalAuditors: 12,
+    totalManagers: 4,
+    totalTemplates: 16,
+  };
   protected readonly auditorAssignments = [
     { name: 'Asha Menon', assigned: 5, openFindings: 7 },
     { name: 'Priya Shah', assigned: 4, openFindings: 3 },
@@ -78,5 +83,9 @@ export class Dashboard {
 
   protected get isManager(): boolean {
     return this.auth.role() === 'Manager';
+  }
+
+  protected get isSuperAdmin(): boolean {
+    return this.auth.role() === 'Super Admin';
   }
 }

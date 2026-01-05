@@ -84,7 +84,7 @@
   </section>
 
   <ng-template #managerDashboard>
-    <section *ngIf="isManager; else defaultDashboard" class="auditor-dashboard">
+    <section *ngIf="isManager; else superAdminDashboard" class="auditor-dashboard">
       <div class="metrics">
         <article>
           <span>Total audits</span>
@@ -155,6 +155,85 @@
         <div class="legend">
           <span class="dot"></span>
           <span>All audit dates</span>
+        </div>
+      </section>
+    </section>
+  </ng-template>
+
+  <ng-template #superAdminDashboard>
+    <section *ngIf="isSuperAdmin; else defaultDashboard" class="auditor-dashboard">
+      <div class="metrics">
+        <article>
+          <span>Total auditors</span>
+          <strong>{{ superAdminSummary.totalAuditors }}</strong>
+        </article>
+        <article>
+          <span>Total managers</span>
+          <strong>{{ superAdminSummary.totalManagers }}</strong>
+        </article>
+        <article>
+          <span>Total templates</span>
+          <strong>{{ superAdminSummary.totalTemplates }}</strong>
+        </article>
+      </div>
+
+      <section class="panel split">
+        <div>
+          <div class="panel-header">
+            <h2>User distribution</h2>
+          </div>
+          <div class="chart stacked">
+            <div class="stack-bar">
+              <span
+                class="stack-fill auditors"
+                [style.width.%]="70"
+                aria-label="Auditors"
+              ></span>
+              <span
+                class="stack-fill managers"
+                [style.width.%]="20"
+                aria-label="Managers"
+              ></span>
+              <span
+                class="stack-fill templates"
+                [style.width.%]="10"
+                aria-label="Templates"
+              ></span>
+            </div>
+            <div class="stack-legend">
+              <span><i class="dot auditors"></i> Auditors</span>
+              <span><i class="dot managers"></i> Managers</span>
+              <span><i class="dot templates"></i> Templates</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="panel-header">
+            <h2>Totals snapshot</h2>
+          </div>
+          <div class="chart">
+            <div class="chart-row">
+              <span>Auditors</span>
+              <div class="bar">
+                <span class="fill completed" [style.width.%]="75"></span>
+              </div>
+              <strong>{{ superAdminSummary.totalAuditors }}</strong>
+            </div>
+            <div class="chart-row">
+              <span>Managers</span>
+              <div class="bar">
+                <span class="fill planned" [style.width.%]="45"></span>
+              </div>
+              <strong>{{ superAdminSummary.totalManagers }}</strong>
+            </div>
+            <div class="chart-row">
+              <span>Templates</span>
+              <div class="bar">
+                <span class="fill templates" [style.width.%]="55"></span>
+              </div>
+              <strong>{{ superAdminSummary.totalTemplates }}</strong>
+            </div>
+          </div>
         </div>
       </section>
     </section>
