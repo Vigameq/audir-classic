@@ -47,7 +47,7 @@
         <a
           routerLink="/templates"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Auditor'"
         >
           Templates
         </a>
@@ -55,14 +55,14 @@
         <a
           routerLink="/user-management"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Manager'"
+          *ngIf="auth.role() !== 'Manager' && auth.role() !== 'Auditor'"
         >
           User Management
         </a>
         <a
           routerLink="/settings"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Auditor'"
         >
           Settings
         </a>
