@@ -24,11 +24,11 @@ export class Dashboard {
     totalLocations: 18,
   };
   protected readonly auditorAssignments = [
-    { name: 'Asha Menon', assigned: 5 },
-    { name: 'Priya Shah', assigned: 4 },
-    { name: 'Aman Rao', assigned: 3 },
-    { name: 'Ravi Kumar', assigned: 6 },
-    { name: 'Neha Patel', assigned: 2 },
+    { name: 'Asha Menon', assigned: 5, openFindings: 7 },
+    { name: 'Priya Shah', assigned: 4, openFindings: 3 },
+    { name: 'Aman Rao', assigned: 3, openFindings: 2 },
+    { name: 'Ravi Kumar', assigned: 6, openFindings: 5 },
+    { name: 'Neha Patel', assigned: 2, openFindings: 1 },
   ];
   protected readonly assignedAudits = [
     {

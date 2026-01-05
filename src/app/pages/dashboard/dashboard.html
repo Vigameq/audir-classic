@@ -109,7 +109,9 @@
             <article class="audit-row" *ngFor="let auditor of auditorAssignments">
               <div>
                 <strong>{{ auditor.name }}</strong>
-                <p>{{ auditor.assigned }} audits assigned</p>
+                <p>
+                  {{ auditor.assigned }} audits assigned · {{ auditor.openFindings }} open findings
+                </p>
               </div>
               <span class="status">Active</span>
             </article>
