@@ -52,7 +52,13 @@
           Templates
         </a>
         <a routerLink="/reports" routerLinkActive="active">Reports</a>
-        <a routerLink="/user-management" routerLinkActive="active">User Management</a>
+        <a
+          routerLink="/user-management"
+          routerLinkActive="active"
+          *ngIf="auth.role() !== 'Manager'"
+        >
+          User Management
+        </a>
         <a
           routerLink="/settings"
           routerLinkActive="active"
