@@ -10,6 +10,7 @@
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { onRequest } from 'firebase-functions/v2/https';
+import * as functions from 'firebase-functions';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
@@ -25,22 +26,24 @@ type AuthedRequest = Request & { user?: AuthPayload };
 const app = express();
 const router = express.Router();
 
-app.use(cors({ origin: process.env.FRONTEND_ORIGIN ?? '*', credentials: true }));
+const config = functions.config().app ?? {};
+
+app.use(cors({ origin: config.frontend_origin ?? '*', credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : undefined,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSLMODE === 'require' ? { rejectUnauthorized: false } : undefined,
-  options: `-c search_path=${process.env.DB_SCHEMA ?? 'public'}`,
+  host: config.db_host,
+  port: config.db_port ? Number(config.db_port) : undefined,
+  database: config.db_name,
+  user: config.db_user,
+  password: config.db_password,
+  ssl: config.db_sslmode === 'require' ? { rejectUnauthorized: false } : undefined,
+  options: `-c search_path=${config.db_schema ?? 'public'}`,
 });
 
-const jwtSecret = process.env.JWT_SECRET ?? '';
-const jwtExpiryMinutes = Number(process.env.ACCESS_TOKEN_EXPIRE_MINUTES ?? 60);
+const jwtSecret = config.jwt_secret ?? '';
+const jwtExpiryMinutes = Number(config.access_token_expire_minutes ?? 60);
 
 const requireAuth = (req: AuthedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization ?? '';
