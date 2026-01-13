@@ -26,10 +26,7 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "run": {
-          "serviceId": "audir-backend",
-          "region": "asia-south1"
-        }
+        "function": "api"
       },
       {
         "source": "**",
