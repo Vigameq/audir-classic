@@ -6,251 +6,32 @@
   </header>
 
   <section *ngIf="isAuditor; else managerDashboard" class="auditor-dashboard">
-    <div class="metrics">
-      <article>
-        <span>Planned audits</span>
-        <strong>{{ auditorSummary.planned }}</strong>
-      </article>
-      <article>
-        <span>Completed audits</span>
-        <strong>{{ auditorSummary.completed }}</strong>
-      </article>
-      <article>
-        <span>Open findings</span>
-        <strong>{{ auditorSummary.openFindings }}</strong>
-      </article>
-    </div>
-
-    <section class="panel split">
-      <div>
-        <div class="panel-header">
-          <h2>Assigned audits</h2>
-        </div>
-        <div class="audit-list">
-          <article class="audit-row" *ngFor="let audit of assignedAudits">
-            <div>
-              <strong>{{ audit.type }}</strong>
-              <p>{{ audit.subtype }} · {{ audit.code }}</p>
-            </div>
-            <div>
-              <span>{{ audit.dateRange }}</span>
-              <span class="status">{{ audit.status }}</span>
-            </div>
-          </article>
-        </div>
-      </div>
-      <div>
-        <div class="panel-header">
-          <h2>Planned vs completed</h2>
-        </div>
-        <div class="chart">
-          <div class="chart-row">
-            <span>Planned</span>
-            <div class="bar">
-              <span class="fill planned" [style.width.%]="30"></span>
-            </div>
-            <strong>{{ auditorSummary.planned }}</strong>
-          </div>
-          <div class="chart-row">
-            <span>Completed</span>
-            <div class="bar">
-              <span class="fill completed" [style.width.%]="70"></span>
-            </div>
-            <strong>{{ auditorSummary.completed }}</strong>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section class="panel">
       <div class="panel-header">
-        <h2>Planned audit calendar</h2>
-        <select
-          class="month-select"
-          [(ngModel)]="selectedAuditorMonth"
-          *ngIf="isAuditor"
-        >
-          <option *ngFor="let month of auditorCalendars" [ngValue]="month">
-            {{ month.label }}
-          </option>
-        </select>
+        <h2>Auditor overview</h2>
       </div>
-      <div class="calendar">
-        <span
-          class="day"
-          *ngFor="let day of getDays(selectedAuditorMonth.days)"
-          [class.highlight]="selectedAuditorMonth.highlights.includes(day)"
-        >
-          {{ day }}
-        </span>
-      </div>
-      <div class="legend">
-        <span class="dot"></span>
-        <span>Planned audit dates</span>
-      </div>
+      <div class="empty">No auditor data available yet.</div>
     </section>
   </section>
 
   <ng-template #managerDashboard>
     <section *ngIf="isManager; else superAdminDashboard" class="auditor-dashboard">
-      <div class="metrics">
-        <article>
-          <span>Total audits</span>
-          <strong>{{ managerSummary.totalAudits }}</strong>
-        </article>
-        <article>
-          <span>Completed audits</span>
-          <strong>{{ managerSummary.completedAudits }}</strong>
-        </article>
-        <article>
-          <span>Total auditors</span>
-          <strong>{{ managerSummary.totalAuditors }}</strong>
-        </article>
-      </div>
-
-      <section class="panel split">
-        <div>
-          <div class="panel-header">
-            <h2>Auditor assignments</h2>
-          </div>
-          <div class="audit-list">
-            <article class="audit-row" *ngFor="let auditor of auditorAssignments">
-              <div>
-                <strong>{{ auditor.name }}</strong>
-                <p>
-                  {{ auditor.assigned }} audits assigned · {{ auditor.openFindings }} open findings
-                </p>
-              </div>
-              <span class="status">Active</span>
-            </article>
-          </div>
-        </div>
-        <div>
-          <div class="panel-header">
-            <h2>Coverage snapshot</h2>
-          </div>
-          <div class="metrics compact">
-            <article>
-              <span>Templates</span>
-              <strong>{{ managerSummary.totalTemplates }}</strong>
-            </article>
-            <article>
-              <span>Regions</span>
-              <strong>{{ managerSummary.totalRegions }}</strong>
-            </article>
-            <article>
-              <span>Locations</span>
-              <strong>{{ managerSummary.totalLocations }}</strong>
-            </article>
-          </div>
-        </div>
-      </section>
-
       <section class="panel">
         <div class="panel-header">
-          <h2>Audit calendar</h2>
-          <select
-            class="month-select"
-            [(ngModel)]="selectedManagerMonth"
-            *ngIf="isManager"
-          >
-            <option *ngFor="let month of managerCalendars" [ngValue]="month">
-              {{ month.label }}
-            </option>
-          </select>
+          <h2>Manager overview</h2>
         </div>
-        <div class="calendar">
-          <span
-            class="day"
-            *ngFor="let day of getDays(selectedManagerMonth.days)"
-            [class.highlight]="selectedManagerMonth.highlights.includes(day)"
-          >
-            {{ day }}
-          </span>
-        </div>
-        <div class="legend">
-          <span class="dot"></span>
-          <span>All audit dates</span>
-        </div>
+        <div class="empty">No manager data available yet.</div>
       </section>
     </section>
   </ng-template>
 
   <ng-template #superAdminDashboard>
     <section *ngIf="isSuperAdmin; else defaultDashboard" class="auditor-dashboard">
-      <div class="metrics">
-        <article>
-          <span>Total auditors</span>
-          <strong>{{ superAdminSummary.totalAuditors }}</strong>
-        </article>
-        <article>
-          <span>Total managers</span>
-          <strong>{{ superAdminSummary.totalManagers }}</strong>
-        </article>
-        <article>
-          <span>Total templates</span>
-          <strong>{{ superAdminSummary.totalTemplates }}</strong>
-        </article>
-      </div>
-
-      <section class="panel split">
-        <div>
-          <div class="panel-header">
-            <h2>User distribution</h2>
-          </div>
-          <div class="chart stacked">
-            <div class="stack-bar">
-              <span
-                class="stack-fill auditors"
-                [style.width.%]="70"
-                aria-label="Auditors"
-              ></span>
-              <span
-                class="stack-fill managers"
-                [style.width.%]="20"
-                aria-label="Managers"
-              ></span>
-              <span
-                class="stack-fill templates"
-                [style.width.%]="10"
-                aria-label="Templates"
-              ></span>
-            </div>
-            <div class="stack-legend">
-              <span><i class="dot auditors"></i> Auditors</span>
-              <span><i class="dot managers"></i> Managers</span>
-              <span><i class="dot templates"></i> Templates</span>
-            </div>
-          </div>
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Super Admin overview</h2>
         </div>
-        <div>
-          <div class="panel-header">
-            <h2>Totals snapshot</h2>
-          </div>
-          <div class="chart">
-            <div class="chart-row">
-              <span>Auditors</span>
-              <div class="bar">
-                <span class="fill completed" [style.width.%]="75"></span>
-              </div>
-              <strong>{{ superAdminSummary.totalAuditors }}</strong>
-            </div>
-            <div class="chart-row">
-              <span>Managers</span>
-              <div class="bar">
-                <span class="fill planned" [style.width.%]="45"></span>
-              </div>
-              <strong>{{ superAdminSummary.totalManagers }}</strong>
-            </div>
-            <div class="chart-row">
-              <span>Templates</span>
-              <div class="bar">
-                <span class="fill templates" [style.width.%]="55"></span>
-              </div>
-              <strong>{{ superAdminSummary.totalTemplates }}</strong>
-            </div>
-          </div>
-        </div>
+        <div class="empty">No super admin data available yet.</div>
       </section>
     </section>
   </ng-template>
