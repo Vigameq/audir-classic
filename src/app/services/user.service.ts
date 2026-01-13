@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { AuthState } from '../auth-state';
 
 export type User = {
   id: number;
@@ -38,23 +39,42 @@ export type UserUpdate = {
 export class UserService {
   private readonly baseUrl = '/api';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly auth: AuthState
+  ) {}
 
   listUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.baseUrl}/users`);
+    return this.http.get<User[]>(`${this.baseUrl}/users`, {
+      headers: this.authHeaders(),
+    });
   }
 
   createUser(payload: UserCreate): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/users`, payload);
+    return this.http.post<User>(`${this.baseUrl}/users`, payload, {
+      headers: this.authHeaders(),
+    });
   }
 
   updateUser(userId: number, payload: UserUpdate): Observable<User> {
-    return this.http.put<User>(`${this.baseUrl}/users/${userId}`, payload);
+    return this.http.put<User>(`${this.baseUrl}/users/${userId}`, payload, {
+      headers: this.authHeaders(),
+    });
   }
 
   resetPassword(userId: number, newPassword: string): Observable<User> {
-    return this.http.post<User>(`${this.baseUrl}/users/${userId}/reset-password`, {
-      new_password: newPassword,
-    });
+    return this.http.post<User>(
+      `${this.baseUrl}/users/${userId}/reset-password`,
+      { new_password: newPassword },
+      { headers: this.authHeaders() }
+    );
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = this.auth.accessToken();
+    if (!token) {
+      return new HttpHeaders();
+    }
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 }
