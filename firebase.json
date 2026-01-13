@@ -16,7 +16,7 @@
     }
   ],
   "hosting": {
-    "public": "dist/audir-classic",
+    "public": "dist/tx-digitaltwining/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
