@@ -26,24 +26,44 @@ type AuthedRequest = Request & { user?: AuthPayload };
 const app = express();
 const router = express.Router();
 
-const config = functions.config().app ?? {};
+const config = (() => {
+  try {
+    return functions.config().app ?? {};
+  } catch {
+    return {};
+  }
+})();
 
-app.use(cors({ origin: config.frontend_origin ?? '*', credentials: true }));
+const env = {
+  dbHost: process.env.DB_HOST ?? config.db_host ?? "",
+  dbPort: process.env.DB_PORT ?? config.db_port ?? "",
+  dbName: process.env.DB_NAME ?? config.db_name ?? "",
+  dbUser: process.env.DB_USER ?? config.db_user ?? "",
+  dbPassword: process.env.DB_PASSWORD ?? config.db_password ?? "",
+  dbSslMode: process.env.DB_SSLMODE ?? config.db_sslmode ?? "require",
+  dbSchema: process.env.DB_SCHEMA ?? config.db_schema ?? "public",
+  jwtSecret: process.env.JWT_SECRET ?? config.jwt_secret ?? "",
+  accessTokenExpireMinutes:
+    process.env.ACCESS_TOKEN_EXPIRE_MINUTES ?? config.access_token_expire_minutes ?? "60",
+  frontendOrigin: process.env.FRONTEND_ORIGIN ?? config.frontend_origin ?? "*",
+};
+
+app.use(cors({ origin: env.frontendOrigin, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 const pool = new Pool({
-  host: config.db_host,
-  port: config.db_port ? Number(config.db_port) : undefined,
-  database: config.db_name,
-  user: config.db_user,
-  password: config.db_password,
-  ssl: config.db_sslmode === 'require' ? { rejectUnauthorized: false } : undefined,
-  options: `-c search_path=${config.db_schema ?? 'public'}`,
+  host: env.dbHost,
+  port: env.dbPort ? Number(env.dbPort) : undefined,
+  database: env.dbName,
+  user: env.dbUser,
+  password: env.dbPassword,
+  ssl: env.dbSslMode === "require" ? { rejectUnauthorized: false } : undefined,
+  options: `-c search_path=${env.dbSchema}`,
 });
 
-const jwtSecret = config.jwt_secret ?? '';
-const jwtExpiryMinutes = Number(config.access_token_expire_minutes ?? 60);
+const jwtSecret = env.jwtSecret;
+const jwtExpiryMinutes = Number(env.accessTokenExpireMinutes);
 
 const requireAuth = (req: AuthedRequest, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization ?? '';
