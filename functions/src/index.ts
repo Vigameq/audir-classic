@@ -9,7 +9,7 @@
 
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import * as functions from 'firebase-functions';
+import * as functions from 'firebase-functions/v1';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
