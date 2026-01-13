@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { DepartmentService } from '../../services/department.service';
 import { User, UserService } from '../../services/user.service';
 
 type UserRow = {
@@ -23,6 +24,7 @@ type UserRow = {
 })
 export class UserManagement implements OnInit {
   private readonly userService = inject(UserService);
+  private readonly departmentService = inject(DepartmentService);
 
   protected showInviteModal = false;
   protected showEditModal = false;
@@ -42,6 +44,9 @@ export class UserManagement implements OnInit {
 
   protected readonly roles = ['Auditor', 'Manager', 'Super Admin'];
   protected users: UserRow[] = [];
+  protected get departments(): string[] {
+    return this.departmentService.departments();
+  }
 
   protected editForm: UserRow | null = null;
 
