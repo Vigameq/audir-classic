@@ -350,4 +350,4 @@ router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) =
 
 app.use('/api', router);
 
-export const api = onRequest({ region: 'asia-south1' }, app);
+export const api = onRequest({ region: 'asia-south1', invoker: 'public' }, app);
