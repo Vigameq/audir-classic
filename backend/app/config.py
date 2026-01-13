@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     db_user: str
     db_password: str
     db_sslmode: str = 'require'
+    db_schema: str = 'public'
     jwt_secret: str
     jwt_algorithm: str = 'HS256'
     access_token_expire_minutes: int = 60

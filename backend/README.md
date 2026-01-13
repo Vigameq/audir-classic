@@ -11,6 +11,7 @@ cp .env.example .env
 ```
 
 Update `.env` with your database and JWT settings.
+Set `DB_SCHEMA` to isolate AuditX tables (e.g. `auditx`).
 
 ## Run
 
