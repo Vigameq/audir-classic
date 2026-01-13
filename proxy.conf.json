@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://auditx-tierx.web.app",
+    "target": "https://asia-south1-auditx-tierx.cloudfunctions.net",
     "secure": true,
     "changeOrigin": true
   }
