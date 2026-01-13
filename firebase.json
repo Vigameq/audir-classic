@@ -28,7 +28,7 @@
         "source": "/api/**",
         "run": {
           "serviceId": "audir-backend",
-          "region": "us-central1"
+          "region": "asia-south1"
         }
       },
       {
