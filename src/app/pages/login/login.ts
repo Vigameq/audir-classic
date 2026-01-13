@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthState } from '../../auth-state';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ import { AuthState } from '../../auth-state';
 export class Login {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthState);
+  private readonly authService = inject(AuthService);
 
   protected email = '';
   protected password = '';
@@ -21,7 +23,14 @@ export class Login {
 
   protected signIn(): void {
     this.loginError = '';
-    this.auth.login('dev-token', this.role);
-    this.router.navigate(['/dashboard']);
+    this.authService.login(this.email, this.password).subscribe({
+      next: (token) => {
+        this.auth.login(token.access_token, this.role);
+        this.router.navigate(['/dashboard']);
+      },
+      error: () => {
+        this.loginError = 'Invalid credentials. Please try again.';
+      },
+    });
   }
 }

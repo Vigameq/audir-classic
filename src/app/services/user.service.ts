@@ -36,7 +36,7 @@ export type UserUpdate = {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
-  private readonly baseUrl = 'http://localhost:8000';
+  private readonly baseUrl = '/api';
 
   constructor(private readonly http: HttpClient) {}
 

@@ -10,7 +10,7 @@ type TokenResponse = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'http://localhost:8000';
+  private readonly baseUrl = '/api';
 
   constructor(private readonly http: HttpClient, private readonly auth: AuthState) {}
 
