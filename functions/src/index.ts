@@ -348,6 +348,6 @@ router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) =
   return res.status(204).send();
 });
 
-app.use('/api', router);
+app.use('/', router);
 
 export const api = onRequest({ region: 'asia-south1', invoker: 'public' }, app);
