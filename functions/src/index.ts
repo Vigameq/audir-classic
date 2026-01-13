@@ -9,7 +9,6 @@
 
 import cors from 'cors';
 import express, { type NextFunction, type Request, type Response } from 'express';
-import { onRequest } from 'firebase-functions/v2/https';
 import * as functions from 'firebase-functions';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
@@ -350,4 +349,4 @@ router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) =
 
 app.use('/', router);
 
-export const api = onRequest({ region: 'asia-south1', invoker: 'public' }, app);
+export const api = functions.region('asia-south1').https.onRequest(app);
