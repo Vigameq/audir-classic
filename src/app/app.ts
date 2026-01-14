@@ -52,9 +52,9 @@ export class App {
   protected get displayName(): string {
     const email = this.auth.email();
     if (email) {
-      return email;
+      return email.split('@')[0];
     }
-    return this.auth.role() || 'User';
+    return 'User';
   }
 
   protected get avatarText(): string {
