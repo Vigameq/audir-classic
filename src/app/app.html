@@ -62,7 +62,7 @@
         <a
           routerLink="/settings"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Auditor'"
+          *ngIf="auth.role() !== 'Auditor'"
         >
           Settings
         </a>
