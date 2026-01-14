@@ -55,6 +55,9 @@ export class App {
     this.userService.listUsers().subscribe({
       next: (users) => {
         const match = users.find((user) => user.email === email);
+        if (match?.first_name) {
+          this.auth.setFirstName(match.first_name);
+        }
         if (match?.department) {
           this.auth.setDepartment(match.department);
         }
@@ -73,9 +76,9 @@ export class App {
   }
 
   protected get displayName(): string {
-    const email = this.auth.email();
-    if (email) {
-      return email.split('@')[0];
+    const firstName = this.auth.firstName();
+    if (firstName) {
+      return firstName;
     }
     return 'User';
   }
