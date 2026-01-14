@@ -36,7 +36,11 @@ export class DepartmentService {
   syncFromApi(): Observable<string[]> {
     return this.http.get<unknown[]>(`${this.baseUrl}/departments`).pipe(
       map((rows) =>
-        Array.isArray(rows) ? rows.map((row) => String(row?.name ?? '')).filter(Boolean) : []
+        Array.isArray(rows)
+          ? rows
+              .map((row) => String((row as { name?: string })?.name ?? ''))
+              .filter(Boolean)
+          : []
       ),
       tap((departments) => {
         const next = departments.length ? departments : [...DEFAULT_DEPARTMENTS];
