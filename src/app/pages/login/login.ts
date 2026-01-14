@@ -25,7 +25,7 @@ export class Login {
     this.loginError = '';
     this.authService.login(this.email, this.password).subscribe({
       next: (token) => {
-        this.auth.login(token.access_token, this.role);
+        this.auth.login(token.access_token, this.role, this.email);
         this.router.navigate(['/dashboard']);
       },
       error: () => {

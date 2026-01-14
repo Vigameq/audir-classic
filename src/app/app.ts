@@ -46,4 +46,21 @@ export class App {
     this.auth.logout();
     this.router.navigate(['/login']);
   }
+
+  protected get displayName(): string {
+    const email = this.auth.email();
+    if (email) {
+      return email;
+    }
+    return this.auth.role() || 'User';
+  }
+
+  protected get avatarText(): string {
+    const source = this.auth.email() || this.auth.role() || 'U';
+    const cleaned = source.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+    if (!cleaned) {
+      return 'U';
+    }
+    return cleaned.slice(0, 2).toUpperCase();
+  }
 }

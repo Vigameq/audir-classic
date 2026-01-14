@@ -68,6 +68,13 @@
         </a>
       </nav>
     </div>
+    <div class="user-chip" *ngIf="auth.isLoggedIn()">
+      <div class="avatar">{{ avatarText }}</div>
+      <div>
+        <div class="user-name">{{ displayName }}</div>
+        <div class="user-role">{{ auth.role() || 'User' }}</div>
+      </div>
+    </div>
     <button class="logout" type="button" (click)="logout()" *ngIf="auth.isLoggedIn()">
       Logout
     </button>

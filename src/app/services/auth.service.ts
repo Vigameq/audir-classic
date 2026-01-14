@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
-import { AuthState } from '../auth-state';
+import { Observable } from 'rxjs';
 
 type TokenResponse = {
   access_token: string;
@@ -12,7 +11,7 @@ type TokenResponse = {
 export class AuthService {
   private readonly baseUrl = '/api';
 
-  constructor(private readonly http: HttpClient, private readonly auth: AuthState) {}
+  constructor(private readonly http: HttpClient) {}
 
   login(email: string, password: string): Observable<TokenResponse> {
     const body = new HttpParams()
@@ -21,7 +20,6 @@ export class AuthService {
     return this.http
       .post<TokenResponse>(`${this.baseUrl}/auth/login`, body.toString(), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      })
-      .pipe(tap((response) => this.auth.login(response.access_token)));
+      });
   }
 }
