@@ -6,6 +6,7 @@ const ROLE_KEY = 'audir_role';
 const EMAIL_KEY = 'audir_email';
 const DEPARTMENT_KEY = 'audir_department';
 const FIRST_NAME_KEY = 'audir_first_name';
+const LAST_NAME_KEY = 'audir_last_name';
 
 @Injectable({ providedIn: 'root' })
 export class AuthState {
@@ -15,6 +16,7 @@ export class AuthState {
   private readonly emailSignal = signal(this.loadEmail());
   private readonly departmentSignal = signal(this.loadDepartment());
   private readonly firstNameSignal = signal(this.loadFirstName());
+  private readonly lastNameSignal = signal(this.loadLastName());
 
   readonly isLoggedIn = this.loggedInSignal.asReadonly();
   readonly accessToken = this.tokenSignal.asReadonly();
@@ -22,6 +24,7 @@ export class AuthState {
   readonly email = this.emailSignal.asReadonly();
   readonly department = this.departmentSignal.asReadonly();
   readonly firstName = this.firstNameSignal.asReadonly();
+  readonly lastName = this.lastNameSignal.asReadonly();
 
   login(token: string, role?: string, email?: string): void {
     this.loggedInSignal.set(true);
@@ -48,6 +51,11 @@ export class AuthState {
     localStorage.setItem(FIRST_NAME_KEY, firstName);
   }
 
+  setLastName(lastName: string): void {
+    this.lastNameSignal.set(lastName);
+    localStorage.setItem(LAST_NAME_KEY, lastName);
+  }
+
   logout(): void {
     this.loggedInSignal.set(false);
     localStorage.removeItem(AUTH_KEY);
@@ -61,6 +69,8 @@ export class AuthState {
     localStorage.removeItem(DEPARTMENT_KEY);
     this.firstNameSignal.set('');
     localStorage.removeItem(FIRST_NAME_KEY);
+    this.lastNameSignal.set('');
+    localStorage.removeItem(LAST_NAME_KEY);
   }
 
   private loadInitialState(): boolean {
@@ -85,5 +95,9 @@ export class AuthState {
 
   private loadFirstName(): string {
     return localStorage.getItem(FIRST_NAME_KEY) ?? '';
+  }
+
+  private loadLastName(): string {
+    return localStorage.getItem(LAST_NAME_KEY) ?? '';
   }
 }

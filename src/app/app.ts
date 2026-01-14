@@ -58,6 +58,9 @@ export class App {
         if (match?.first_name) {
           this.auth.setFirstName(match.first_name);
         }
+        if (match?.last_name) {
+          this.auth.setLastName(match.last_name);
+        }
         if (match?.department) {
           this.auth.setDepartment(match.department);
         }

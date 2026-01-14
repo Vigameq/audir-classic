@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import QRCode from 'qrcode';
 import { firstValueFrom } from 'rxjs';
+import { AuthState } from '../../auth-state';
 import { AuditAnswerService } from '../../services/audit-answer.service';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
@@ -22,6 +23,7 @@ export class AuditPerform implements OnInit {
   private readonly templateService = inject(TemplateService);
   private readonly responseService = inject(ResponseService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly auth = inject(AuthState);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -43,7 +45,11 @@ export class AuditPerform implements OnInit {
       }
       return true;
     });
-    return filtered.sort((a, b) =>
+    const scoped =
+      this.auth.role() === 'Auditor'
+        ? filtered.filter((audit) => this.isAssignedToCurrentUser(audit))
+        : filtered;
+    return scoped.sort((a, b) =>
       this.sortOrder === 'asc'
         ? a.createdAt.localeCompare(b.createdAt)
         : b.createdAt.localeCompare(a.createdAt)
@@ -108,6 +114,9 @@ export class AuditPerform implements OnInit {
   }
 
   protected openPerform(audit: AuditPlanRecord): void {
+    if (this.auth.role() === 'Auditor' && !this.isAssignedToCurrentUser(audit)) {
+      return;
+    }
     this.activeAudit = audit;
     this.router.navigate(['/audit-perform', audit.code], { replaceUrl: true });
     this.activeTemplate =
@@ -232,6 +241,16 @@ export class AuditPerform implements OnInit {
           this.savedQuestions[index] = true;
         },
       });
+  }
+
+  private isAssignedToCurrentUser(audit: AuditPlanRecord): boolean {
+    const first = this.auth.firstName().trim();
+    const last = this.auth.lastName().trim();
+    const fullName = `${first} ${last}`.trim().toLowerCase();
+    if (!fullName) {
+      return false;
+    }
+    return audit.auditorName.trim().toLowerCase() === fullName;
   }
 
   protected onEvidenceSelected(index: number, event: Event): void {
