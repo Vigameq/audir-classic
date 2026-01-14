@@ -1,7 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import {
+  NavigationCancel,
+  NavigationEnd,
+  NavigationError,
+  NavigationStart,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
 import { AuthState } from './auth-state';
+import { LoadingService } from './loading.service';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +21,22 @@ import { AuthState } from './auth-state';
 })
 export class App {
   protected readonly auth = inject(AuthState);
+  protected readonly loading = inject(LoadingService);
   private readonly router = inject(Router);
+
+  constructor() {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationStart) {
+        this.loading.setNavigation(true);
+      } else if (
+        event instanceof NavigationEnd ||
+        event instanceof NavigationCancel ||
+        event instanceof NavigationError
+      ) {
+        this.loading.setNavigation(false);
+      }
+    });
+  }
 
   protected get showNav(): boolean {
     return !this.router.url.startsWith('/login');
