@@ -148,14 +148,19 @@
   z-index: 20;
 }
 
-.role-label {
+.user-detail {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.user-detail span {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   color: var(--color-muted);
 }
 
-.role-value {
+.user-detail strong {
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-ink);

@@ -13,6 +13,7 @@ import {
 import { AuthState } from './auth-state';
 import { DataSyncService } from './services/data-sync.service';
 import { LoadingService } from './loading.service';
+import { UserService } from './services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -25,11 +26,13 @@ export class App {
   protected readonly loading = inject(LoadingService);
   private readonly router = inject(Router);
   private readonly dataSync = inject(DataSyncService);
+  private readonly userService = inject(UserService);
   protected isUserMenuOpen = false;
 
   constructor() {
     if (this.auth.isLoggedIn()) {
       this.dataSync.syncAll().subscribe();
+      this.loadUserDepartment();
     }
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
@@ -41,6 +44,21 @@ export class App {
       ) {
         this.loading.setNavigation(false);
       }
+    });
+  }
+
+  private loadUserDepartment(): void {
+    const email = this.auth.email();
+    if (!email) {
+      return;
+    }
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        const match = users.find((user) => user.email === email);
+        if (match?.department) {
+          this.auth.setDepartment(match.department);
+        }
+      },
     });
   }
 

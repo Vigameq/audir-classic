@@ -74,8 +74,18 @@
         <div class="user-name">{{ displayName }}</div>
       </button>
       <div class="user-dropdown" *ngIf="isUserMenuOpen">
-        <div class="role-label">Role</div>
-        <div class="role-value">{{ auth.role() || 'User' }}</div>
+        <div class="user-detail">
+          <span>Email ID</span>
+          <strong>{{ auth.email() || '—' }}</strong>
+        </div>
+        <div class="user-detail">
+          <span>Role</span>
+          <strong>{{ auth.role() || 'User' }}</strong>
+        </div>
+        <div class="user-detail">
+          <span>Department</span>
+          <strong>{{ auth.department() || '—' }}</strong>
+        </div>
         <button class="logout" type="button" (click)="logout()">Logout</button>
       </div>
     </div>
