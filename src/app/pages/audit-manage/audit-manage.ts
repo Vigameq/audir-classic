@@ -189,6 +189,12 @@ export class AuditManage implements OnInit {
   }
 
   ngOnInit(): void {
+    this.auditPlanService.migrateFromLocal().subscribe();
+    this.departmentService.migrateFromLocal().subscribe();
+    this.siteService.migrateFromLocal().subscribe();
+    this.regionService.migrateFromLocal().subscribe();
+    this.responseService.migrateFromLocal().subscribe();
+    this.ncService.listRecords().subscribe();
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
@@ -223,19 +229,22 @@ export class AuditManage implements OnInit {
     if (!this.activeAudit || form.invalid) {
       return;
     }
-    this.auditPlanService.updatePlan(this.activeAudit.id, {
-      startDate: this.editForm.startDate,
-      endDate: this.editForm.endDate,
-      auditorName: this.editForm.auditorName,
-      department: this.editForm.department,
-      locationCity: this.editForm.locationCity,
-      site: this.editForm.site,
-      country: this.editForm.country,
-      region: this.editForm.region,
-      auditNote: this.editForm.auditNote,
-      responseType: this.editForm.responseType,
-    });
-    this.closeEdit(form);
+    this.auditPlanService
+      .updatePlanApi(this.activeAudit.id, {
+        startDate: this.editForm.startDate,
+        endDate: this.editForm.endDate,
+        auditorName: this.editForm.auditorName,
+        department: this.editForm.department,
+        locationCity: this.editForm.locationCity,
+        site: this.editForm.site,
+        country: this.editForm.country,
+        region: this.editForm.region,
+        auditNote: this.editForm.auditNote,
+        responseType: this.editForm.responseType,
+      })
+      .subscribe({
+        next: () => this.closeEdit(form),
+      });
   }
 
   protected openView(audit: AuditPlanRecord): void {
@@ -257,6 +266,6 @@ export class AuditManage implements OnInit {
     if (this.activeAudit?.id === audit.id) {
       this.activeAudit = null;
     }
-    this.auditPlanService.deletePlan(audit.id);
+    this.auditPlanService.deletePlanApi(audit.id).subscribe();
   }
 }

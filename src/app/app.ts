@@ -11,6 +11,7 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { AuthState } from './auth-state';
+import { DataSyncService } from './services/data-sync.service';
 import { LoadingService } from './loading.service';
 
 @Component({
@@ -23,9 +24,13 @@ export class App {
   protected readonly auth = inject(AuthState);
   protected readonly loading = inject(LoadingService);
   private readonly router = inject(Router);
+  private readonly dataSync = inject(DataSyncService);
   protected isUserMenuOpen = false;
 
   constructor() {
+    if (this.auth.isLoggedIn()) {
+      this.dataSync.syncAll().subscribe();
+    }
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.loading.setNavigation(true);

@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import QRCode from 'qrcode';
 import { firstValueFrom } from 'rxjs';
+import { AuditAnswerService } from '../../services/audit-answer.service';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
-import { NcService } from '../../services/nc.service';
 import { ResponseService } from '../../services/response.service';
 import { TemplateRecord, TemplateService } from '../../services/template.service';
 
@@ -18,10 +18,10 @@ import { TemplateRecord, TemplateService } from '../../services/template.service
 })
 export class AuditPerform implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
+  private readonly auditAnswerService = inject(AuditAnswerService);
   private readonly templateService = inject(TemplateService);
   private readonly responseService = inject(ResponseService);
   private readonly departmentService = inject(DepartmentService);
-  private readonly ncService = inject(NcService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -75,6 +75,10 @@ export class AuditPerform implements OnInit {
   protected sortOrder: 'asc' | 'desc' = 'desc';
 
   ngOnInit(): void {
+    this.auditPlanService.migrateFromLocal().subscribe();
+    this.templateService.migrateFromLocal().subscribe();
+    this.responseService.migrateFromLocal().subscribe();
+    this.departmentService.migrateFromLocal().subscribe();
     this.route.paramMap.subscribe((params) => {
       const code = params.get('code');
       if (!code) {
@@ -114,22 +118,12 @@ export class AuditPerform implements OnInit {
       .find((item) => item.name === audit.responseType);
     this.responseOptions = response?.types ?? [];
     this.negativeResponseOptions = response?.negativeTypes ?? [];
-    this.responseSelections = [];
-    this.noteWords = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill(0)
-      : [];
-    this.ncAssignments = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.savedQuestions = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill(false)
-      : [];
-    this.evidenceFiles = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.noteEntries = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
+    this.resetQuestionState();
+    if (this.activeAudit) {
+      this.auditAnswerService.listByAuditCode(this.activeAudit.code).subscribe({
+        next: (answers) => this.applyAnswers(answers),
+      });
+    }
   }
 
   protected closePerform(): void {
@@ -151,35 +145,18 @@ export class AuditPerform implements OnInit {
   }
 
   protected saveQuestion(index: number): void {
-    this.savedQuestions[index] = true;
+    this.persistAnswer(index, 'Saved');
   }
 
   protected submitQuestion(index: number): void {
     if (!this.activeAudit || !this.activeTemplate) {
       return;
     }
-    if (!this.isNegativeSelection(index)) {
-      return;
-    }
     const response = this.responseSelections[index];
     if (!response) {
       return;
     }
-    this.ncService.addRecord({
-      id: crypto.randomUUID(),
-      auditCode: this.activeAudit.code,
-      auditType: this.activeAudit.auditType,
-      auditSubtype: this.activeAudit.auditSubtype || '—',
-      startDate: this.activeAudit.startDate,
-      endDate: this.activeAudit.endDate,
-      auditorName: this.activeAudit.auditorName || '—',
-      question: this.activeTemplate.questions[index] ?? '',
-      response,
-      assignedNc: this.ncAssignments[index] || '—',
-      note: this.noteEntries[index] || '',
-      createdAt: new Date().toISOString(),
-    });
-    this.savedQuestions[index] = true;
+    this.persistAnswer(index, 'Submitted');
   }
 
   protected isNegativeSelection(index: number): boolean {
@@ -191,6 +168,70 @@ export class AuditPerform implements OnInit {
     if (!this.isNegativeSelection(index)) {
       this.ncAssignments[index] = '';
     }
+  }
+
+  private resetQuestionState(): void {
+    this.responseSelections = [];
+    this.noteWords = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(0)
+      : [];
+    this.ncAssignments = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
+    this.savedQuestions = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(false)
+      : [];
+    this.evidenceFiles = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
+    this.noteEntries = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
+  }
+
+  private applyAnswers(answers: {
+    questionIndex: number;
+    response?: string | null;
+    assignedNc?: string | null;
+    note?: string | null;
+    evidenceName?: string | null;
+    status?: string | null;
+  }[]): void {
+    answers.forEach((answer) => {
+      const index = answer.questionIndex;
+      this.responseSelections[index] = answer.response ?? '';
+      this.ncAssignments[index] = answer.assignedNc ?? '';
+      this.noteEntries[index] = answer.note ?? '';
+      this.evidenceFiles[index] = answer.evidenceName ?? '';
+      this.noteWords[index] = this.countWords(this.noteEntries[index]);
+      this.savedQuestions[index] = !!answer.status;
+    });
+  }
+
+  private persistAnswer(index: number, status: 'Saved' | 'Submitted'): void {
+    if (!this.activeAudit || !this.activeTemplate) {
+      return;
+    }
+    const questionText = this.activeTemplate.questions[index] ?? '';
+    const response = this.responseSelections[index] || null;
+    const isNegative = this.isNegativeSelection(index);
+    this.auditAnswerService
+      .upsertAnswer({
+        audit_code: this.activeAudit.code,
+        question_index: index,
+        question_text: questionText,
+        response,
+        response_is_negative: isNegative,
+        assigned_nc: isNegative ? this.ncAssignments[index] || null : null,
+        note: this.noteEntries[index] || null,
+        evidence_name: this.evidenceFiles[index] || null,
+        status,
+      })
+      .subscribe({
+        next: () => {
+          this.savedQuestions[index] = true;
+        },
+      });
   }
 
   protected onEvidenceSelected(index: number, event: Event): void {

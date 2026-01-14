@@ -196,6 +196,12 @@ export class AuditPlan implements OnInit {
   }
 
   ngOnInit(): void {
+    this.auditPlanService.migrateFromLocal().subscribe();
+    this.departmentService.migrateFromLocal().subscribe();
+    this.siteService.migrateFromLocal().subscribe();
+    this.regionService.migrateFromLocal().subscribe();
+    this.templateService.migrateFromLocal().subscribe();
+    this.responseService.migrateFromLocal().subscribe();
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
@@ -231,22 +237,27 @@ export class AuditPlan implements OnInit {
       auditType: this.auditForm.auditType,
       auditSubtype: this.auditForm.auditSubtype || '—',
     };
-    this.auditPlanService.addPlan({
-      startDate: this.auditForm.startDate,
-      endDate: this.auditForm.endDate,
-      auditType: this.auditForm.auditType,
-      auditSubtype: this.auditForm.auditSubtype,
-      auditorName: this.auditForm.auditorName,
-      department: this.auditForm.department,
-      locationCity: this.auditForm.locationCity,
-      site: this.auditForm.site,
-      country: this.auditForm.country,
-      region: this.auditForm.region,
-      auditNote: this.auditForm.auditNote,
-      responseType: this.auditForm.responseType,
-    });
-    this.cancel(form);
-    this.showSuccessModal = true;
+    this.auditPlanService
+      .createPlan({
+        startDate: this.auditForm.startDate,
+        endDate: this.auditForm.endDate,
+        auditType: this.auditForm.auditType,
+        auditSubtype: this.auditForm.auditSubtype,
+        auditorName: this.auditForm.auditorName,
+        department: this.auditForm.department,
+        locationCity: this.auditForm.locationCity,
+        site: this.auditForm.site,
+        country: this.auditForm.country,
+        region: this.auditForm.region,
+        auditNote: this.auditForm.auditNote,
+        responseType: this.auditForm.responseType,
+      })
+      .subscribe({
+        next: () => {
+          this.cancel(form);
+          this.showSuccessModal = true;
+        },
+      });
   }
 
   protected closeSuccessModal(): void {

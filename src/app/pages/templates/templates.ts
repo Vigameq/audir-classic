@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
 import { TemplateRecord, TemplateService } from '../../services/template.service';
@@ -10,7 +10,7 @@ import { TemplateRecord, TemplateService } from '../../services/template.service
   templateUrl: './templates.html',
   styleUrl: './templates.scss',
 })
-export class Templates {
+export class Templates implements OnInit {
   private readonly templateService = inject(TemplateService);
 
   protected isImporting = false;
@@ -29,6 +29,10 @@ export class Templates {
 
   protected get templates(): TemplateRecord[] {
     return this.templateService.templates();
+  }
+
+  ngOnInit(): void {
+    this.templateService.migrateFromLocal().subscribe();
   }
 
   protected async onFileSelected(event: Event): Promise<void> {
@@ -90,18 +94,23 @@ export class Templates {
       return;
     }
     const name = this.templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
-    this.templateService.createTemplate({
-      name,
-      note: this.importNote.trim(),
-      tags: [],
-      questions: this.questions,
-    });
-    this.templateName = '';
-    this.importNote = '';
-    this.noteChars = 0;
-    this.selectedFileName = '';
-    this.createError = '';
-    this.showImportModal = false;
+    this.templateService
+      .createTemplateApi({
+        name,
+        note: this.importNote.trim(),
+        tags: [],
+        questions: this.questions,
+      })
+      .subscribe({
+        next: () => {
+          this.templateName = '';
+          this.importNote = '';
+          this.noteChars = 0;
+          this.selectedFileName = '';
+          this.createError = '';
+          this.showImportModal = false;
+        },
+      });
   }
 
   protected deleteTemplate(id: string): void {
@@ -109,7 +118,7 @@ export class Templates {
     if (!confirmed) {
       return;
     }
-    this.templateService.deleteTemplate(id);
+    this.templateService.deleteTemplateApi(id).subscribe();
   }
 
   protected toggleTemplate(id: string): void {

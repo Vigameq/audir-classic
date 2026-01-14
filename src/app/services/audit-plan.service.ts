@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, of, tap } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 export type AuditPlanRecord = {
   id: string;
@@ -71,6 +71,88 @@ export class AuditPlanService {
     );
   }
 
+  createPlan(plan: Omit<AuditPlanRecord, 'id' | 'createdAt' | 'code'> & { code?: string }): Observable<AuditPlanRecord[]> {
+    return this.http
+      .post(`${this.baseUrl}/audit-plans`, {
+        code: plan.code ?? null,
+        start_date: plan.startDate,
+        end_date: plan.endDate,
+        audit_type: plan.auditType,
+        audit_subtype: plan.auditSubtype || null,
+        auditor_name: plan.auditorName || null,
+        department: plan.department || null,
+        location_city: plan.locationCity || null,
+        site: plan.site || null,
+        country: plan.country || null,
+        region: plan.region || null,
+        audit_note: plan.auditNote || null,
+        response_type: plan.responseType || null,
+      })
+      .pipe(switchMap(() => this.syncFromApi()));
+  }
+
+  updatePlanApi(
+    planId: string,
+    updates: Partial<Omit<AuditPlanRecord, 'id' | 'code' | 'createdAt'>>
+  ): Observable<AuditPlanRecord[]> {
+    return this.http
+      .put(`${this.baseUrl}/audit-plans/${planId}`, {
+        start_date: updates.startDate,
+        end_date: updates.endDate,
+        auditor_name: updates.auditorName,
+        department: updates.department,
+        location_city: updates.locationCity,
+        site: updates.site,
+        country: updates.country,
+        region: updates.region,
+        audit_note: updates.auditNote,
+        response_type: updates.responseType,
+      })
+      .pipe(switchMap(() => this.syncFromApi()));
+  }
+
+  deletePlanApi(planId: string): Observable<AuditPlanRecord[]> {
+    return this.http.delete(`${this.baseUrl}/audit-plans/${planId}`).pipe(
+      switchMap(() => this.syncFromApi())
+    );
+  }
+
+  migrateFromLocal(): Observable<AuditPlanRecord[]> {
+    const local = this.loadLocalRaw();
+    if (!local.length) {
+      return this.syncFromApi();
+    }
+    return this.http.get<unknown[]>(`${this.baseUrl}/audit-plans`).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      switchMap((remote) => {
+        const remoteCodes = remote.map((item) => item.code);
+        const toCreate = local.filter((item) => !remoteCodes.includes(item.code));
+        if (!toCreate.length) {
+          return this.syncFromApi();
+        }
+        return forkJoin(
+          toCreate.map((plan) =>
+            this.http.post(`${this.baseUrl}/audit-plans`, {
+              code: plan.code,
+              start_date: plan.startDate,
+              end_date: plan.endDate,
+              audit_type: plan.auditType,
+              audit_subtype: plan.auditSubtype || null,
+              auditor_name: plan.auditorName || null,
+              department: plan.department || null,
+              location_city: plan.locationCity || null,
+              site: plan.site || null,
+              country: plan.country || null,
+              region: plan.region || null,
+              audit_note: plan.auditNote || null,
+              response_type: plan.responseType || null,
+            })
+          )
+        ).pipe(switchMap(() => this.syncFromApi()));
+      })
+    );
+  }
+
   fetchByCode(code: string): Observable<AuditPlanRecord | null> {
     const local = this.plansSignal().find((plan) => plan.code === code);
     if (local) {
@@ -124,5 +206,21 @@ export class AuditPlanService {
       responseType: String(payload?.response_type ?? ''),
       createdAt: String(payload?.created_at ?? ''),
     };
+  }
+
+  private loadLocalRaw(): AuditPlanRecord[] {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed as AuditPlanRecord[];
+      }
+    } catch {
+      return [];
+    }
+    return [];
   }
 }

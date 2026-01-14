@@ -201,11 +201,19 @@ const simpleListCreateDelete = (table: string, column = 'name') => {
   });
 
   router.delete(`/${table}/:id`, requireAuth, async (req: AuthedRequest, res) => {
-    const id = Number(req.params.id);
-    await pool.query(`DELETE FROM ${table} WHERE id = $1 AND tenant_id = $2`, [
-      id,
-      req.user?.tenant_id,
-    ]);
+    const raw = req.params.id;
+    const id = Number(raw);
+    if (Number.isNaN(id)) {
+      await pool.query(`DELETE FROM ${table} WHERE name = $1 AND tenant_id = $2`, [
+        raw,
+        req.user?.tenant_id,
+      ]);
+    } else {
+      await pool.query(`DELETE FROM ${table} WHERE id = $1 AND tenant_id = $2`, [
+        id,
+        req.user?.tenant_id,
+      ]);
+    }
     return res.status(204).send();
   });
 };
@@ -216,26 +224,40 @@ simpleListCreateDelete('regions');
 
 router.get('/response-types', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
-    'SELECT id, name, types, created_at FROM response_types WHERE tenant_id = $1 ORDER BY created_at DESC',
+    'SELECT id, name, types, negative_types, created_at FROM response_types WHERE tenant_id = $1 ORDER BY created_at DESC',
     [req.user?.tenant_id]
   );
   return res.json(rows);
 });
 
 router.post('/response-types', requireAuth, async (req: AuthedRequest, res) => {
-  const { name, types } = req.body ?? {};
+  const { name, types, negative_types } = req.body ?? {};
   const { rows } = await pool.query(
-    'INSERT INTO response_types (tenant_id, name, types, created_at) VALUES ($1, $2, $3, NOW()) RETURNING id, name, types, created_at',
-    [req.user?.tenant_id, name, JSON.stringify(types ?? [])]
+    'INSERT INTO response_types (tenant_id, name, types, negative_types, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, name, types, negative_types, created_at',
+    [
+      req.user?.tenant_id,
+      name,
+      JSON.stringify(types ?? []),
+      JSON.stringify(negative_types ?? []),
+    ]
   );
   return res.status(201).json(rows[0]);
 });
 
 router.delete('/response-types/:id', requireAuth, async (req: AuthedRequest, res) => {
-  await pool.query('DELETE FROM response_types WHERE id = $1 AND tenant_id = $2', [
-    Number(req.params.id),
-    req.user?.tenant_id,
-  ]);
+  const raw = req.params.id;
+  const id = Number(raw);
+  if (Number.isNaN(id)) {
+    await pool.query('DELETE FROM response_types WHERE name = $1 AND tenant_id = $2', [
+      raw,
+      req.user?.tenant_id,
+    ]);
+  } else {
+    await pool.query('DELETE FROM response_types WHERE id = $1 AND tenant_id = $2', [
+      id,
+      req.user?.tenant_id,
+    ]);
+  }
   return res.status(204).send();
 });
 
@@ -282,7 +304,7 @@ const generateCode = () => {
 
 router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   const payload = req.body ?? {};
-  const code = generateCode();
+  const code = payload.code ? String(payload.code) : generateCode();
   const { rows } = await pool.query(
     `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
@@ -345,6 +367,147 @@ router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) =
     req.user?.tenant_id,
   ]);
   return res.status(204).send();
+});
+
+router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
+  const auditCode = String(req.query.audit_code ?? '');
+  const auditPlanId = req.query.audit_plan_id ? Number(req.query.audit_plan_id) : null;
+  let planId = auditPlanId;
+  if (!planId && auditCode) {
+    const plan = await pool.query(
+      'SELECT id FROM audit_plans WHERE tenant_id = $1 AND code = $2 LIMIT 1',
+      [req.user?.tenant_id, auditCode]
+    );
+    planId = plan.rows[0]?.id ?? null;
+  }
+  if (!planId) {
+    return res.status(400).json({ detail: 'Missing audit identifier' });
+  }
+  const { rows } = await pool.query(
+    `SELECT id, audit_plan_id, question_index, question_text, response, response_is_negative,
+            assigned_nc, note, evidence_name, status, created_at, updated_at
+     FROM audit_answers
+     WHERE tenant_id = $1 AND audit_plan_id = $2
+     ORDER BY question_index ASC`,
+    [req.user?.tenant_id, planId]
+  );
+  return res.json(rows);
+});
+
+router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
+  const payload = req.body ?? {};
+  const auditCode = payload.audit_code ? String(payload.audit_code) : '';
+  const auditPlanId = payload.audit_plan_id ? Number(payload.audit_plan_id) : null;
+  let planId = auditPlanId;
+  if (!planId && auditCode) {
+    const plan = await pool.query(
+      'SELECT id FROM audit_plans WHERE tenant_id = $1 AND code = $2 LIMIT 1',
+      [req.user?.tenant_id, auditCode]
+    );
+    planId = plan.rows[0]?.id ?? null;
+  }
+  const questionIndex =
+    payload.question_index !== undefined ? Number(payload.question_index) : null;
+  if (!planId || questionIndex === null) {
+    return res.status(400).json({ detail: 'Missing audit answer fields' });
+  }
+  const { rows } = await pool.query(
+    `INSERT INTO audit_answers
+      (tenant_id, audit_plan_id, question_index, question_text, response, response_is_negative,
+       assigned_nc, note, evidence_name, status, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+     ON CONFLICT (tenant_id, audit_plan_id, question_index)
+     DO UPDATE SET
+       question_text = EXCLUDED.question_text,
+       response = EXCLUDED.response,
+       response_is_negative = EXCLUDED.response_is_negative,
+       assigned_nc = EXCLUDED.assigned_nc,
+       note = EXCLUDED.note,
+       evidence_name = EXCLUDED.evidence_name,
+       status = EXCLUDED.status,
+       updated_at = NOW()
+     RETURNING id, audit_plan_id, question_index, question_text, response, response_is_negative,
+               assigned_nc, note, evidence_name, status, created_at, updated_at`,
+    [
+      req.user?.tenant_id,
+      planId,
+      questionIndex,
+      payload.question_text ?? '',
+      payload.response ?? null,
+      payload.response_is_negative ?? false,
+      payload.assigned_nc ?? null,
+      payload.note ?? null,
+      payload.evidence_name ?? null,
+      payload.status ?? 'Saved',
+    ]
+  );
+  return res.status(201).json(rows[0]);
+});
+
+router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
+  const { rows } = await pool.query(
+    `SELECT a.id AS answer_id,
+            p.code AS audit_code,
+            p.audit_type,
+            p.audit_subtype,
+            p.start_date,
+            p.end_date,
+            p.auditor_name,
+            a.question_text,
+            a.response,
+            a.assigned_nc,
+            a.note,
+            a.updated_at AS submitted_at,
+            n.root_cause,
+            n.containment_action,
+            n.corrective_action,
+            n.preventive_action,
+            n.evidence_name,
+            n.status AS nc_status
+     FROM audit_answers a
+     JOIN audit_plans p ON p.id = a.audit_plan_id
+     LEFT JOIN nc_actions n ON n.audit_answer_id = a.id AND n.tenant_id = a.tenant_id
+     WHERE a.tenant_id = $1 AND a.status = 'Submitted' AND a.response_is_negative = TRUE
+     ORDER BY a.updated_at DESC`,
+    [req.user?.tenant_id]
+  );
+  return res.json(rows);
+});
+
+router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
+  const payload = req.body ?? {};
+  const answerId = Number(payload.answer_id);
+  if (!answerId) {
+    return res.status(400).json({ detail: 'Missing answer id' });
+  }
+  const { rows } = await pool.query(
+    `INSERT INTO nc_actions
+      (tenant_id, audit_answer_id, root_cause, containment_action, corrective_action,
+       preventive_action, evidence_name, status, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+     ON CONFLICT (tenant_id, audit_answer_id)
+     DO UPDATE SET
+       root_cause = EXCLUDED.root_cause,
+       containment_action = EXCLUDED.containment_action,
+       corrective_action = EXCLUDED.corrective_action,
+       preventive_action = EXCLUDED.preventive_action,
+       evidence_name = EXCLUDED.evidence_name,
+       status = EXCLUDED.status,
+       updated_at = NOW()
+     RETURNING id, audit_answer_id, root_cause, containment_action, corrective_action,
+               preventive_action, evidence_name, status, created_at, updated_at`,
+    [
+      req.user?.tenant_id,
+      answerId,
+      payload.root_cause ?? null,
+      payload.containment_action ?? null,
+      payload.corrective_action ?? null,
+      payload.preventive_action ?? null,
+      payload.evidence_name ?? null,
+      payload.status ?? 'Saved',
+    ]
+  );
+  return res.json(rows[0]);
 });
 
 app.use('/', router);

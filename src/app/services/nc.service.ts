@@ -1,7 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
 
 export type NcRecord = {
-  id: string;
+  answerId: string;
   auditCode: string;
   auditType: string;
   auditSubtype: string;
@@ -12,36 +14,63 @@ export type NcRecord = {
   response: string;
   assignedNc: string;
   note: string;
-  createdAt: string;
+  submittedAt: string;
+  rootCause?: string;
+  containmentAction?: string;
+  correctiveAction?: string;
+  preventiveAction?: string;
+  evidenceName?: string;
+  status?: string;
 };
-
-const STORAGE_KEY = 'audir_nc_records';
 
 @Injectable({ providedIn: 'root' })
 export class NcService {
-  private readonly recordsSignal = signal<NcRecord[]>(this.loadRecords());
+  private readonly recordsSignal = signal<NcRecord[]>([]);
+  private readonly baseUrl = '/api';
 
   readonly records = this.recordsSignal.asReadonly();
 
-  addRecord(record: NcRecord): void {
-    const next = [record, ...this.recordsSignal()];
-    this.recordsSignal.set(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  constructor(private readonly http: HttpClient) {}
+
+  listRecords(): Observable<NcRecord[]> {
+    return this.http.get<unknown[]>(`${this.baseUrl}/nc-records`).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      tap((records) => this.recordsSignal.set(records))
+    );
   }
 
-  private loadRecords(): NcRecord[] {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) {
-      return [];
-    }
-    try {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) {
-        return parsed as NcRecord[];
-      }
-    } catch {
-      return [];
-    }
-    return [];
+  upsertAction(payload: {
+    answer_id: string;
+    root_cause?: string | null;
+    containment_action?: string | null;
+    corrective_action?: string | null;
+    preventive_action?: string | null;
+    evidence_name?: string | null;
+    status?: string;
+  }): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/nc-actions`, payload);
+  }
+
+  private mapFromApi(payload: any): NcRecord {
+    return {
+      answerId: String(payload?.answer_id ?? ''),
+      auditCode: String(payload?.audit_code ?? ''),
+      auditType: String(payload?.audit_type ?? ''),
+      auditSubtype: String(payload?.audit_subtype ?? ''),
+      startDate: String(payload?.start_date ?? ''),
+      endDate: String(payload?.end_date ?? ''),
+      auditorName: String(payload?.auditor_name ?? ''),
+      question: String(payload?.question_text ?? ''),
+      response: String(payload?.response ?? ''),
+      assignedNc: String(payload?.assigned_nc ?? ''),
+      note: String(payload?.note ?? ''),
+      submittedAt: String(payload?.submitted_at ?? ''),
+      rootCause: String(payload?.root_cause ?? ''),
+      containmentAction: String(payload?.containment_action ?? ''),
+      correctiveAction: String(payload?.corrective_action ?? ''),
+      preventiveAction: String(payload?.preventive_action ?? ''),
+      evidenceName: String(payload?.evidence_name ?? ''),
+      status: String(payload?.nc_status ?? ''),
+    };
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
@@ -12,7 +12,7 @@ import { SiteService } from '../../services/site.service';
   templateUrl: './settings.html',
   styleUrl: './settings.scss',
 })
-export class Settings {
+export class Settings implements OnInit {
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
@@ -48,13 +48,16 @@ export class Settings {
     if (!value) {
       return;
     }
-    this.departmentService.addDepartment(value);
-    this.newDepartment = '';
-    form.resetForm();
+    this.departmentService.createDepartment(value).subscribe({
+      next: () => {
+        this.newDepartment = '';
+        form.resetForm();
+      },
+    });
   }
 
   protected removeDepartment(name: string): void {
-    this.departmentService.removeDepartment(name);
+    this.departmentService.deleteDepartment(name).subscribe();
   }
 
   protected addSite(form: NgForm): void {
@@ -62,13 +65,16 @@ export class Settings {
     if (!value) {
       return;
     }
-    this.siteService.addSite(value);
-    this.newSite = '';
-    form.resetForm();
+    this.siteService.createSite(value).subscribe({
+      next: () => {
+        this.newSite = '';
+        form.resetForm();
+      },
+    });
   }
 
   protected removeSite(name: string): void {
-    this.siteService.removeSite(name);
+    this.siteService.deleteSite(name).subscribe();
   }
 
   protected addRegion(form: NgForm): void {
@@ -76,13 +82,16 @@ export class Settings {
     if (!value) {
       return;
     }
-    this.regionService.addRegion(value);
-    this.newRegion = '';
-    form.resetForm();
+    this.regionService.createRegion(value).subscribe({
+      next: () => {
+        this.newRegion = '';
+        form.resetForm();
+      },
+    });
   }
 
   protected removeRegion(name: string): void {
-    this.regionService.removeRegion(name);
+    this.regionService.deleteRegion(name).subscribe();
   }
 
   protected openResponseModal(): void {
@@ -103,12 +112,15 @@ export class Settings {
     if (!name || !this.responseTypes.length) {
       return;
     }
-    this.responseService.addResponse({
-      name,
-      types: [...this.responseTypes],
-      negativeTypes: [...this.responseNegativeTypes],
-    });
-    this.closeResponseModal();
+    this.responseService
+      .createResponse({
+        name,
+        types: [...this.responseTypes],
+        negativeTypes: [...this.responseNegativeTypes],
+      })
+      .subscribe({
+        next: () => this.closeResponseModal(),
+      });
   }
 
   protected addResponseType(): void {
@@ -134,7 +146,7 @@ export class Settings {
   }
 
   public removeResponse(name: string): void {
-    this.responseService.removeResponse(name);
+    this.responseService.deleteResponseByName(name).subscribe();
   }
 
   protected isNegativeTag(response: ResponseDefinition, tag: string): boolean {
@@ -146,3 +158,9 @@ export class Settings {
   }
 
 }
+  ngOnInit(): void {
+    this.departmentService.migrateFromLocal().subscribe();
+    this.siteService.migrateFromLocal().subscribe();
+    this.regionService.migrateFromLocal().subscribe();
+    this.responseService.migrateFromLocal().subscribe();
+  }

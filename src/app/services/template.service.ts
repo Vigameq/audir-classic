@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
 const STORAGE_KEY = 'audir_template_questions';
 const TEMPLATE_KEY = 'audir_templates';
@@ -64,6 +64,50 @@ export class TemplateService {
     );
   }
 
+  createTemplateApi(payload: Omit<TemplateRecord, 'id' | 'createdAt'>): Observable<TemplateRecord[]> {
+    return this.http
+      .post(`${this.baseUrl}/templates`, {
+        name: payload.name,
+        note: payload.note ?? null,
+        tags: payload.tags ?? [],
+        questions: payload.questions ?? [],
+      })
+      .pipe(switchMap(() => this.syncFromApi()));
+  }
+
+  deleteTemplateApi(id: string): Observable<TemplateRecord[]> {
+    return this.http.delete(`${this.baseUrl}/templates/${id}`).pipe(
+      switchMap(() => this.syncFromApi())
+    );
+  }
+
+  migrateFromLocal(): Observable<TemplateRecord[]> {
+    const local = this.loadLocalRaw();
+    if (!local.length) {
+      return this.syncFromApi();
+    }
+    return this.http.get<unknown[]>(`${this.baseUrl}/templates`).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      switchMap((remote) => {
+        const remoteNames = remote.map((item) => item.name);
+        const toCreate = local.filter((item) => !remoteNames.includes(item.name));
+        if (!toCreate.length) {
+          return this.syncFromApi();
+        }
+        return forkJoin(
+          toCreate.map((template) =>
+            this.http.post(`${this.baseUrl}/templates`, {
+              name: template.name,
+              note: template.note ?? null,
+              tags: template.tags ?? [],
+              questions: template.questions ?? [],
+            })
+          )
+        ).pipe(switchMap(() => this.syncFromApi()));
+      })
+    );
+  }
+
   private loadQuestions(): string[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -81,6 +125,22 @@ export class TemplateService {
   }
 
   private loadTemplates(): TemplateRecord[] {
+    const stored = localStorage.getItem(TEMPLATE_KEY);
+    if (!stored) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed as TemplateRecord[];
+      }
+    } catch {
+      return [];
+    }
+    return [];
+  }
+
+  private loadLocalRaw(): TemplateRecord[] {
     const stored = localStorage.getItem(TEMPLATE_KEY);
     if (!stored) {
       return [];
