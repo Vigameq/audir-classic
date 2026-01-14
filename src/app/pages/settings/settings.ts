@@ -157,10 +157,10 @@ export class Settings implements OnInit {
     return this.responseNegativeTypes.includes(tag);
   }
 
-}
   ngOnInit(): void {
     this.departmentService.migrateFromLocal().subscribe();
     this.siteService.migrateFromLocal().subscribe();
     this.regionService.migrateFromLocal().subscribe();
     this.responseService.migrateFromLocal().subscribe();
   }
+}
