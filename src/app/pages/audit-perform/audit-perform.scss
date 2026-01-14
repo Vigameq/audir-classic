@@ -441,6 +441,25 @@ button.small {
 }
 
 @media (max-width: 720px) {
+  .drawer-backdrop {
+    justify-items: stretch;
+  }
+
+  .drawer {
+    width: 100%;
+    border-radius: 0;
+    padding: 1.5rem 1.25rem;
+  }
+
+  .drawer-meta {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .inline-fields {
+    grid-template-columns: 1fr;
+  }
+
   .audit-card-header {
     align-items: flex-start;
     flex-direction: column;
