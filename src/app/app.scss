@@ -97,31 +97,21 @@
   box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
 }
 
-.logout {
-  border: 1px solid rgba(255, 154, 0, 0.5);
-  background: #fff6eb;
-  color: var(--color-ink);
-  padding: 0.45rem 1rem;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font: inherit;
-}
-
-.logout:hover {
-  border-color: var(--color-accent);
-  box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
+.user-menu {
+  position: relative;
 }
 
 .user-chip {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0.8rem;
+  gap: 0.6rem;
+  padding: 0.4rem 0.9rem 0.4rem 0.4rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 154, 0, 0.25);
   background: #ffffff;
   box-shadow: 0 10px 20px rgba(255, 154, 0, 0.12);
+  cursor: pointer;
+  font: inherit;
 }
 
 .avatar {
@@ -143,9 +133,48 @@
   color: var(--color-ink);
 }
 
-.user-role {
-  font-size: 0.72rem;
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.6rem);
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 154, 0, 0.25);
+  border-radius: 1rem;
+  padding: 0.8rem;
+  box-shadow: 0 18px 40px rgba(255, 154, 0, 0.2);
+  display: grid;
+  gap: 0.6rem;
+  z-index: 20;
+}
+
+.role-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
   color: var(--color-muted);
+}
+
+.role-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.logout {
+  border: 1px solid rgba(255, 154, 0, 0.5);
+  background: #fff6eb;
+  color: var(--color-ink);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font: inherit;
+}
+
+.logout:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
 }
 
 .app-main {

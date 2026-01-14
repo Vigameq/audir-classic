@@ -68,16 +68,17 @@
         </a>
       </nav>
     </div>
-    <div class="user-chip" *ngIf="auth.isLoggedIn()">
-      <div class="avatar">{{ avatarText }}</div>
-      <div>
+    <div class="user-menu" *ngIf="auth.isLoggedIn()">
+      <button class="user-chip" type="button" (click)="toggleUserMenu()">
+        <div class="avatar">{{ avatarText }}</div>
         <div class="user-name">{{ displayName }}</div>
-        <div class="user-role">{{ auth.role() || 'User' }}</div>
+      </button>
+      <div class="user-dropdown" *ngIf="isUserMenuOpen">
+        <div class="role-label">Role</div>
+        <div class="role-value">{{ auth.role() || 'User' }}</div>
+        <button class="logout" type="button" (click)="logout()">Logout</button>
       </div>
     </div>
-    <button class="logout" type="button" (click)="logout()" *ngIf="auth.isLoggedIn()">
-      Logout
-    </button>
   </div>
 </header>
 

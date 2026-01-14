@@ -23,6 +23,7 @@ export class App {
   protected readonly auth = inject(AuthState);
   protected readonly loading = inject(LoadingService);
   private readonly router = inject(Router);
+  protected isUserMenuOpen = false;
 
   constructor() {
     this.router.events.subscribe((event) => {
@@ -45,6 +46,7 @@ export class App {
   protected logout(): void {
     this.auth.logout();
     this.router.navigate(['/login']);
+    this.isUserMenuOpen = false;
   }
 
   protected get displayName(): string {
@@ -62,5 +64,13 @@ export class App {
       return 'U';
     }
     return cleaned.slice(0, 2).toUpperCase();
+  }
+
+  protected toggleUserMenu(): void {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  protected closeUserMenu(): void {
+    this.isUserMenuOpen = false;
   }
 }
