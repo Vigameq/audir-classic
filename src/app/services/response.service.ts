@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
 
 export type ResponseDefinition = {
   name: string;
@@ -10,7 +12,9 @@ const STORAGE_KEY = 'audir_responses';
 
 @Injectable({ providedIn: 'root' })
 export class ResponseService {
+  private readonly http = inject(HttpClient);
   private readonly responsesSignal = signal<ResponseDefinition[]>(this.loadResponses());
+  private readonly baseUrl = '/api';
 
   readonly responses = this.responsesSignal.asReadonly();
 
@@ -24,6 +28,16 @@ export class ResponseService {
     const next = this.responsesSignal().filter((item) => item.name !== name);
     this.responsesSignal.set(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
+  syncFromApi(): Observable<ResponseDefinition[]> {
+    return this.http.get<unknown[]>(`${this.baseUrl}/response-types`).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      tap((responses) => {
+        this.responsesSignal.set(responses);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
+      })
+    );
   }
 
   private loadResponses(): ResponseDefinition[] {
@@ -44,5 +58,17 @@ export class ResponseService {
       return [];
     }
     return [];
+  }
+
+  private mapFromApi(payload: any): ResponseDefinition {
+    const types = Array.isArray(payload?.types) ? payload.types : [];
+    const negativeTypes = Array.isArray(payload?.negative_types)
+      ? payload.negative_types
+      : [];
+    return {
+      name: String(payload?.name ?? ''),
+      types,
+      negativeTypes,
+    };
   }
 }

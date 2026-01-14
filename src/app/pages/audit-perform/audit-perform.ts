@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import QRCode from 'qrcode';
+import { firstValueFrom } from 'rxjs';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { NcService } from '../../services/nc.service';
@@ -79,11 +80,27 @@ export class AuditPerform implements OnInit {
       if (!code) {
         return;
       }
-      const audit = this.auditPlanService.plans().find((item) => item.code === code);
-      if (audit) {
-        this.openPerform(audit);
-      }
+      void this.loadAuditByCode(code);
     });
+  }
+
+  private async loadAuditByCode(code: string): Promise<void> {
+    const audit =
+      this.auditPlanService.plans().find((item) => item.code === code) ??
+      (await firstValueFrom(this.auditPlanService.fetchByCode(code)));
+    if (!audit) {
+      return;
+    }
+    if (!this.templateService.templates().length) {
+      await firstValueFrom(this.templateService.syncFromApi());
+    }
+    if (!this.responseService.responses().length) {
+      await firstValueFrom(this.responseService.syncFromApi());
+    }
+    if (!this.departmentService.departments().length) {
+      await firstValueFrom(this.departmentService.syncFromApi());
+    }
+    this.openPerform(audit);
   }
 
   protected openPerform(audit: AuditPlanRecord): void {

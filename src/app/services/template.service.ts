@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, map, tap } from 'rxjs';
 
 const STORAGE_KEY = 'audir_template_questions';
 const TEMPLATE_KEY = 'audir_templates';
@@ -14,8 +16,10 @@ export type TemplateRecord = {
 
 @Injectable({ providedIn: 'root' })
 export class TemplateService {
+  private readonly http = inject(HttpClient);
   private readonly questionsSignal = signal<string[]>(this.loadQuestions());
   private readonly templatesSignal = signal<TemplateRecord[]>(this.loadTemplates());
+  private readonly baseUrl = '/api';
 
   readonly questions = this.questionsSignal.asReadonly();
   readonly templates = this.templatesSignal.asReadonly();
@@ -50,6 +54,16 @@ export class TemplateService {
     localStorage.setItem(TEMPLATE_KEY, JSON.stringify(next));
   }
 
+  syncFromApi(): Observable<TemplateRecord[]> {
+    return this.http.get<unknown[]>(`${this.baseUrl}/templates`).pipe(
+      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      tap((templates) => {
+        this.templatesSignal.set(templates);
+        localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
+      })
+    );
+  }
+
   private loadQuestions(): string[] {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (!stored) {
@@ -80,5 +94,16 @@ export class TemplateService {
       return [];
     }
     return [];
+  }
+
+  private mapFromApi(payload: any): TemplateRecord {
+    return {
+      id: String(payload?.id ?? ''),
+      name: String(payload?.name ?? ''),
+      note: String(payload?.note ?? ''),
+      tags: Array.isArray(payload?.tags) ? payload.tags : [],
+      questions: Array.isArray(payload?.questions) ? payload.questions : [],
+      createdAt: String(payload?.created_at ?? ''),
+    };
   }
 }
