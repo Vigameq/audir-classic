@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+import { AuditAnswerRecord, AuditAnswerService } from '../../services/audit-answer.service';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
 import { NcRecord, NcService } from '../../services/nc.service';
 import { RegionService } from '../../services/region.service';
 import { ResponseService } from '../../services/response.service';
 import { SiteService } from '../../services/site.service';
+import { TemplateService } from '../../services/template.service';
 import { User, UserService } from '../../services/user.service';
 
 @Component({
@@ -17,12 +20,14 @@ import { User, UserService } from '../../services/user.service';
 })
 export class AuditManage implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
+  private readonly auditAnswerService = inject(AuditAnswerService);
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
   private readonly responseService = inject(ResponseService);
+  private readonly templateService = inject(TemplateService);
 
   protected auditors: User[] = [];
   protected activeAudit: AuditPlanRecord | null = null;
@@ -43,10 +48,21 @@ export class AuditManage implements OnInit {
   protected viewAudit: AuditPlanRecord | null = null;
   protected viewResponses: NcRecord[] = [];
 
+  protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
+  protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
+
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
       b.createdAt.localeCompare(a.createdAt)
     );
+  }
+
+  protected get completedAudits(): AuditPlanRecord[] {
+    return this.audits.filter((audit) => this.completionMap[audit.code] === 'Completed');
+  }
+
+  protected get inProgressAudits(): AuditPlanRecord[] {
+    return this.audits.filter((audit) => this.completionMap[audit.code] !== 'Completed');
   }
 
   protected readonly citiesByCountry: Record<string, string[]> = {
@@ -194,12 +210,14 @@ export class AuditManage implements OnInit {
     this.siteService.migrateFromLocal().subscribe();
     this.regionService.migrateFromLocal().subscribe();
     this.responseService.migrateFromLocal().subscribe();
+    this.templateService.migrateFromLocal().subscribe();
     this.ncService.listRecords().subscribe();
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
       },
     });
+    this.loadAuditProgress();
   }
 
   protected openEdit(audit: AuditPlanRecord): void {
@@ -267,5 +285,36 @@ export class AuditManage implements OnInit {
       this.activeAudit = null;
     }
     this.auditPlanService.deletePlanApi(audit.id).subscribe();
+  }
+
+  private loadAuditProgress(): void {
+    const audits = this.audits;
+    if (!audits.length) {
+      this.completionMap = {};
+      return;
+    }
+    forkJoin(
+      audits.map((audit) => this.auditAnswerService.listByAuditCode(audit.code))
+    ).subscribe({
+      next: (allAnswers) => {
+        const nextMap: Record<string, 'Completed' | 'In Progress'> = {};
+        const nextAnswers: Record<string, AuditAnswerRecord[]> = {};
+        audits.forEach((audit, index) => {
+          const answers = allAnswers[index] ?? [];
+          nextAnswers[audit.code] = answers;
+          const totalQuestions = this.getTemplateQuestionCount(audit.auditType);
+          const submittedCount = answers.filter((answer) => answer.status === 'Submitted').length;
+          nextMap[audit.code] =
+            totalQuestions > 0 && submittedCount >= totalQuestions ? 'Completed' : 'In Progress';
+        });
+        this.completionMap = nextMap;
+        this.answersByAudit = nextAnswers;
+      },
+    });
+  }
+
+  private getTemplateQuestionCount(auditType: string): number {
+    const template = this.templateService.templates().find((item) => item.name === auditType);
+    return template?.questions.length ?? 0;
   }
 }
