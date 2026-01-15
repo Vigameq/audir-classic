@@ -229,7 +229,7 @@
       </header>
       <p class="modal-subtitle">
         {{ viewAudit.auditType }} · {{ viewAudit.auditSubtype || '—' }} ·
-        {{ viewAudit.startDate }} → {{ viewAudit.endDate }}
+        {{ formatDate(viewAudit.startDate) }} → {{ formatDate(viewAudit.endDate) }}
       </p>
       <div class="view-list" *ngIf="viewResponses.length; else emptyResponses">
         <article class="view-card" *ngFor="let response of viewResponses">
