@@ -27,8 +27,11 @@ CREATE TABLE IF NOT EXISTS nc_actions (
   corrective_action TEXT,
   preventive_action TEXT,
   evidence_name TEXT,
-  status TEXT NOT NULL DEFAULT 'Saved',
+  status TEXT NOT NULL DEFAULT 'Assigned',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (tenant_id, audit_answer_id)
 );
+
+ALTER TABLE nc_actions
+  ALTER COLUMN status SET DEFAULT 'Assigned';

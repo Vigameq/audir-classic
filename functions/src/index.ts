@@ -132,7 +132,16 @@ router.post('/users', requireAuth, async (req: AuthedRequest, res) => {
       payload.status ?? null,
     ]
   );
-  return res.status(201).json(rows[0]);
+  const result = rows[0];
+  if (payload.response_is_negative && payload.status === 'Submitted') {
+    await pool.query(
+      `INSERT INTO nc_actions (tenant_id, audit_answer_id, status, created_at, updated_at)
+       VALUES ($1, $2, 'Assigned', NOW(), NOW())
+       ON CONFLICT (tenant_id, audit_answer_id) DO NOTHING`,
+      [req.user?.tenant_id, result.id]
+    );
+  }
+  return res.status(201).json(result);
 });
 
 router.put('/users/:userId', requireAuth, async (req: AuthedRequest, res) => {
@@ -463,7 +472,7 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
             n.corrective_action,
             n.preventive_action,
             n.evidence_name,
-            n.status AS nc_status
+            COALESCE(n.status, 'Assigned') AS nc_status
      FROM audit_answers a
      JOIN audit_plans p ON p.id = a.audit_plan_id
      LEFT JOIN nc_actions n ON n.audit_answer_id = a.id AND n.tenant_id = a.tenant_id
@@ -479,6 +488,41 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
   const answerId = Number(payload.answer_id);
   if (!answerId) {
     return res.status(400).json({ detail: 'Missing answer id' });
+  }
+  const requestedStatus = String(payload.status ?? 'In Progress');
+  const userId = Number(req.user?.sub ?? 0);
+  if (!userId) {
+    return res.status(401).json({ detail: 'Missing user' });
+  }
+  const userQuery = await pool.query(
+    'SELECT first_name, last_name, department FROM users WHERE id = $1 AND tenant_id = $2',
+    [userId, req.user?.tenant_id]
+  );
+  const user = userQuery.rows[0];
+  if (!user) {
+    return res.status(401).json({ detail: 'Invalid user' });
+  }
+  const auditQuery = await pool.query(
+    `SELECT p.auditor_name, a.assigned_nc
+     FROM audit_answers a
+     JOIN audit_plans p ON p.id = a.audit_plan_id
+     WHERE a.id = $1 AND a.tenant_id = $2`,
+    [answerId, req.user?.tenant_id]
+  );
+  const auditRow = auditQuery.rows[0];
+  const auditorName = String(auditRow?.auditor_name ?? '').toLowerCase();
+  const assignedDepartment = String(auditRow?.assigned_nc ?? '').toLowerCase();
+  const userFullName = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim().toLowerCase();
+  if (requestedStatus === 'Closed' || requestedStatus === 'Rework') {
+    if (!userFullName || userFullName !== auditorName) {
+      return res.status(403).json({ detail: 'Not authorized to change status' });
+    }
+  }
+  if (requestedStatus === 'Resolution Submitted' || requestedStatus === 'In Progress') {
+    const userDepartment = String(user.department ?? '').toLowerCase();
+    if (!userDepartment || userDepartment !== assignedDepartment) {
+      return res.status(403).json({ detail: 'Not authorized to submit resolution' });
+    }
   }
   const { rows } = await pool.query(
     `INSERT INTO nc_actions
@@ -504,7 +548,7 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
       payload.corrective_action ?? null,
       payload.preventive_action ?? null,
       payload.evidence_name ?? null,
-      payload.status ?? 'Saved',
+      requestedStatus,
     ]
   );
   return res.json(rows[0]);

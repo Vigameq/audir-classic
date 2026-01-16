@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthState } from '../../auth-state';
 import { NcRecord, NcService } from '../../services/nc.service';
 
 @Component({
@@ -10,6 +11,7 @@ import { NcRecord, NcService } from '../../services/nc.service';
   styleUrl: './nc-management.scss',
 })
 export class NcManagement implements OnInit {
+  private readonly auth = inject(AuthState);
   private readonly ncService = inject(NcService);
   protected activeRecord: NcRecord | null = null;
   protected ncResponse = {
@@ -21,7 +23,19 @@ export class NcManagement implements OnInit {
   };
 
   protected get ncRecords(): NcRecord[] {
-    return this.ncService.records();
+    const records = this.ncService.records();
+    const department = this.auth.department().toLowerCase();
+    return records.filter((record) => {
+      const status = (record.status || 'Assigned').toLowerCase();
+      const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
+      if (!allowed) {
+        return false;
+      }
+      if (!department) {
+        return false;
+      }
+      return record.assignedNc?.toLowerCase() === department;
+    });
   }
 
   ngOnInit(): void {
@@ -62,7 +76,7 @@ export class NcManagement implements OnInit {
         corrective_action: this.ncResponse.correctiveAction || null,
         preventive_action: this.ncResponse.preventiveAction || null,
         evidence_name: this.ncResponse.evidenceFile || null,
-        status: 'Submitted',
+        status: 'Resolution Submitted',
       })
       .subscribe({
         next: () => {
@@ -84,7 +98,7 @@ export class NcManagement implements OnInit {
         corrective_action: this.ncResponse.correctiveAction || null,
         preventive_action: this.ncResponse.preventiveAction || null,
         evidence_name: this.ncResponse.evidenceFile || null,
-        status: 'Saved',
+        status: 'In Progress',
       })
       .subscribe({
         next: () => {

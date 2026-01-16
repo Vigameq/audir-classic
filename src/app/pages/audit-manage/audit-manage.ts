@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { AuthState } from '../../auth-state';
 import { AuditAnswerRecord, AuditAnswerService } from '../../services/audit-answer.service';
 import { AuditPlanRecord, AuditPlanService } from '../../services/audit-plan.service';
 import { DepartmentService } from '../../services/department.service';
@@ -22,6 +23,7 @@ export class AuditManage implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
   private readonly auditAnswerService = inject(AuditAnswerService);
   private readonly ncService = inject(NcService);
+  private readonly auth = inject(AuthState);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
@@ -65,6 +67,17 @@ export class AuditManage implements OnInit {
 
   protected get inProgressAudits(): AuditPlanRecord[] {
     return this.audits.filter((audit) => this.completionMap[audit.code] !== 'Completed');
+  }
+
+  protected get pendingReviewRecords(): NcRecord[] {
+    const records = this.ncService.records().filter((record) => {
+      const status = (record.status || '').toLowerCase();
+      return status === 'resolution submitted';
+    });
+    if (this.auth.role() !== 'Auditor') {
+      return records;
+    }
+    return records.filter((record) => this.isAuditOwnedByCurrentAuditor(record.auditCode));
   }
 
   protected readonly citiesByCountry: Record<string, string[]> = {
@@ -289,6 +302,38 @@ export class AuditManage implements OnInit {
     this.auditPlanService.deletePlanApi(audit.id).subscribe();
   }
 
+  protected approveNc(record: NcRecord): void {
+    this.ncService
+      .upsertAction({
+        answer_id: record.answerId,
+        root_cause: record.rootCause || null,
+        containment_action: record.containmentAction || null,
+        corrective_action: record.correctiveAction || null,
+        preventive_action: record.preventiveAction || null,
+        evidence_name: record.evidenceName || null,
+        status: 'Closed',
+      })
+      .subscribe({
+        next: () => this.ncService.listRecords().subscribe(),
+      });
+  }
+
+  protected requestRework(record: NcRecord): void {
+    this.ncService
+      .upsertAction({
+        answer_id: record.answerId,
+        root_cause: record.rootCause || null,
+        containment_action: record.containmentAction || null,
+        corrective_action: record.correctiveAction || null,
+        preventive_action: record.preventiveAction || null,
+        evidence_name: record.evidenceName || null,
+        status: 'Rework',
+      })
+      .subscribe({
+        next: () => this.ncService.listRecords().subscribe(),
+      });
+  }
+
   protected toggleInProgress(): void {
     this.showInProgress = !this.showInProgress;
   }
@@ -348,5 +393,19 @@ export class AuditManage implements OnInit {
   private getTemplateQuestionCount(auditType: string): number {
     const template = this.templateService.templates().find((item) => item.name === auditType);
     return template?.questions.length ?? 0;
+  }
+
+  private isAuditOwnedByCurrentAuditor(code: string): boolean {
+    const audit = this.auditPlanService.plans().find((item) => item.code === code);
+    if (!audit) {
+      return false;
+    }
+    const first = this.auth.firstName().trim();
+    const last = this.auth.lastName().trim();
+    const fullName = `${first} ${last}`.trim().toLowerCase();
+    if (!fullName) {
+      return false;
+    }
+    return audit.auditorName.trim().toLowerCase() === fullName;
   }
 }

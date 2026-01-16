@@ -10,6 +10,70 @@
   <section class="panel wide">
     <div class="panel-header">
       <div class="section-title">
+        <h2>Pending review</h2>
+        <span class="count">{{ pendingReviewRecords.length }} total</span>
+      </div>
+    </div>
+    <div class="audit-grid" *ngIf="pendingReviewRecords.length">
+      <article class="audit-card" *ngFor="let record of pendingReviewRecords">
+        <div class="audit-card-header">
+          <div>
+            <p class="audit-label">Audit</p>
+            <p class="code">
+              {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
+            </p>
+          </div>
+          <div class="card-actions">
+            <button class="ghost small" type="button" (click)="requestRework(record)">
+              Request rework
+            </button>
+            <button class="primary small" type="button" (click)="approveNc(record)">
+              Close NC
+            </button>
+          </div>
+        </div>
+        <div class="audit-meta">
+          <div class="meta-block">
+            <span>Question</span>
+            <strong>{{ record.question }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Response</span>
+            <strong>{{ record.response }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Assigned NC</span>
+            <strong>{{ record.assignedNc || '—' }}</strong>
+          </div>
+        </div>
+        <div class="audit-footer">
+          <div class="meta-block">
+            <span>Root cause</span>
+            <strong>{{ record.rootCause || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Containment</span>
+            <strong>{{ record.containmentAction || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Corrective</span>
+            <strong>{{ record.correctiveAction || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Preventive</span>
+            <strong>{{ record.preventiveAction || '—' }}</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="empty" *ngIf="!pendingReviewRecords.length">
+      No resolutions pending review.
+    </div>
+  </section>
+
+  <section class="panel wide">
+    <div class="panel-header">
+      <div class="section-title">
         <h2>In progress audits</h2>
         <span class="count">{{ inProgressAudits.length }} total</span>
       </div>
