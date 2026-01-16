@@ -52,6 +52,7 @@ export class UserManagement implements OnInit {
   protected editForm: UserRow | null = null;
 
   ngOnInit(): void {
+    this.departmentService.migrateFromLocal().subscribe();
     this.loadUsers();
   }
 

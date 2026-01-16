@@ -205,12 +205,12 @@
         </div>
         <div class="field">
           <label>Department <span class="req">*</span></label>
-          <input
-            type="text"
-            name="editDepartment"
-            [(ngModel)]="editForm.department"
-            required
-          />
+          <select name="editDepartment" [(ngModel)]="editForm.department" required>
+            <option value="">Select department</option>
+            <option *ngFor="let department of departments" [value]="department">
+              {{ department }}
+            </option>
+          </select>
         </div>
         <div class="field">
           <label>Role <span class="req">*</span></label>
