@@ -46,6 +46,10 @@
             <span>Auditor</span>
             <strong>{{ audit.auditorName || '—' }}</strong>
           </div>
+          <div class="meta-block">
+            <span>NC count</span>
+            <strong>{{ getAuditProgress(audit).nc }}</strong>
+          </div>
         </div>
         <div class="audit-footer">
           <div class="meta-block">
@@ -107,6 +111,10 @@
           <div class="meta-block">
             <span>Auditor</span>
             <strong>{{ audit.auditorName || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>NC count</span>
+            <strong>{{ getAuditProgress(audit).nc }}</strong>
           </div>
         </div>
         <div class="audit-footer">

@@ -297,6 +297,14 @@ export class AuditManage implements OnInit {
     this.showCompleted = !this.showCompleted;
   }
 
+  protected getAuditProgress(audit: AuditPlanRecord): { nc: number; nonNc: number } {
+    const answers = this.answersByAudit[audit.code] ?? [];
+    const submitted = answers.filter((answer) => answer.status === 'Submitted');
+    const nc = submitted.filter((answer) => answer.responseIsNegative).length;
+    const nonNc = submitted.length - nc;
+    return { nc, nonNc };
+  }
+
   protected formatDate(value: string): string {
     if (!value) {
       return '—';
