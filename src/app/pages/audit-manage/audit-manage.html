@@ -9,10 +9,15 @@
 
   <section class="panel wide">
     <div class="panel-header">
-      <h2>In progress audits</h2>
-      <span class="count">{{ inProgressAudits.length }} total</span>
+      <div class="section-title">
+        <h2>In progress audits</h2>
+        <span class="count">{{ inProgressAudits.length }} total</span>
+      </div>
+      <button class="ghost small" type="button" (click)="toggleInProgress()">
+        {{ showInProgress ? 'Collapse' : 'Expand' }}
+      </button>
     </div>
-    <div class="audit-grid" *ngIf="inProgressAudits.length">
+    <div class="audit-grid" *ngIf="showInProgress && inProgressAudits.length">
       <article class="audit-card" *ngFor="let audit of inProgressAudits">
         <div class="audit-card-header">
           <div>
@@ -66,10 +71,15 @@
 
   <section class="panel wide">
     <div class="panel-header">
-      <h2>Completed audits</h2>
-      <span class="count">{{ completedAudits.length }} total</span>
+      <div class="section-title">
+        <h2>Completed audits</h2>
+        <span class="count">{{ completedAudits.length }} total</span>
+      </div>
+      <button class="ghost small" type="button" (click)="toggleCompleted()">
+        {{ showCompleted ? 'Collapse' : 'Expand' }}
+      </button>
     </div>
-    <div class="audit-grid" *ngIf="completedAudits.length">
+    <div class="audit-grid" *ngIf="showCompleted && completedAudits.length">
       <article class="audit-card" *ngFor="let audit of completedAudits">
         <div class="audit-card-header">
           <div>

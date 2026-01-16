@@ -50,6 +50,8 @@ export class AuditManage implements OnInit {
 
   protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
+  protected showInProgress = true;
+  protected showCompleted = true;
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
@@ -285,6 +287,14 @@ export class AuditManage implements OnInit {
       this.activeAudit = null;
     }
     this.auditPlanService.deletePlanApi(audit.id).subscribe();
+  }
+
+  protected toggleInProgress(): void {
+    this.showInProgress = !this.showInProgress;
+  }
+
+  protected toggleCompleted(): void {
+    this.showCompleted = !this.showCompleted;
   }
 
   protected formatDate(value: string): string {

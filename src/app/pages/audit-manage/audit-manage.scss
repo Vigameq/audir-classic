@@ -94,6 +94,11 @@ button.small,
   justify-content: space-between;
 }
 
+.section-title {
+  display: grid;
+  gap: 0.2rem;
+}
+
 .count {
   color: var(--color-muted);
   font-size: 0.85rem;
