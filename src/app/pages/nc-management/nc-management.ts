@@ -28,17 +28,21 @@ export class NcManagement implements OnInit {
 
   protected get ncRecords(): NcRecord[] {
     const records = this.ncService.records();
-    const department = this.auth.department().toLowerCase();
+    const department = this.auth.department().trim().toLowerCase();
     return records.filter((record) => {
       const status = (record.status || 'Assigned').toLowerCase();
       const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
       if (!allowed) {
         return false;
       }
+      const assignedUserId = record.assignedUserId;
+      if (assignedUserId && this.currentUserId) {
+        return assignedUserId === this.currentUserId;
+      }
       if (!department) {
         return false;
       }
-      return record.assignedNc?.toLowerCase() === department;
+      return record.assignedNc?.trim().toLowerCase() === department;
     });
   }
 
