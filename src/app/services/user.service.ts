@@ -70,6 +70,12 @@ export class UserService {
     );
   }
 
+  deleteUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${userId}`, {
+      headers: this.authHeaders(),
+    });
+  }
+
   private authHeaders(): HttpHeaders {
     const token = this.auth.accessToken();
     if (!token) {

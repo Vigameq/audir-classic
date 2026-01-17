@@ -157,6 +157,20 @@ export class UserManagement implements OnInit {
     });
   }
 
+  protected deleteUser(user: UserRow): void {
+    const confirmed = window.confirm(
+      `Delete ${user.firstName} ${user.lastName}? This cannot be undone.`
+    );
+    if (!confirmed) {
+      return;
+    }
+    this.userService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.users = this.users.filter((entry) => entry.id !== user.id);
+      },
+    });
+  }
+
   private loadUsers(): void {
     this.userService.listUsers().subscribe({
       next: (users) => {

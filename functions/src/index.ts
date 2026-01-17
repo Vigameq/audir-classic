@@ -191,6 +191,15 @@ router.post('/users/:userId/reset-password', requireAuth, async (req: AuthedRequ
   return res.json(rows[0]);
 });
 
+router.delete('/users/:userId', requireAuth, async (req: AuthedRequest, res) => {
+  const userId = Number(req.params.userId);
+  await pool.query('DELETE FROM users WHERE id = $1 AND tenant_id = $2', [
+    userId,
+    req.user?.tenant_id,
+  ]);
+  return res.status(204).send();
+});
+
 const simpleListCreateDelete = (table: string, column = 'name') => {
   router.get(`/${table}`, requireAuth, async (req: AuthedRequest, res) => {
     const { rows } = await pool.query(
