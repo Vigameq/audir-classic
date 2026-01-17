@@ -98,7 +98,7 @@
             class="primary small"
             type="button"
             (click)="openRecord(record)"
-            [disabled]="!record.assignedUserId"
+            [disabled]="!canPerformNc(record)"
           >
             Perform NC
           </button>

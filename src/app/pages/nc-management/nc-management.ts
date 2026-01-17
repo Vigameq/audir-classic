@@ -16,7 +16,7 @@ export class NcManagement implements OnInit {
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
-  private readonly currentUserId = signal<number | null>(null);
+  protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
     rootCause: '',
     containmentAction: '',
@@ -28,8 +28,12 @@ export class NcManagement implements OnInit {
 
   protected readonly ncRecords = computed(() => {
     const records = this.ncService.records();
-    const department = this.auth.department().trim().toLowerCase();
     const currentUserId = this.currentUserId();
+    let department = this.auth.department().trim().toLowerCase();
+    if (!department && currentUserId) {
+      const currentUser = this.users.find((user) => user.id === currentUserId);
+      department = String(currentUser?.department ?? '').trim().toLowerCase();
+    }
     return records.filter((record) => {
       const status = (record.status || 'Assigned').toLowerCase();
       const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
@@ -37,8 +41,8 @@ export class NcManagement implements OnInit {
         return false;
       }
       const assignedUserId = record.assignedUserId;
-      if (assignedUserId && currentUserId) {
-        return assignedUserId === currentUserId;
+      if (assignedUserId && currentUserId && assignedUserId === currentUserId) {
+        return true;
       }
       if (!department) {
         return false;
@@ -52,8 +56,10 @@ export class NcManagement implements OnInit {
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.users = users;
-        const email = this.auth.email();
-        const current = email ? users.find((user) => user.email === email) : undefined;
+        const email = this.auth.email().trim().toLowerCase();
+        const current = email
+          ? users.find((user) => user.email.toLowerCase() === email)
+          : undefined;
         this.currentUserId.set(current?.id ?? null);
       },
     });
@@ -144,8 +150,10 @@ export class NcManagement implements OnInit {
       return;
     }
     if (!this.currentUserId()) {
-      const email = this.auth.email();
-      const match = email ? this.users.find((user) => user.email === email) : undefined;
+      const email = this.auth.email().trim().toLowerCase();
+      const match = email
+        ? this.users.find((user) => user.email.toLowerCase() === email)
+        : undefined;
       this.currentUserId.set(match?.id ?? null);
     }
     if (!this.currentUserId()) {
@@ -181,5 +189,17 @@ export class NcManagement implements OnInit {
       return 'Assigned';
     }
     return 'Unassigned';
+  }
+
+  protected canPerformNc(record: NcRecord): boolean {
+    const currentUserId = this.currentUserId();
+    if (record.assignedUserId && currentUserId) {
+      return record.assignedUserId === currentUserId;
+    }
+    const email = this.auth.email().trim().toLowerCase();
+    if (record.assignedUserEmail && email) {
+      return record.assignedUserEmail.trim().toLowerCase() === email;
+    }
+    return false;
   }
 }
