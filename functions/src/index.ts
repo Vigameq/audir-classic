@@ -481,10 +481,15 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
             n.corrective_action,
             n.preventive_action,
             n.evidence_name,
+            n.assigned_user_id,
+            u.first_name AS assigned_user_first_name,
+            u.last_name AS assigned_user_last_name,
+            u.email AS assigned_user_email,
             COALESCE(n.status, 'Assigned') AS nc_status
      FROM audit_answers a
      JOIN audit_plans p ON p.id = a.audit_plan_id
      LEFT JOIN nc_actions n ON n.audit_answer_id = a.id AND n.tenant_id = a.tenant_id
+     LEFT JOIN users u ON u.id = n.assigned_user_id AND u.tenant_id = a.tenant_id
      WHERE a.tenant_id = $1 AND a.status = 'Submitted' AND a.response_is_negative = TRUE
      ORDER BY a.updated_at DESC`,
     [req.user?.tenant_id]
@@ -499,6 +504,10 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
     return res.status(400).json({ detail: 'Missing answer id' });
   }
   const requestedStatus = String(payload.status ?? 'In Progress');
+  const assignedUserId =
+    payload.assigned_user_id !== undefined && payload.assigned_user_id !== null
+      ? Number(payload.assigned_user_id)
+      : null;
   const userId = Number(req.user?.sub ?? 0);
   if (!userId) {
     return res.status(401).json({ detail: 'Missing user' });
@@ -522,6 +531,17 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
   const auditorName = String(auditRow?.auditor_name ?? '').toLowerCase();
   const assignedDepartment = String(auditRow?.assigned_nc ?? '').toLowerCase();
   const userFullName = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim().toLowerCase();
+  if (assignedUserId) {
+    const assigneeQuery = await pool.query(
+      'SELECT department FROM users WHERE id = $1 AND tenant_id = $2',
+      [assignedUserId, req.user?.tenant_id]
+    );
+    const assignee = assigneeQuery.rows[0];
+    const assigneeDepartment = String(assignee?.department ?? '').toLowerCase();
+    if (!assigneeDepartment || assigneeDepartment !== assignedDepartment) {
+      return res.status(400).json({ detail: 'Invalid assignee for department' });
+    }
+  }
   if (requestedStatus === 'Closed' || requestedStatus === 'Rework') {
     if (!userFullName || userFullName !== auditorName) {
       return res.status(403).json({ detail: 'Not authorized to change status' });
@@ -536,8 +556,8 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `INSERT INTO nc_actions
       (tenant_id, audit_answer_id, root_cause, containment_action, corrective_action,
-       preventive_action, evidence_name, status, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+       preventive_action, evidence_name, assigned_user_id, status, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
      ON CONFLICT (tenant_id, audit_answer_id)
      DO UPDATE SET
        root_cause = EXCLUDED.root_cause,
@@ -545,10 +565,11 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
        corrective_action = EXCLUDED.corrective_action,
        preventive_action = EXCLUDED.preventive_action,
        evidence_name = EXCLUDED.evidence_name,
+       assigned_user_id = EXCLUDED.assigned_user_id,
        status = EXCLUDED.status,
        updated_at = NOW()
      RETURNING id, audit_answer_id, root_cause, containment_action, corrective_action,
-               preventive_action, evidence_name, status, created_at, updated_at`,
+               preventive_action, evidence_name, assigned_user_id, status, created_at, updated_at`,
     [
       req.user?.tenant_id,
       answerId,
@@ -557,6 +578,7 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
       payload.corrective_action ?? null,
       payload.preventive_action ?? null,
       payload.evidence_name ?? null,
+      assignedUserId,
       requestedStatus,
     ]
   );

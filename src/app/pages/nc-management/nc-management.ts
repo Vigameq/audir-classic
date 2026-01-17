@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthState } from '../../auth-state';
 import { NcRecord, NcService } from '../../services/nc.service';
+import { User, UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-nc-management',
@@ -13,6 +14,7 @@ import { NcRecord, NcService } from '../../services/nc.service';
 export class NcManagement implements OnInit {
   private readonly auth = inject(AuthState);
   private readonly ncService = inject(NcService);
+  private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
   protected ncResponse = {
     rootCause: '',
@@ -21,6 +23,7 @@ export class NcManagement implements OnInit {
     preventiveAction: '',
     evidenceFile: '',
   };
+  protected users: User[] = [];
 
   protected get ncRecords(): NcRecord[] {
     const records = this.ncService.records();
@@ -40,6 +43,11 @@ export class NcManagement implements OnInit {
 
   ngOnInit(): void {
     this.ncService.listRecords().subscribe();
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+      },
+    });
   }
 
   protected openRecord(record: NcRecord): void {
@@ -106,5 +114,51 @@ export class NcManagement implements OnInit {
           this.ncService.listRecords().subscribe();
         },
       });
+  }
+
+  protected formatDate(value: string): string {
+    if (!value) {
+      return '—';
+    }
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  protected usersForDepartment(department: string): User[] {
+    if (!department) {
+      return [];
+    }
+    const target = department.trim().toLowerCase();
+    return this.users.filter((user) => {
+      const userDepartment = String(user.department ?? '').trim().toLowerCase();
+      return userDepartment === target && user.status === 'Active';
+    });
+  }
+
+  protected assignUser(record: NcRecord, value: string | number): void {
+    if (record.assignedUserId) {
+      return;
+    }
+    const selectedId = Number(value);
+    if (!selectedId) {
+      return;
+    }
+    const status = record.status || 'Assigned';
+    this.ncService.assignUser(record.answerId, selectedId, status).subscribe({
+      next: () => {
+        this.ncService.listRecords().subscribe();
+      },
+    });
+  }
+
+  protected userLabel(user: User): string {
+    const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
+    return name || user.email;
   }
 }

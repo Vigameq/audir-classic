@@ -51,7 +51,9 @@
             <p class="code">
               {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
             </p>
-            <p class="meta">{{ record.startDate }} → {{ record.endDate }}</p>
+            <p class="meta">
+              {{ formatDate(record.startDate) }} → {{ formatDate(record.endDate) }}
+            </p>
           </div>
           <span class="status-pill medium">Submitted</span>
         </div>
@@ -70,6 +72,23 @@
               <strong>{{ record.assignedNc || '—' }}</strong>
             </div>
             <div class="meta-block">
+              <span>Assigned user</span>
+              <select
+                class="assignee-select"
+                [ngModel]="record.assignedUserId || ''"
+                (ngModelChange)="assignUser(record, $event)"
+                [disabled]="!!record.assignedUserId"
+              >
+                <option value="">Select user</option>
+                <option
+                  *ngFor="let user of usersForDepartment(record.assignedNc)"
+                  [ngValue]="user.id"
+                >
+                  {{ userLabel(user) }}
+                </option>
+              </select>
+            </div>
+            <div class="meta-block">
               <span>Auditor</span>
               <strong>{{ record.auditorName || '—' }}</strong>
             </div>
@@ -80,7 +99,12 @@
           </div>
         </div>
         <div class="nc-actions">
-          <button class="primary small" type="button" (click)="openRecord(record)">
+          <button
+            class="primary small"
+            type="button"
+            (click)="openRecord(record)"
+            [disabled]="!record.assignedUserId"
+          >
             Perform NC
           </button>
         </div>
@@ -99,7 +123,7 @@
           <p class="subtitle">
             {{ activeRecord.auditCode }} · {{ activeRecord.auditType }} ·
             {{ activeRecord.auditSubtype }} ·
-            {{ activeRecord.startDate }} → {{ activeRecord.endDate }}
+            {{ formatDate(activeRecord.startDate) }} → {{ formatDate(activeRecord.endDate) }}
           </p>
         </div>
         <button class="ghost small" type="button" (click)="closeRecord()">Close</button>
