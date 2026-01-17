@@ -139,17 +139,24 @@ export class NcManagement implements OnInit {
       return;
     }
     if (!this.currentUserId) {
+      const email = this.auth.email();
+      const match = email ? this.users.find((user) => user.email === email) : undefined;
+      this.currentUserId = match?.id ?? null;
+    }
+    if (!this.currentUserId) {
       return;
     }
     const confirmed = window.confirm('Assign this NC to you?');
     if (!confirmed) {
       return;
     }
+    const currentUser = this.users.find((user) => user.id === this.currentUserId);
+    const label = currentUser
+      ? `${currentUser.first_name ?? ''} ${currentUser.last_name ?? ''}`.trim() || currentUser.email
+      : '';
     record.assignedUserId = this.currentUserId;
-    record.assignedUserName = this.auth.firstName()
-      ? `${this.auth.firstName()} ${this.auth.lastName()}`.trim()
-      : undefined;
-    record.assignedUserEmail = this.auth.email() || record.assignedUserEmail;
+    record.assignedUserName = label || record.assignedUserName;
+    record.assignedUserEmail = currentUser?.email || this.auth.email() || record.assignedUserEmail;
     const status = record.status || 'Assigned';
     this.ncService.assignUser(record.answerId, this.currentUserId, status).subscribe({
       next: () => {
@@ -164,6 +171,9 @@ export class NcManagement implements OnInit {
     }
     if (record.assignedUserEmail) {
       return record.assignedUserEmail;
+    }
+    if (record.assignedUserId) {
+      return 'Assigned';
     }
     return 'Unassigned';
   }
