@@ -121,6 +121,34 @@ select {
   flex-wrap: wrap;
 }
 
+.icon-button {
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 154, 0, 0.35);
+  background: #fff6eb;
+  display: grid;
+  place-items: center;
+  color: #7a4300;
+}
+
+.icon-button svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.icon-button:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 20px rgba(255, 154, 0, 0.2);
+}
+
+.icon-button.danger {
+  color: #8a1f2b;
+  border-color: rgba(180, 35, 24, 0.35);
+  background: #fff1f1;
+}
+
 .status {
   color: #7a4300;
   font-size: 0.8rem;

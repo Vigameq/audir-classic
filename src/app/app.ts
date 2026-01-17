@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -13,6 +13,8 @@ import {
 import { AuthState } from './auth-state';
 import { DataSyncService } from './services/data-sync.service';
 import { LoadingService } from './loading.service';
+import { AuditPlanRecord, AuditPlanService } from './services/audit-plan.service';
+import { NcRecord, NcService } from './services/nc.service';
 import { UserService } from './services/user.service';
 
 @Component({
@@ -27,13 +29,22 @@ export class App {
   private readonly router = inject(Router);
   private readonly dataSync = inject(DataSyncService);
   private readonly userService = inject(UserService);
+  private readonly auditPlanService = inject(AuditPlanService);
+  private readonly ncService = inject(NcService);
   protected isUserMenuOpen = false;
+  protected isNotificationOpen = false;
 
   constructor() {
-    if (this.auth.isLoggedIn()) {
-      this.dataSync.syncAll().subscribe();
-      this.loadUserDepartment();
-    }
+    effect(() => {
+      if (this.auth.isLoggedIn()) {
+        this.dataSync.syncAll().subscribe();
+        this.loadUserDepartment();
+        this.ncService.listRecords().subscribe();
+      } else {
+        this.isUserMenuOpen = false;
+        this.isNotificationOpen = false;
+      }
+    });
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.loading.setNavigation(true);
@@ -76,6 +87,7 @@ export class App {
     this.auth.logout();
     this.router.navigate(['/login']);
     this.isUserMenuOpen = false;
+    this.isNotificationOpen = false;
   }
 
   protected get displayName(): string {
@@ -96,10 +108,135 @@ export class App {
   }
 
   protected toggleUserMenu(): void {
+    this.isNotificationOpen = false;
     this.isUserMenuOpen = !this.isUserMenuOpen;
   }
 
   protected closeUserMenu(): void {
     this.isUserMenuOpen = false;
   }
+
+  protected toggleNotifications(): void {
+    this.isUserMenuOpen = false;
+    this.isNotificationOpen = !this.isNotificationOpen;
+  }
+
+  protected closeNotifications(): void {
+    this.isNotificationOpen = false;
+  }
+
+  protected get notificationCount(): number {
+    return this.notifications.length;
+  }
+
+  protected get notifications(): NotificationItem[] {
+    if (!this.auth.isLoggedIn()) {
+      return [];
+    }
+    const role = this.auth.role();
+    const audits = this.auditPlanService.plans();
+    const records = this.ncService.records();
+    const items: NotificationItem[] = [];
+
+    if (role === 'Auditor') {
+      audits
+        .filter((audit) => this.isAssignedToCurrentUser(audit))
+        .forEach((audit) => {
+          items.push({
+            title: 'Audit assigned',
+            detail: this.formatAuditLabel(audit.auditType, audit.auditSubtype, audit.code),
+            route: ['/audit-perform', audit.code],
+          });
+        });
+      records
+        .filter(
+          (record) =>
+            this.isPendingReview(record) && this.isAuditOwnedByCurrentAuditor(record)
+        )
+        .forEach((record) => {
+          items.push({
+            title: 'NC pending review',
+            detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
+            route: ['/audit-manage'],
+          });
+        });
+      return items;
+    }
+
+    if (role === 'Manager' || role === 'Super Admin') {
+      records.filter((record) => this.isPendingReview(record)).forEach((record) => {
+        items.push({
+          title: 'NC pending review',
+          detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
+          route: ['/audit-manage'],
+        });
+      });
+      return items;
+    }
+
+    const department = this.auth.department().trim().toLowerCase();
+    if (!department) {
+      return [];
+    }
+    records
+      .filter((record) => this.isAssignedNc(record, department))
+      .forEach((record) => {
+        items.push({
+          title: 'NC assigned',
+          detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
+          route: ['/nc-management'],
+        });
+      });
+    return items;
+  }
+
+  protected openNotification(item: NotificationItem): void {
+    this.isNotificationOpen = false;
+    this.router.navigate(item.route);
+  }
+
+  private isAssignedToCurrentUser(audit: AuditPlanRecord): boolean {
+    const first = this.auth.firstName().trim();
+    const last = this.auth.lastName().trim();
+    const fullName = `${first} ${last}`.trim().toLowerCase();
+    if (!fullName) {
+      return false;
+    }
+    return audit.auditorName.trim().toLowerCase() === fullName;
+  }
+
+  private isAuditOwnedByCurrentAuditor(record: NcRecord): boolean {
+    const first = this.auth.firstName().trim();
+    const last = this.auth.lastName().trim();
+    const fullName = `${first} ${last}`.trim().toLowerCase();
+    if (!fullName) {
+      return false;
+    }
+    return record.auditorName.trim().toLowerCase() === fullName;
+  }
+
+  private isPendingReview(record: NcRecord): boolean {
+    return (record.status || '').trim().toLowerCase() === 'resolution submitted';
+  }
+
+  private isAssignedNc(record: NcRecord, department: string): boolean {
+    const status = (record.status || 'Assigned').trim().toLowerCase();
+    const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
+    if (!allowed) {
+      return false;
+    }
+    return record.assignedNc?.trim().toLowerCase() === department;
+  }
+
+  private formatAuditLabel(auditType: string, auditSubtype: string, code: string): string {
+    const base = [auditType, auditSubtype].filter(Boolean).join(' · ');
+    const suffix = code ? ` • ${code}` : '';
+    return `${base || 'Audit'}${suffix}`;
+  }
 }
+
+type NotificationItem = {
+  title: string;
+  detail: string;
+  route: string[];
+};
