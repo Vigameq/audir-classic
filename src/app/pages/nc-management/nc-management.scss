@@ -178,13 +178,8 @@
   font-weight: 600;
 }
 
-.assignee-select {
-  font: inherit;
-  padding: 0.4rem 0.6rem;
-  border-radius: 0.65rem;
-  border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
-  color: var(--color-ink);
+.assign-button {
+  justify-self: start;
 }
 
 .nc-actions {

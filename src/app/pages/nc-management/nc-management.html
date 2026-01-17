@@ -73,20 +73,15 @@
             </div>
             <div class="meta-block">
               <span>Assigned user</span>
-              <select
-                class="assignee-select"
-                [ngModel]="record.assignedUserId || ''"
-                (ngModelChange)="assignUser(record, $event)"
+              <strong>{{ getAssignedUserLabel(record) }}</strong>
+              <button
+                class="ghost small assign-button"
+                type="button"
+                (click)="assignToMe(record)"
                 [disabled]="!!record.assignedUserId"
               >
-                <option value="">Select user</option>
-                <option
-                  *ngFor="let user of usersForDepartment(record.assignedNc)"
-                  [ngValue]="user.id"
-                >
-                  {{ userLabel(user) }}
-                </option>
-              </select>
+                Assign to me
+              </button>
             </div>
             <div class="meta-block">
               <span>Auditor</span>

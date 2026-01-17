@@ -16,6 +16,7 @@ export class NcManagement implements OnInit {
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
+  private currentUserId: number | null = null;
   protected ncResponse = {
     rootCause: '',
     containmentAction: '',
@@ -46,6 +47,9 @@ export class NcManagement implements OnInit {
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.users = users;
+        const email = this.auth.email();
+        const current = email ? users.find((user) => user.email === email) : undefined;
+        this.currentUserId = current?.id ?? null;
       },
     });
   }
@@ -130,35 +134,37 @@ export class NcManagement implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
-  protected usersForDepartment(department: string): User[] {
-    if (!department) {
-      return [];
-    }
-    const target = department.trim().toLowerCase();
-    return this.users.filter((user) => {
-      const userDepartment = String(user.department ?? '').trim().toLowerCase();
-      return userDepartment === target && user.status === 'Active';
-    });
-  }
-
-  protected assignUser(record: NcRecord, value: string | number): void {
+  protected assignToMe(record: NcRecord): void {
     if (record.assignedUserId) {
       return;
     }
-    const selectedId = Number(value);
-    if (!selectedId) {
+    if (!this.currentUserId) {
       return;
     }
+    const confirmed = window.confirm('Assign this NC to you?');
+    if (!confirmed) {
+      return;
+    }
+    record.assignedUserId = this.currentUserId;
+    record.assignedUserName = this.auth.firstName()
+      ? `${this.auth.firstName()} ${this.auth.lastName()}`.trim()
+      : undefined;
+    record.assignedUserEmail = this.auth.email() || record.assignedUserEmail;
     const status = record.status || 'Assigned';
-    this.ncService.assignUser(record.answerId, selectedId, status).subscribe({
+    this.ncService.assignUser(record.answerId, this.currentUserId, status).subscribe({
       next: () => {
         this.ncService.listRecords().subscribe();
       },
     });
   }
 
-  protected userLabel(user: User): string {
-    const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
-    return name || user.email;
+  protected getAssignedUserLabel(record: NcRecord): string {
+    if (record.assignedUserName) {
+      return record.assignedUserName;
+    }
+    if (record.assignedUserEmail) {
+      return record.assignedUserEmail;
+    }
+    return 'Unassigned';
   }
 }
