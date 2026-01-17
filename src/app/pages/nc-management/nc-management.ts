@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthState } from '../../auth-state';
 import { NcRecord, NcService } from '../../services/nc.service';
@@ -16,7 +16,7 @@ export class NcManagement implements OnInit {
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
-  private currentUserId: number | null = null;
+  private readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
     rootCause: '',
     containmentAction: '',
@@ -26,9 +26,10 @@ export class NcManagement implements OnInit {
   };
   protected users: User[] = [];
 
-  protected get ncRecords(): NcRecord[] {
+  protected readonly ncRecords = computed(() => {
     const records = this.ncService.records();
     const department = this.auth.department().trim().toLowerCase();
+    const currentUserId = this.currentUserId();
     return records.filter((record) => {
       const status = (record.status || 'Assigned').toLowerCase();
       const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
@@ -36,15 +37,15 @@ export class NcManagement implements OnInit {
         return false;
       }
       const assignedUserId = record.assignedUserId;
-      if (assignedUserId && this.currentUserId) {
-        return assignedUserId === this.currentUserId;
+      if (assignedUserId && currentUserId) {
+        return assignedUserId === currentUserId;
       }
       if (!department) {
         return false;
       }
       return record.assignedNc?.trim().toLowerCase() === department;
     });
-  }
+  });
 
   ngOnInit(): void {
     this.ncService.listRecords().subscribe();
@@ -53,7 +54,7 @@ export class NcManagement implements OnInit {
         this.users = users;
         const email = this.auth.email();
         const current = email ? users.find((user) => user.email === email) : undefined;
-        this.currentUserId = current?.id ?? null;
+        this.currentUserId.set(current?.id ?? null);
       },
     });
   }
@@ -142,27 +143,27 @@ export class NcManagement implements OnInit {
     if (record.assignedUserId) {
       return;
     }
-    if (!this.currentUserId) {
+    if (!this.currentUserId()) {
       const email = this.auth.email();
       const match = email ? this.users.find((user) => user.email === email) : undefined;
-      this.currentUserId = match?.id ?? null;
+      this.currentUserId.set(match?.id ?? null);
     }
-    if (!this.currentUserId) {
+    if (!this.currentUserId()) {
       return;
     }
     const confirmed = window.confirm('Assign this NC to you?');
     if (!confirmed) {
       return;
     }
-    const currentUser = this.users.find((user) => user.id === this.currentUserId);
+    const currentUser = this.users.find((user) => user.id === this.currentUserId());
     const label = currentUser
       ? `${currentUser.first_name ?? ''} ${currentUser.last_name ?? ''}`.trim() || currentUser.email
       : '';
-    record.assignedUserId = this.currentUserId;
+    record.assignedUserId = this.currentUserId() ?? undefined;
     record.assignedUserName = label || record.assignedUserName;
     record.assignedUserEmail = currentUser?.email || this.auth.email() || record.assignedUserEmail;
     const status = record.status || 'Assigned';
-    this.ncService.assignUser(record.answerId, this.currentUserId, status).subscribe({
+    this.ncService.assignUser(record.answerId, this.currentUserId() ?? 0, status).subscribe({
       next: () => {
         this.ncService.listRecords().subscribe();
       },

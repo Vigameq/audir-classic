@@ -41,10 +41,10 @@
   <section class="panel wide">
     <div class="panel-header">
       <h2>Flagged questions</h2>
-      <span class="count">{{ ncRecords.length }} flagged</span>
+      <span class="count">{{ ncRecords().length }} flagged</span>
     </div>
-    <div class="nc-grid" *ngIf="ncRecords.length; else emptyState">
-      <article class="nc-card" *ngFor="let record of ncRecords">
+    <div class="nc-grid" *ngIf="ncRecords().length; else emptyState">
+      <article class="nc-card" *ngFor="let record of ncRecords()">
         <div class="nc-card-header">
           <div>
             <p class="audit-label">Audit</p>
