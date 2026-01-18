@@ -69,17 +69,6 @@ export class AuditManage implements OnInit {
     return this.audits.filter((audit) => this.completionMap[audit.code] !== 'Completed');
   }
 
-  protected get pendingReviewRecords(): NcRecord[] {
-    const records = this.ncService.records().filter((record) => {
-      const status = (record.status || '').toLowerCase();
-      return status === 'resolution submitted';
-    });
-    if (this.auth.role() !== 'Auditor') {
-      return records;
-    }
-    return records.filter((record) => this.isAuditOwnedByCurrentAuditor(record.auditCode));
-  }
-
   protected readonly citiesByCountry: Record<string, string[]> = {
     India: [
       'Agartala',
@@ -300,38 +289,6 @@ export class AuditManage implements OnInit {
       this.activeAudit = null;
     }
     this.auditPlanService.deletePlanApi(audit.id).subscribe();
-  }
-
-  protected approveNc(record: NcRecord): void {
-    this.ncService
-      .upsertAction({
-        answer_id: record.answerId,
-        root_cause: record.rootCause || null,
-        containment_action: record.containmentAction || null,
-        corrective_action: record.correctiveAction || null,
-        preventive_action: record.preventiveAction || null,
-        evidence_name: record.evidenceName || null,
-        status: 'Closed',
-      })
-      .subscribe({
-        next: () => this.ncService.listRecords().subscribe(),
-      });
-  }
-
-  protected requestRework(record: NcRecord): void {
-    this.ncService
-      .upsertAction({
-        answer_id: record.answerId,
-        root_cause: record.rootCause || null,
-        containment_action: record.containmentAction || null,
-        corrective_action: record.correctiveAction || null,
-        preventive_action: record.preventiveAction || null,
-        evidence_name: record.evidenceName || null,
-        status: 'Rework',
-      })
-      .subscribe({
-        next: () => this.ncService.listRecords().subscribe(),
-      });
   }
 
   protected toggleInProgress(): void {

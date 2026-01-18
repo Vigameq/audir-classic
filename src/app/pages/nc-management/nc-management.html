@@ -73,15 +73,20 @@
             </div>
             <div class="meta-block">
               <span>Assigned user</span>
-              <strong>{{ getAssignedUserLabel(record) }}</strong>
-              <button
-                class="ghost small assign-button"
-                type="button"
-                (click)="assignToMe(record)"
+              <select
+                class="assignee-select"
+                [ngModel]="record.assignedUserId || ''"
+                (ngModelChange)="assignUser(record, $event)"
                 [disabled]="!!record.assignedUserId"
               >
-                Assign to me
-              </button>
+                <option value="">Select user</option>
+                <option
+                  *ngFor="let user of usersForDepartment(record.assignedNc)"
+                  [ngValue]="user.id"
+                >
+                  {{ userLabel(user) }}
+                </option>
+              </select>
             </div>
             <div class="meta-block">
               <span>Auditor</span>
@@ -98,7 +103,6 @@
             class="primary small"
             type="button"
             (click)="openRecord(record)"
-            [disabled]="!canPerformNc(record)"
           >
             Perform NC
           </button>
@@ -108,6 +112,73 @@
     <ng-template #emptyState>
       <div class="empty">No submitted negative responses yet.</div>
     </ng-template>
+  </section>
+
+  <section class="panel wide">
+    <div class="panel-header">
+      <div class="section-title">
+        <h2>Pending review</h2>
+        <span class="count">{{ pendingReviewRecords().length }} total</span>
+      </div>
+    </div>
+    <div class="audit-grid" *ngIf="pendingReviewRecords().length">
+      <article class="audit-card" *ngFor="let record of pendingReviewRecords()">
+        <div class="audit-card-header">
+          <div>
+            <p class="audit-label">Audit</p>
+            <p class="code">
+              {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
+            </p>
+          </div>
+          <div class="card-actions">
+            <button class="ghost small" type="button" (click)="openReview(record)">
+              View
+            </button>
+            <button class="ghost small" type="button" (click)="requestRework(record)">
+              Request rework
+            </button>
+            <button class="primary small" type="button" (click)="approveNc(record)">
+              Close NC
+            </button>
+          </div>
+        </div>
+        <div class="audit-meta">
+          <div class="meta-block">
+            <span>Question</span>
+            <strong>{{ record.question }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Response</span>
+            <strong>{{ record.response }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Assigned NC</span>
+            <strong>{{ record.assignedNc || '—' }}</strong>
+          </div>
+        </div>
+        <div class="audit-footer">
+          <div class="meta-block">
+            <span>Root cause</span>
+            <strong>{{ record.rootCause || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Containment</span>
+            <strong>{{ record.containmentAction || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Corrective</span>
+            <strong>{{ record.correctiveAction || '—' }}</strong>
+          </div>
+          <div class="meta-block">
+            <span>Preventive</span>
+            <strong>{{ record.preventiveAction || '—' }}</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="empty" *ngIf="!pendingReviewRecords().length">
+      No resolutions pending review.
+    </div>
   </section>
 
   <div class="drawer-backdrop" *ngIf="activeRecord">
@@ -184,6 +255,76 @@
               <button class="ghost" type="button" (click)="saveNc()">Save</button>
               <button class="primary" type="button" (click)="submitNc()">Submit</button>
               <button class="ghost" type="button" (click)="closeRecord()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div class="drawer-backdrop" *ngIf="viewRecord">
+    <aside class="drawer">
+      <header class="drawer-header">
+        <div>
+          <h2>Pending review</h2>
+          <p class="subtitle">
+            {{ viewRecord.auditCode }} · {{ viewRecord.auditType }} ·
+            {{ viewRecord.auditSubtype }} ·
+            {{ formatDate(viewRecord.startDate) }} → {{ formatDate(viewRecord.endDate) }}
+          </p>
+        </div>
+        <button class="ghost small" type="button" (click)="closeReview()">Close</button>
+      </header>
+      <section class="drawer-content">
+        <div class="detail-card">
+          <div class="detail-row">
+            <span>Question</span>
+            <strong>{{ viewRecord.question }}</strong>
+          </div>
+          <div class="detail-grid">
+            <div>
+              <span>Response</span>
+              <strong>{{ viewRecord.response }}</strong>
+            </div>
+            <div>
+              <span>Assigned NC</span>
+              <strong>{{ viewRecord.assignedNc || '—' }}</strong>
+            </div>
+            <div>
+              <span>Auditor</span>
+              <strong>{{ viewRecord.auditorName || '—' }}</strong>
+            </div>
+            <div>
+              <span>Submitted</span>
+              <strong>{{ viewRecord.submittedAt | date:'medium' }}</strong>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span>Auditor note</span>
+            <strong>{{ viewRecord.note || '—' }}</strong>
+          </div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-grid stacked">
+            <div>
+              <span>Root cause</span>
+              <strong>{{ viewRecord.rootCause || '—' }}</strong>
+            </div>
+            <div>
+              <span>Containment</span>
+              <strong>{{ viewRecord.containmentAction || '—' }}</strong>
+            </div>
+            <div>
+              <span>Corrective</span>
+              <strong>{{ viewRecord.correctiveAction || '—' }}</strong>
+            </div>
+            <div>
+              <span>Preventive</span>
+              <strong>{{ viewRecord.preventiveAction || '—' }}</strong>
+            </div>
+            <div>
+              <span>Evidence</span>
+              <strong>{{ viewRecord.evidenceName || '—' }}</strong>
             </div>
           </div>
         </div>

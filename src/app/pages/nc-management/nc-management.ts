@@ -16,6 +16,7 @@ export class NcManagement implements OnInit {
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
+  protected viewRecord: NcRecord | null = null;
   protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
     rootCause: '',
@@ -25,6 +26,8 @@ export class NcManagement implements OnInit {
     evidenceFile: '',
   };
   protected users: User[] = [];
+  private usersLoaded = false;
+  private usersLoading = false;
 
   protected readonly ncRecords = computed(() => {
     const records = this.ncService.records();
@@ -51,21 +54,30 @@ export class NcManagement implements OnInit {
     });
   });
 
+  protected readonly pendingReviewRecords = computed(() => {
+    const records = this.ncService.records().filter((record) => {
+      const status = (record.status || '').toLowerCase();
+      return status === 'resolution submitted';
+    });
+    if (this.auth.role() !== 'Auditor') {
+      return records;
+    }
+    const fullName = `${this.auth.firstName()} ${this.auth.lastName()}`.trim().toLowerCase();
+    if (!fullName) {
+      return [];
+    }
+    return records.filter(
+      (record) => record.auditorName.trim().toLowerCase() === fullName
+    );
+  });
+
   ngOnInit(): void {
     this.ncService.listRecords().subscribe();
-    this.userService.listUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        const email = this.auth.email().trim().toLowerCase();
-        const current = email
-          ? users.find((user) => user.email.toLowerCase() === email)
-          : undefined;
-        this.currentUserId.set(current?.id ?? null);
-      },
-    });
+    this.loadUsers();
   }
 
   protected openRecord(record: NcRecord): void {
+    this.viewRecord = null;
     this.activeRecord = record;
     this.ncResponse = {
       rootCause: record.rootCause || '',
@@ -78,6 +90,15 @@ export class NcManagement implements OnInit {
 
   protected closeRecord(): void {
     this.activeRecord = null;
+  }
+
+  protected openReview(record: NcRecord): void {
+    this.activeRecord = null;
+    this.viewRecord = record;
+  }
+
+  protected closeReview(): void {
+    this.viewRecord = null;
   }
 
   protected onEvidenceSelected(event: Event): void {
@@ -145,39 +166,6 @@ export class NcManagement implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
-  protected assignToMe(record: NcRecord): void {
-    if (record.assignedUserId) {
-      return;
-    }
-    if (!this.currentUserId()) {
-      const email = this.auth.email().trim().toLowerCase();
-      const match = email
-        ? this.users.find((user) => user.email.toLowerCase() === email)
-        : undefined;
-      this.currentUserId.set(match?.id ?? null);
-    }
-    if (!this.currentUserId()) {
-      return;
-    }
-    const confirmed = window.confirm('Assign this NC to you?');
-    if (!confirmed) {
-      return;
-    }
-    const currentUser = this.users.find((user) => user.id === this.currentUserId());
-    const label = currentUser
-      ? `${currentUser.first_name ?? ''} ${currentUser.last_name ?? ''}`.trim() || currentUser.email
-      : '';
-    record.assignedUserId = this.currentUserId() ?? undefined;
-    record.assignedUserName = label || record.assignedUserName;
-    record.assignedUserEmail = currentUser?.email || this.auth.email() || record.assignedUserEmail;
-    const status = record.status || 'Assigned';
-    this.ncService.assignUser(record.answerId, this.currentUserId() ?? 0, status).subscribe({
-      next: () => {
-        this.ncService.listRecords().subscribe();
-      },
-    });
-  }
-
   protected getAssignedUserLabel(record: NcRecord): string {
     if (record.assignedUserName) {
       return record.assignedUserName;
@@ -192,14 +180,119 @@ export class NcManagement implements OnInit {
   }
 
   protected canPerformNc(record: NcRecord): boolean {
-    const currentUserId = this.currentUserId();
+    const currentUserId = this.getCurrentUserId();
     if (record.assignedUserId && currentUserId) {
       return record.assignedUserId === currentUserId;
     }
-    const email = this.auth.email().trim().toLowerCase();
-    if (record.assignedUserEmail && email) {
-      return record.assignedUserEmail.trim().toLowerCase() === email;
-    }
     return false;
+  }
+
+  private getCurrentUserId(): number | null {
+    const existing = this.currentUserId();
+    if (existing) {
+      return existing;
+    }
+    const email = this.auth.email().trim().toLowerCase();
+    if (!email) {
+      return null;
+    }
+    const match = this.users.find((user) => user.email.toLowerCase() === email);
+    if (match?.id) {
+      this.currentUserId.set(match.id);
+      return match.id;
+    }
+    return null;
+  }
+
+  protected usersForDepartment(department: string): User[] {
+    const target = String(department ?? '').trim().toLowerCase();
+    if (!target) {
+      return [];
+    }
+    if (!this.usersLoaded && !this.usersLoading) {
+      this.loadUsers();
+    }
+    return this.users.filter((user) => {
+      const userDepartment = String(user.department ?? '').trim().toLowerCase();
+      const status = String(user.status ?? '').trim().toLowerCase();
+      return userDepartment === target && status === 'active';
+    });
+  }
+
+  protected userLabel(user: User): string {
+    const name = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim();
+    return name || user.email;
+  }
+
+  protected assignUser(record: NcRecord, value: string | number): void {
+    if (record.assignedUserId) {
+      return;
+    }
+    const selectedId = Number(value);
+    if (!selectedId) {
+      return;
+    }
+    const status = record.status || 'Assigned';
+    this.ncService.assignUser(record.answerId, selectedId, status).subscribe({
+      next: () => {
+        this.ncService.listRecords().subscribe();
+      },
+    });
+  }
+
+  protected approveNc(record: NcRecord): void {
+    this.ncService
+      .upsertAction({
+        answer_id: record.answerId,
+        root_cause: record.rootCause || null,
+        containment_action: record.containmentAction || null,
+        corrective_action: record.correctiveAction || null,
+        preventive_action: record.preventiveAction || null,
+        evidence_name: record.evidenceName || null,
+        status: 'Closed',
+      })
+      .subscribe({
+        next: () => this.ncService.listRecords().subscribe(),
+      });
+  }
+
+  protected requestRework(record: NcRecord): void {
+    this.ncService
+      .upsertAction({
+        answer_id: record.answerId,
+        root_cause: record.rootCause || null,
+        containment_action: record.containmentAction || null,
+        corrective_action: record.correctiveAction || null,
+        preventive_action: record.preventiveAction || null,
+        evidence_name: record.evidenceName || null,
+        status: 'Rework',
+      })
+      .subscribe({
+        next: () => this.ncService.listRecords().subscribe(),
+      });
+  }
+
+  private loadUsers(): void {
+    if (this.usersLoading) {
+      return;
+    }
+    this.usersLoading = true;
+    this.userService.listUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+        this.usersLoaded = true;
+        const email = this.auth.email().trim().toLowerCase();
+        const current = email
+          ? users.find((user) => user.email.toLowerCase() === email)
+          : undefined;
+        this.currentUserId.set(current?.id ?? null);
+      },
+      error: () => {
+        this.usersLoaded = false;
+      },
+      complete: () => {
+        this.usersLoading = false;
+      },
+    });
   }
 }
