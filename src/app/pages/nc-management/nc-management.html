@@ -75,16 +75,24 @@
               <span>Assigned user</span>
               <select
                 class="assignee-select"
-                [ngModel]="record.assignedUserId || ''"
+                [ngModelOptions]="{ standalone: true }"
+                name="assignee-{{ record.answerId }}"
+                [ngModel]="getAssignedUserId(record) || ''"
                 (ngModelChange)="assignUser(record, $event)"
-                [disabled]="!!record.assignedUserId"
+                [disabled]="(!!getAssignedUserId(record) && auth.role() !== 'Manager') || (record.status || '').toLowerCase() === 'rework'"
               >
                 <option value="">Select user</option>
+                <option
+                  *ngIf="getAssignedUserId(record) && !hasAssignedUserOption(record)"
+                  [ngValue]="getAssignedUserId(record)"
+                >
+                  {{ getAssignedUserLabel(record) }}
+                </option>
                 <option
                   *ngFor="let user of usersForDepartment(record.assignedNc)"
                   [ngValue]="user.id"
                 >
-                  {{ userLabel(user) }}
+                  {{ userLabel(user) }} ({{ user.email }})
                 </option>
               </select>
             </div>
@@ -103,6 +111,7 @@
             class="primary small"
             type="button"
             (click)="openRecord(record)"
+            [disabled]="!canPerformNc(record)"
           >
             Perform NC
           </button>

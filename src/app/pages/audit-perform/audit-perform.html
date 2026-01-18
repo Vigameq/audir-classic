@@ -184,12 +184,14 @@
               <button class="ghost small" type="button" (click)="saveQuestion(i)">
                 {{ savedQuestions[i] ? 'Saved' : 'Save' }}
               </button>
-              <button class="primary small" type="button" (click)="submitQuestion(i)">
-                Submit
-              </button>
             </div>
           </li>
         </ol>
+        <div class="submit-all">
+          <button class="primary" type="button" (click)="submitAllQuestions()">
+            Submit audit
+          </button>
+        </div>
       </section>
     </aside>
   </div>

@@ -12,7 +12,7 @@ import { User, UserService } from '../../services/user.service';
   styleUrl: './nc-management.scss',
 })
 export class NcManagement implements OnInit {
-  private readonly auth = inject(AuthState);
+  protected readonly auth = inject(AuthState);
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
@@ -26,6 +26,10 @@ export class NcManagement implements OnInit {
     evidenceFile: '',
   };
   protected users: User[] = [];
+  protected assignedOverrides: Record<
+    string,
+    { id: number; name?: string; email?: string }
+  > = {};
   private usersLoaded = false;
   private usersLoading = false;
 
@@ -112,6 +116,10 @@ export class NcManagement implements OnInit {
     if (!this.activeRecord) {
       return;
     }
+    const confirmed = window.confirm('Are you sure you want to submit this NC?');
+    if (!confirmed) {
+      return;
+    }
     this.ncService
       .upsertAction({
         answer_id: this.activeRecord.answerId,
@@ -167,6 +175,13 @@ export class NcManagement implements OnInit {
   }
 
   protected getAssignedUserLabel(record: NcRecord): string {
+    const override = this.assignedOverrides[record.answerId];
+    if (override?.name) {
+      return override.name;
+    }
+    if (override?.email) {
+      return override.email;
+    }
     if (record.assignedUserName) {
       return record.assignedUserName;
     }
@@ -180,9 +195,31 @@ export class NcManagement implements OnInit {
   }
 
   protected canPerformNc(record: NcRecord): boolean {
+    const assignedId = this.getAssignedUserId(record);
+    if (!assignedId) {
+      return false;
+    }
+    const email = this.auth.email().trim().toLowerCase();
+    const override = this.assignedOverrides[record.answerId];
+    if (override?.email && email) {
+      return override.email.trim().toLowerCase() === email;
+    }
+    const assignedUser = this.users.find((user) => user.id === assignedId);
+    if (assignedUser?.email && email) {
+      return assignedUser.email.trim().toLowerCase() === email;
+    }
+    if (record.assignedUserEmail && email) {
+      return record.assignedUserEmail.trim().toLowerCase() === email;
+    }
+    const currentUser = email
+      ? this.users.find((user) => user.email.trim().toLowerCase() === email)
+      : undefined;
+    if (currentUser?.id) {
+      return assignedId === currentUser.id;
+    }
     const currentUserId = this.getCurrentUserId();
-    if (record.assignedUserId && currentUserId) {
-      return record.assignedUserId === currentUserId;
+    if (currentUserId) {
+      return assignedId === currentUserId;
     }
     return false;
   }
@@ -225,13 +262,24 @@ export class NcManagement implements OnInit {
   }
 
   protected assignUser(record: NcRecord, value: string | number): void {
-    if (record.assignedUserId) {
+    if (this.getAssignedUserId(record) && this.auth.role() !== 'Manager') {
       return;
     }
     const selectedId = Number(value);
     if (!selectedId) {
       return;
     }
+    const selectedUser = this.users.find((user) => user.id === selectedId);
+    const label = selectedUser ? this.userLabel(selectedUser) : 'this user';
+    const confirmed = window.confirm(`Are you sure to assign this NC to ${label}?`);
+    if (!confirmed) {
+      return;
+    }
+    this.assignedOverrides[record.answerId] = {
+      id: selectedId,
+      name: selectedUser ? this.userLabel(selectedUser) : undefined,
+      email: selectedUser?.email,
+    };
     const status = record.status || 'Assigned';
     this.ncService.assignUser(record.answerId, selectedId, status).subscribe({
       next: () => {
@@ -241,6 +289,10 @@ export class NcManagement implements OnInit {
   }
 
   protected approveNc(record: NcRecord): void {
+    const confirmed = window.confirm('Are you sure you want to close this NC?');
+    if (!confirmed) {
+      return;
+    }
     this.ncService
       .upsertAction({
         answer_id: record.answerId,
@@ -257,6 +309,11 @@ export class NcManagement implements OnInit {
   }
 
   protected requestRework(record: NcRecord): void {
+    const confirmed = window.confirm('Are you sure you want to request rework?');
+    if (!confirmed) {
+      return;
+    }
+    const assignedUserId = this.getAssignedUserId(record);
     this.ncService
       .upsertAction({
         answer_id: record.answerId,
@@ -265,6 +322,7 @@ export class NcManagement implements OnInit {
         corrective_action: record.correctiveAction || null,
         preventive_action: record.preventiveAction || null,
         evidence_name: record.evidenceName || null,
+        assigned_user_id: assignedUserId ?? null,
         status: 'Rework',
       })
       .subscribe({
@@ -289,10 +347,32 @@ export class NcManagement implements OnInit {
       },
       error: () => {
         this.usersLoaded = false;
+        this.usersLoading = false;
       },
       complete: () => {
         this.usersLoading = false;
       },
     });
+  }
+
+  protected getAssignedUserId(record: NcRecord): number | null {
+    const override = this.assignedOverrides[record.answerId];
+    if (override?.id) {
+      return override.id;
+    }
+    if (record.assignedUserId) {
+      return record.assignedUserId;
+    }
+    return null;
+  }
+
+  protected hasAssignedUserOption(record: NcRecord): boolean {
+    const assignedId = this.getAssignedUserId(record);
+    if (!assignedId) {
+      return false;
+    }
+    return this.usersForDepartment(record.assignedNc).some(
+      (user) => user.id === assignedId
+    );
   }
 }

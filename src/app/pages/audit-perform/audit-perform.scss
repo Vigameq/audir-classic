@@ -440,6 +440,12 @@ button.small {
   margin-top: 0.6rem;
 }
 
+.submit-all {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+}
+
 @media (max-width: 720px) {
   .drawer-backdrop {
     justify-items: stretch;

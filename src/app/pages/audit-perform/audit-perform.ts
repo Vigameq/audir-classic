@@ -49,7 +49,8 @@ export class AuditPerform implements OnInit {
       this.auth.role() === 'Auditor'
         ? filtered.filter((audit) => this.isAssignedToCurrentUser(audit))
         : filtered;
-    return scoped.sort((a, b) =>
+    const visible = scoped.filter((audit) => !this.completedAuditCodes.has(audit.code));
+    return visible.sort((a, b) =>
       this.sortOrder === 'asc'
         ? a.createdAt.localeCompare(b.createdAt)
         : b.createdAt.localeCompare(a.createdAt)
@@ -68,6 +69,7 @@ export class AuditPerform implements OnInit {
   protected noteEntries: string[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
+  private completedAuditCodes = new Set<string>();
 
   protected get totalQuestions(): number {
     return this.activeTemplate?.questions.length ?? 0;
@@ -92,6 +94,7 @@ export class AuditPerform implements OnInit {
       }
       void this.loadAuditByCode(code);
     });
+    this.refreshCompletionState();
   }
 
   private async loadAuditByCode(code: string): Promise<void> {
@@ -168,6 +171,31 @@ export class AuditPerform implements OnInit {
     this.persistAnswer(index, 'Submitted');
   }
 
+  protected submitAllQuestions(): void {
+    if (!this.activeAudit || !this.activeTemplate) {
+      return;
+    }
+    const totalQuestions = this.activeTemplate.questions.length;
+    const hasAllAnswers =
+      this.responseSelections.length === totalQuestions &&
+      this.responseSelections.every((response) => response?.trim());
+    if (!hasAllAnswers) {
+      window.alert('Please answer all questions before submitting.');
+      return;
+    }
+    const confirmed = window.confirm('Are you sure you want to submit this audit?');
+    if (!confirmed) {
+      return;
+    }
+    const submissions = this.responseSelections.map((_response, index) =>
+      this.persistAnswer(index, 'Submitted')
+    );
+    Promise.all(submissions).then(() => {
+      this.markAuditSubmitted(this.activeAudit?.code ?? '');
+      this.closePerform();
+    });
+  }
+
   protected isNegativeSelection(index: number): boolean {
     const selected = this.responseSelections[index];
     return !!selected && this.negativeResponseOptions.includes(selected);
@@ -217,30 +245,67 @@ export class AuditPerform implements OnInit {
     });
   }
 
-  private persistAnswer(index: number, status: 'Saved' | 'Submitted'): void {
+  private persistAnswer(index: number, status: 'Saved' | 'Submitted'): Promise<void> {
     if (!this.activeAudit || !this.activeTemplate) {
-      return;
+      return Promise.resolve();
     }
     const questionText = this.activeTemplate.questions[index] ?? '';
     const response = this.responseSelections[index] || null;
     const isNegative = this.isNegativeSelection(index);
-    this.auditAnswerService
-      .upsertAnswer({
-        audit_code: this.activeAudit.code,
-        question_index: index,
-        question_text: questionText,
-        response,
-        response_is_negative: isNegative,
-        assigned_nc: isNegative ? this.ncAssignments[index] || null : null,
-        note: this.noteEntries[index] || null,
-        evidence_name: this.evidenceFiles[index] || null,
-        status,
-      })
-      .subscribe({
-        next: () => {
-          this.savedQuestions[index] = true;
+    return new Promise((resolve) => {
+      this.auditAnswerService
+        .upsertAnswer({
+          audit_code: this.activeAudit?.code ?? '',
+          question_index: index,
+          question_text: questionText,
+          response,
+          response_is_negative: isNegative,
+          assigned_nc: isNegative ? this.ncAssignments[index] || null : null,
+          note: this.noteEntries[index] || null,
+          evidence_name: this.evidenceFiles[index] || null,
+          status,
+        })
+        .subscribe({
+          next: () => {
+            this.savedQuestions[index] = true;
+            resolve();
+          },
+          error: () => resolve(),
+        });
+    });
+  }
+
+  private refreshCompletionState(): void {
+    const audits = this.auditPlanService.plans();
+    if (!audits.length) {
+      this.completedAuditCodes = new Set();
+      return;
+    }
+    audits.forEach((audit) => {
+      this.auditAnswerService.listByAuditCode(audit.code).subscribe({
+        next: (answers) => {
+          const totalQuestions = this.getTemplateQuestionCount(audit.auditType);
+          const submittedCount = answers.filter(
+            (answer) => answer.status === 'Submitted'
+          ).length;
+          if (totalQuestions > 0 && submittedCount >= totalQuestions) {
+            this.completedAuditCodes.add(audit.code);
+          }
         },
       });
+    });
+  }
+
+  private markAuditSubmitted(code: string): void {
+    if (!code) {
+      return;
+    }
+    this.completedAuditCodes.add(code);
+  }
+
+  private getTemplateQuestionCount(auditType: string): number {
+    const template = this.templateService.templates().find((item) => item.name === auditType);
+    return template?.questions.length ?? 0;
   }
 
   private isAssignedToCurrentUser(audit: AuditPlanRecord): boolean {

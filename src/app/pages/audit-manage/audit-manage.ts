@@ -23,7 +23,7 @@ export class AuditManage implements OnInit {
   private readonly auditPlanService = inject(AuditPlanService);
   private readonly auditAnswerService = inject(AuditAnswerService);
   private readonly ncService = inject(NcService);
-  private readonly auth = inject(AuthState);
+  protected readonly auth = inject(AuthState);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
@@ -54,6 +54,7 @@ export class AuditManage implements OnInit {
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
   protected showInProgress = true;
   protected showCompleted = true;
+  protected showCreated = true;
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
@@ -66,7 +67,14 @@ export class AuditManage implements OnInit {
   }
 
   protected get inProgressAudits(): AuditPlanRecord[] {
-    return this.audits.filter((audit) => this.completionMap[audit.code] !== 'Completed');
+    return this.audits.filter(
+      (audit) =>
+        this.completionMap[audit.code] !== 'Completed' && !this.isCreatedAudit(audit)
+    );
+  }
+
+  protected get createdAudits(): AuditPlanRecord[] {
+    return this.audits.filter((audit) => this.isCreatedAudit(audit));
   }
 
   protected readonly citiesByCountry: Record<string, string[]> = {
@@ -215,7 +223,9 @@ export class AuditManage implements OnInit {
     this.regionService.migrateFromLocal().subscribe();
     this.responseService.migrateFromLocal().subscribe();
     this.templateService.migrateFromLocal().subscribe();
-    this.ncService.listRecords().subscribe();
+    this.ncService.listRecords().subscribe({
+      next: () => this.loadAuditProgress(),
+    });
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
@@ -251,6 +261,9 @@ export class AuditManage implements OnInit {
     if (!this.activeAudit || form.invalid) {
       return;
     }
+    if (this.completionMap[this.activeAudit.code] === 'Completed') {
+      return;
+    }
     this.auditPlanService
       .updatePlanApi(this.activeAudit.id, {
         startDate: this.editForm.startDate,
@@ -282,13 +295,26 @@ export class AuditManage implements OnInit {
   }
 
   protected deleteAudit(audit: AuditPlanRecord): void {
+    if (this.auth.role() !== 'Manager') {
+      return;
+    }
+    if (!this.isCreatedAudit(audit)) {
+      return;
+    }
     if (!confirm('Delete this audit? This cannot be undone.')) {
       return;
     }
     if (this.activeAudit?.id === audit.id) {
       this.activeAudit = null;
     }
-    this.auditPlanService.deletePlanApi(audit.id).subscribe();
+    if (this.viewAudit?.id === audit.id) {
+      this.closeView();
+    }
+    this.auditPlanService.deletePlanApi(audit.id).subscribe({
+      next: () => {
+        this.loadAuditProgress();
+      },
+    });
   }
 
   protected toggleInProgress(): void {
@@ -297,6 +323,10 @@ export class AuditManage implements OnInit {
 
   protected toggleCompleted(): void {
     this.showCompleted = !this.showCompleted;
+  }
+
+  protected toggleCreated(): void {
+    this.showCreated = !this.showCreated;
   }
 
   protected getAuditProgress(audit: AuditPlanRecord): { nc: number; nonNc: number } {
@@ -321,6 +351,11 @@ export class AuditManage implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
+  private isCreatedAudit(audit: AuditPlanRecord): boolean {
+    const answers = this.answersByAudit[audit.code];
+    return !answers || answers.length === 0;
+  }
+
   private loadAuditProgress(): void {
     const audits = this.audits;
     if (!audits.length) {
@@ -331,6 +366,24 @@ export class AuditManage implements OnInit {
       audits.map((audit) => this.auditAnswerService.listByAuditCode(audit.code))
     ).subscribe({
       next: (allAnswers) => {
+        const pendingReviewByAudit = new Set(
+          this.ncService
+            .records()
+            .filter(
+              (record) =>
+                (record.status || '').trim().toLowerCase() === 'resolution submitted'
+            )
+            .map((record) => record.auditCode)
+        );
+        const openNcByAudit = new Set(
+          this.ncService
+            .records()
+            .filter((record) => {
+              const status = (record.status || '').trim().toLowerCase();
+              return status === 'assigned' || status === 'in progress' || status === 'rework';
+            })
+            .map((record) => record.auditCode)
+        );
         const nextMap: Record<string, 'Completed' | 'In Progress'> = {};
         const nextAnswers: Record<string, AuditAnswerRecord[]> = {};
         audits.forEach((audit, index) => {
@@ -338,8 +391,15 @@ export class AuditManage implements OnInit {
           nextAnswers[audit.code] = answers;
           const totalQuestions = this.getTemplateQuestionCount(audit.auditType);
           const submittedCount = answers.filter((answer) => answer.status === 'Submitted').length;
+          const hasPendingReview = pendingReviewByAudit.has(audit.code);
+          const hasOpenNc = openNcByAudit.has(audit.code);
           nextMap[audit.code] =
-            totalQuestions > 0 && submittedCount >= totalQuestions ? 'Completed' : 'In Progress';
+            totalQuestions > 0 &&
+            submittedCount >= totalQuestions &&
+            !hasPendingReview &&
+            !hasOpenNc
+              ? 'Completed'
+              : 'In Progress';
         });
         this.completionMap = nextMap;
         this.answersByAudit = nextAnswers;
