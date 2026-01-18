@@ -40,10 +40,15 @@
 
   <section class="panel wide">
     <div class="panel-header">
-      <h2>Flagged questions</h2>
-      <span class="count">{{ ncRecords().length }} flagged</span>
+      <div class="section-title">
+        <h2>Flagged questions</h2>
+        <span class="count">{{ ncRecords().length }} flagged</span>
+      </div>
+      <button class="ghost small" type="button" (click)="toggleFlagged()">
+        {{ showFlagged ? 'Collapse' : 'Expand' }}
+      </button>
     </div>
-    <div class="nc-grid" *ngIf="ncRecords().length; else emptyState">
+    <div class="nc-grid" *ngIf="showFlagged && ncRecords().length">
       <article class="nc-card" *ngFor="let record of ncRecords()">
         <div class="nc-card-header">
           <div>
@@ -118,9 +123,6 @@
         </div>
       </article>
     </div>
-    <ng-template #emptyState>
-      <div class="empty">No submitted negative responses yet.</div>
-    </ng-template>
   </section>
 
   <section class="panel wide">
@@ -129,8 +131,11 @@
         <h2>Pending review</h2>
         <span class="count">{{ pendingReviewRecords().length }} total</span>
       </div>
+      <button class="ghost small" type="button" (click)="togglePendingReview()">
+        {{ showPendingReview ? 'Collapse' : 'Expand' }}
+      </button>
     </div>
-    <div class="audit-grid" *ngIf="pendingReviewRecords().length">
+    <div class="audit-grid" *ngIf="showPendingReview && pendingReviewRecords().length">
       <article class="audit-card" *ngFor="let record of pendingReviewRecords()">
         <div class="audit-card-header">
           <div>
@@ -185,7 +190,7 @@
         </div>
       </article>
     </div>
-    <div class="empty" *ngIf="!pendingReviewRecords().length">
+    <div class="empty" *ngIf="showPendingReview && !pendingReviewRecords().length">
       No resolutions pending review.
     </div>
   </section>

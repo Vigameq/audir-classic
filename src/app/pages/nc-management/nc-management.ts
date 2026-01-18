@@ -17,6 +17,8 @@ export class NcManagement implements OnInit {
   private readonly userService = inject(UserService);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
+  protected showFlagged = false;
+  protected showPendingReview = false;
   protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
     rootCause: '',
@@ -196,17 +198,16 @@ export class NcManagement implements OnInit {
 
   protected canPerformNc(record: NcRecord): boolean {
     const assignedId = this.getAssignedUserId(record);
-    if (!assignedId) {
-      return false;
-    }
     const email = this.auth.email().trim().toLowerCase();
-    const override = this.assignedOverrides[record.answerId];
-    if (override?.email && email) {
-      return override.email.trim().toLowerCase() === email;
-    }
-    const assignedUser = this.users.find((user) => user.id === assignedId);
-    if (assignedUser?.email && email) {
-      return assignedUser.email.trim().toLowerCase() === email;
+    if (assignedId) {
+      const override = this.assignedOverrides[record.answerId];
+      if (override?.email && email) {
+        return override.email.trim().toLowerCase() === email;
+      }
+      const assignedUser = this.users.find((user) => user.id === assignedId);
+      if (assignedUser?.email && email) {
+        return assignedUser.email.trim().toLowerCase() === email;
+      }
     }
     if (record.assignedUserEmail && email) {
       return record.assignedUserEmail.trim().toLowerCase() === email;
@@ -214,14 +215,28 @@ export class NcManagement implements OnInit {
     const currentUser = email
       ? this.users.find((user) => user.email.trim().toLowerCase() === email)
       : undefined;
-    if (currentUser?.id) {
+    if (assignedId && currentUser?.id) {
       return assignedId === currentUser.id;
     }
     const currentUserId = this.getCurrentUserId();
-    if (currentUserId) {
+    if (assignedId && currentUserId) {
       return assignedId === currentUserId;
     }
+    if (record.assignedUserName && currentUser) {
+      return (
+        record.assignedUserName.trim().toLowerCase() ===
+        this.userLabel(currentUser).trim().toLowerCase()
+      );
+    }
     return false;
+  }
+
+  protected toggleFlagged(): void {
+    this.showFlagged = !this.showFlagged;
+  }
+
+  protected togglePendingReview(): void {
+    this.showPendingReview = !this.showPendingReview;
   }
 
   private getCurrentUserId(): number | null {

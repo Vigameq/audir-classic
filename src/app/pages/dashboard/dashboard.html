@@ -6,32 +6,162 @@
   </header>
 
   <section *ngIf="isAuditor; else managerDashboard" class="auditor-dashboard">
+    <section class="panel split">
+      <div class="chart">
+        <div class="panel-header">
+          <h2>Audit health</h2>
+          <span class="legend"><span class="dot"></span>Current load</span>
+        </div>
+        <div class="chart-row">
+          <span>Assigned audits</span>
+          <div class="bar">
+            <span
+              class="fill planned"
+              [style.width.%]="chartPercent(assignedAudits.length, auditorChartMax)"
+            ></span>
+          </div>
+          <strong>{{ assignedAudits.length }}</strong>
+        </div>
+        <div class="chart-row">
+          <span>Open findings</span>
+          <div class="bar">
+            <span
+              class="fill completed"
+              [style.width.%]="chartPercent(assignedOpenFindings, auditorChartMax)"
+            ></span>
+          </div>
+          <strong>{{ assignedOpenFindings }}</strong>
+        </div>
+        <div class="chart-row">
+          <span>Pending review</span>
+          <div class="bar">
+            <span
+              class="fill templates"
+              [style.width.%]="chartPercent(pendingReviewCount, auditorChartMax)"
+            ></span>
+          </div>
+          <strong>{{ pendingReviewCount }}</strong>
+        </div>
+      </div>
+      <div class="chart">
+        <div class="panel-header">
+          <h2>Coverage</h2>
+          <span class="legend"><span class="dot"></span>Templates</span>
+        </div>
+        <div class="metrics compact">
+          <article>
+            <span>Templates</span>
+            <strong>{{ templatesCount }}</strong>
+          </article>
+          <article>
+            <span>Audits due</span>
+            <strong>{{ assignedAudits.length }}</strong>
+          </article>
+        </div>
+      </div>
+    </section>
     <section class="panel">
       <div class="panel-header">
-        <h2>Auditor overview</h2>
+        <h2>Assigned audits</h2>
+        <span class="count">{{ assignedAudits.length }} total</span>
       </div>
-      <div class="empty">No auditor data available yet.</div>
+      <div class="audit-list" *ngIf="assignedAudits.length; else noAudits">
+        <div class="audit-row" *ngFor="let audit of assignedAudits | slice:0:5">
+          <div>
+            <strong>{{ audit.auditType }}</strong>
+            <p>{{ audit.auditSubtype || '—' }} · {{ audit.code }}</p>
+          </div>
+          <div>
+            <span class="status">{{ formatDate(audit.startDate) }}</span>
+          </div>
+        </div>
+      </div>
+      <ng-template #noAudits>
+        <div class="empty">No audits assigned yet.</div>
+      </ng-template>
     </section>
   </section>
 
   <ng-template #managerDashboard>
     <section *ngIf="isManager; else superAdminDashboard" class="auditor-dashboard">
+      <section class="metrics">
+        <article>
+          <span>Total audits</span>
+          <strong>{{ audits.length }}</strong>
+        </article>
+        <article>
+          <span>Open NCs</span>
+          <strong>{{ openNcCount }}</strong>
+        </article>
+        <article>
+          <span>Total auditors</span>
+          <strong>{{ auditors.length }}</strong>
+        </article>
+        <article>
+          <span>Templates</span>
+          <strong>{{ templatesCount }}</strong>
+        </article>
+      </section>
       <section class="panel">
         <div class="panel-header">
-          <h2>Manager overview</h2>
+          <h2>Audit pipeline</h2>
         </div>
-        <div class="empty">No manager data available yet.</div>
+        <div class="metrics compact">
+          <article>
+            <span>Created audits</span>
+            <strong>{{ audits.length }}</strong>
+          </article>
+          <article>
+            <span>Open findings</span>
+            <strong>{{ openNcCount }}</strong>
+          </article>
+          <article>
+            <span>Templates</span>
+            <strong>{{ templatesCount }}</strong>
+          </article>
+        </div>
       </section>
     </section>
   </ng-template>
 
   <ng-template #superAdminDashboard>
     <section *ngIf="isSuperAdmin; else defaultDashboard" class="auditor-dashboard">
+      <section class="metrics">
+        <article>
+          <span>Total users</span>
+          <strong>{{ users.length }}</strong>
+        </article>
+        <article>
+          <span>Auditors</span>
+          <strong>{{ auditors.length }}</strong>
+        </article>
+        <article>
+          <span>Managers</span>
+          <strong>{{ managers.length }}</strong>
+        </article>
+        <article>
+          <span>Templates</span>
+          <strong>{{ templatesCount }}</strong>
+        </article>
+      </section>
       <section class="panel">
         <div class="panel-header">
-          <h2>Super Admin overview</h2>
+          <h2>Audit &amp; NC health</h2>
         </div>
-        <div class="empty">No super admin data available yet.</div>
+        <div class="metrics compact">
+          <article>
+            <span>Total audits</span>
+            <strong>{{ audits.length }}</strong>
+          </article>
+          <article>
+            <span>Open NCs</span>
+            <strong>{{ openNcCount }}</strong>
+          </article>
+          <article>
+            <span>Pending review</span>
+            <strong>{{ pendingReviewAll }}</strong>
+          </article>
+        </div>
       </section>
     </section>
   </ng-template>
@@ -41,7 +171,20 @@
       <div class="panel-header">
         <h2>Overview</h2>
       </div>
-      <div class="empty">No dashboard data available yet.</div>
+      <div class="metrics compact">
+        <article>
+          <span>Total audits</span>
+          <strong>{{ audits.length }}</strong>
+        </article>
+        <article>
+          <span>Open NCs</span>
+          <strong>{{ openNcCount }}</strong>
+        </article>
+        <article>
+          <span>Templates</span>
+          <strong>{{ templatesCount }}</strong>
+        </article>
+      </div>
     </section>
   </ng-template>
 </section>

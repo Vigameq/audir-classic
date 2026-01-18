@@ -195,6 +195,17 @@ export class AuditPlan implements OnInit {
     return this.responseService.responses().map((response) => response.name);
   }
 
+  protected onAuditorChange(value: string): void {
+    this.auditForm.auditorName = value;
+    if (!value) {
+      return;
+    }
+    const match = this.auditors.find(
+      (auditor) => `${auditor.first_name ?? ''} ${auditor.last_name ?? ''}`.trim() === value
+    );
+    this.auditForm.department = match?.department ?? '';
+  }
+
   ngOnInit(): void {
     this.auditPlanService.migrateFromLocal().subscribe();
     this.departmentService.migrateFromLocal().subscribe();

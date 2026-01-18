@@ -52,9 +52,9 @@ export class AuditManage implements OnInit {
 
   protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
-  protected showInProgress = true;
-  protected showCompleted = true;
-  protected showCreated = true;
+  protected showInProgress = false;
+  protected showCompleted = false;
+  protected showCreated = false;
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>

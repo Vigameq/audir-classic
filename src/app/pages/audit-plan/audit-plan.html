@@ -68,7 +68,11 @@
           </div>
           <div class="field">
             <label>Auditor Name</label>
-            <select name="auditorName" [(ngModel)]="auditForm.auditorName">
+            <select
+              name="auditorName"
+              [(ngModel)]="auditForm.auditorName"
+              (ngModelChange)="onAuditorChange($event)"
+            >
               <option value="">Select auditor</option>
               <option
                 *ngFor="let auditor of auditors"
@@ -80,7 +84,7 @@
           </div>
           <div class="field">
             <label>Department</label>
-            <select name="department" [(ngModel)]="auditForm.department">
+            <select name="department" [(ngModel)]="auditForm.department" disabled>
               <option value="">Select department</option>
               <option *ngFor="let department of departments" [value]="department">
                 {{ department }}
