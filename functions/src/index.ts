@@ -298,6 +298,28 @@ router.post('/templates', requireAuth, async (req: AuthedRequest, res) => {
   return res.status(201).json(rows[0]);
 });
 
+router.put('/templates/:id', requireAuth, async (req: AuthedRequest, res) => {
+  const { name, note, tags, questions } = req.body ?? {};
+  const { rows } = await pool.query(
+    `UPDATE audit_templates
+     SET name = $1, note = $2, tags = $3, questions = $4
+     WHERE id = $5 AND tenant_id = $6
+     RETURNING id, name, note, tags, questions, created_at`,
+    [
+      name,
+      note ?? null,
+      JSON.stringify(tags ?? []),
+      JSON.stringify(questions ?? []),
+      Number(req.params.id),
+      req.user?.tenant_id,
+    ]
+  );
+  if (!rows.length) {
+    return res.status(404).json({ detail: 'Template not found' });
+  }
+  return res.json(rows[0]);
+});
+
 router.delete('/templates/:id', requireAuth, async (req: AuthedRequest, res) => {
   await pool.query('DELETE FROM audit_templates WHERE id = $1 AND tenant_id = $2', [
     Number(req.params.id),

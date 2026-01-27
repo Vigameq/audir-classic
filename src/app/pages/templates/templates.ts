@@ -22,6 +22,10 @@ export class Templates implements OnInit {
   protected createError = '';
   protected expandedTemplateId: string | null = null;
   protected selectedFileName = '';
+  protected editingTemplateId: string | null = null;
+  protected editName = '';
+  protected editQuestions: string[] = [];
+  protected editError = '';
 
   protected get questions(): string[] {
     return this.templateService.questions();
@@ -123,5 +127,62 @@ export class Templates implements OnInit {
 
   protected toggleTemplate(id: string): void {
     this.expandedTemplateId = this.expandedTemplateId === id ? null : id;
+  }
+
+  protected startEdit(template: TemplateRecord): void {
+    this.editingTemplateId = template.id;
+    this.expandedTemplateId = template.id;
+    this.editName = template.name;
+    this.editQuestions = [...template.questions];
+    this.editError = '';
+  }
+
+  protected cancelEdit(): void {
+    this.editingTemplateId = null;
+    this.editName = '';
+    this.editQuestions = [];
+    this.editError = '';
+  }
+
+  protected addQuestion(): void {
+    this.editQuestions = [...this.editQuestions, ''];
+  }
+
+  protected removeQuestion(index: number): void {
+    this.editQuestions = this.editQuestions.filter((_, i) => i !== index);
+  }
+
+  protected updateQuestion(index: number, value: string): void {
+    this.editQuestions = this.editQuestions.map((question, i) =>
+      i === index ? value : question
+    );
+  }
+
+  protected saveTemplate(template: TemplateRecord): void {
+    const name = this.editName.trim();
+    if (!name) {
+      this.editError = 'Template name is required.';
+      return;
+    }
+    const questions = this.editQuestions.map((q) => q.trim()).filter(Boolean);
+    if (!questions.length) {
+      this.editError = 'Add at least one question.';
+      return;
+    }
+    this.templateService
+      .updateTemplateApi(template.id, {
+        name,
+        note: template.note ?? null,
+        tags: template.tags ?? [],
+        questions,
+      })
+      .subscribe({
+        next: () => {
+          this.editingTemplateId = null;
+          this.editName = '';
+          this.editQuestions = [];
+          this.editError = '';
+        },
+      });
   }
 }

@@ -269,6 +269,26 @@ def delete_template(
     crud.delete_template(db, template)
 
 
+@app.put('/templates/{template_id}', response_model=AuditTemplateOut)
+def update_template(
+    template_id: int,
+    payload: AuditTemplateBase,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    template = (
+        db.query(AuditTemplate)
+        .filter(
+            AuditTemplate.id == template_id,
+            AuditTemplate.tenant_id == current_user.tenant_id,
+        )
+        .first()
+    )
+    if not template:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Template not found')
+    return crud.update_template(db, template, payload)
+
+
 @app.get('/audit-plans', response_model=list[AuditPlanOut])
 def list_audit_plans(
     current_user: User = Depends(get_current_user),

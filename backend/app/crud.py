@@ -210,6 +210,20 @@ def delete_template(db: Session, template: AuditTemplate) -> None:
     db.commit()
 
 
+def update_template(
+    db: Session,
+    template: AuditTemplate,
+    payload: AuditTemplateBase,
+) -> AuditTemplate:
+    template.name = payload.name
+    template.note = payload.note
+    template.tags = payload.tags
+    template.questions = payload.questions
+    db.commit()
+    db.refresh(template)
+    return template
+
+
 def list_audit_plans(db: Session, tenant_id: int) -> list[AuditPlan]:
     return (
         db.query(AuditPlan)

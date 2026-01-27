@@ -26,11 +26,70 @@
           <div class="tag-list" *ngIf="template.tags.length">
             <span class="tag" *ngFor="let tag of template.tags">{{ tag }}</span>
           </div>
-          <ol class="question-list" *ngIf="expandedTemplateId === template.id">
-            <li *ngFor="let question of template.questions">{{ question }}</li>
-          </ol>
+          <ng-container *ngIf="expandedTemplateId === template.id">
+            <ol class="question-list" *ngIf="editingTemplateId !== template.id">
+              <li *ngFor="let question of template.questions">{{ question }}</li>
+            </ol>
+            <div class="template-edit" *ngIf="editingTemplateId === template.id">
+              <label>
+                Template name
+                <input
+                  type="text"
+                  [(ngModel)]="editName"
+                  name="edit-name-{{ template.id }}"
+                  (click)="$event.stopPropagation()"
+                />
+              </label>
+              <div class="question-edit">
+                <div class="question-edit-header">
+                  <span>Questions</span>
+                  <button class="ghost small" type="button" (click)="addQuestion(); $event.stopPropagation()">
+                    Add question
+                  </button>
+                </div>
+                <div class="question-edit-list">
+                  <div class="question-edit-row" *ngFor="let question of editQuestions; let i = index">
+                    <input
+                      type="text"
+                      [(ngModel)]="editQuestions[i]"
+                      name="edit-question-{{ template.id }}-{{ i }}"
+                      (input)="updateQuestion(i, editQuestions[i])"
+                      (click)="$event.stopPropagation()"
+                    />
+                    <button
+                      class="ghost small danger"
+                      type="button"
+                      (click)="removeQuestion(i); $event.stopPropagation()"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="error" *ngIf="editError">{{ editError }}</p>
+              <div class="edit-actions">
+                <button class="ghost" type="button" (click)="cancelEdit(); $event.stopPropagation()">
+                  Cancel
+                </button>
+                <button
+                  class="primary"
+                  type="button"
+                  (click)="saveTemplate(template); $event.stopPropagation()"
+                >
+                  Save changes
+                </button>
+              </div>
+            </div>
+          </ng-container>
         </div>
         <div class="template-meta">
+          <button
+            class="ghost small"
+            type="button"
+            (click)="startEdit(template); $event.stopPropagation()"
+          >
+            Edit
+          </button>
           <button
             class="ghost small delete"
             type="button"

@@ -81,6 +81,20 @@ export class TemplateService {
     );
   }
 
+  updateTemplateApi(
+    id: string,
+    payload: Omit<TemplateRecord, 'id' | 'createdAt'>
+  ): Observable<TemplateRecord[]> {
+    return this.http
+      .put(`${this.baseUrl}/templates/${id}`, {
+        name: payload.name,
+        note: payload.note ?? null,
+        tags: payload.tags ?? [],
+        questions: payload.questions ?? [],
+      })
+      .pipe(switchMap(() => this.syncFromApi()));
+  }
+
   migrateFromLocal(): Observable<TemplateRecord[]> {
     const local = this.loadLocalRaw();
     if (!local.length) {

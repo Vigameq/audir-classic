@@ -257,6 +257,66 @@ button.ghost {
   font-size: 0.85rem;
 }
 
+.template-edit {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.template-edit label {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.template-edit input[type='text'] {
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.8rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
+.question-edit {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.question-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.question-edit-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.question-edit-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.question-edit-row input[type='text'] {
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: #ffffff;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
 .header-actions button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
