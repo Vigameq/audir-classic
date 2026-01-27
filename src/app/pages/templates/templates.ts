@@ -183,6 +183,9 @@ export class Templates implements OnInit {
           this.editQuestions = [];
           this.editError = '';
         },
+        error: () => {
+          this.editError = 'Unable to save changes. Please try again.';
+        },
       });
   }
 }
