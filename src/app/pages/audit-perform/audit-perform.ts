@@ -66,6 +66,7 @@ export class AuditPerform implements OnInit {
   protected ncAssignments: string[] = [];
   protected savedQuestions: boolean[] = [];
   protected evidenceFiles: string[] = [];
+  protected evidenceDataUrls: string[] = [];
   protected noteEntries: string[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
@@ -221,6 +222,9 @@ export class AuditPerform implements OnInit {
     this.evidenceFiles = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
+    this.evidenceDataUrls = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill('')
+      : [];
     this.noteEntries = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
@@ -232,6 +236,7 @@ export class AuditPerform implements OnInit {
     assignedNc?: string | null;
     note?: string | null;
     evidenceName?: string | null;
+    evidenceDataUrl?: string | null;
     status?: string | null;
   }[]): void {
     answers.forEach((answer) => {
@@ -240,6 +245,7 @@ export class AuditPerform implements OnInit {
       this.ncAssignments[index] = answer.assignedNc ?? '';
       this.noteEntries[index] = answer.note ?? '';
       this.evidenceFiles[index] = answer.evidenceName ?? '';
+      this.evidenceDataUrls[index] = answer.evidenceDataUrl ?? '';
       this.noteWords[index] = this.countWords(this.noteEntries[index]);
       this.savedQuestions[index] = !!answer.status;
     });
@@ -263,6 +269,7 @@ export class AuditPerform implements OnInit {
           assigned_nc: isNegative ? this.ncAssignments[index] || null : null,
           note: this.noteEntries[index] || null,
           evidence_name: this.evidenceFiles[index] || null,
+          evidence_data_url: this.evidenceDataUrls[index] || null,
           status,
         })
         .subscribe({
@@ -322,6 +329,18 @@ export class AuditPerform implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     this.evidenceFiles[index] = file ? file.name : '';
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+        if (dataUrl) {
+          this.evidenceDataUrls[index] = dataUrl;
+        }
+      };
+      reader.readAsDataURL(file);
+    } else {
+      this.evidenceDataUrls[index] = '';
+    }
     input.value = '';
   }
 

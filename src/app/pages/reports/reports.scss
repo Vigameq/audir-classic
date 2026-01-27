@@ -12,3 +12,72 @@
   margin: 0;
   color: var(--color-muted);
 }
+
+.panel {
+  border-radius: 1.4rem;
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(15, 8, 0, 0.06);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.count {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.report-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.report-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.25rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 154, 0, 0.2);
+  background: #fff7ed;
+}
+
+.report-card h3 {
+  margin: 0.25rem 0;
+  font-size: 1.1rem;
+}
+
+.code {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #7a4300;
+}
+
+.meta,
+.dates {
+  margin: 0.2rem 0;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.error {
+  color: #8a1f2b;
+  margin: 0;
+}
+
+.muted {
+  color: var(--color-muted);
+  margin: 0;
+}

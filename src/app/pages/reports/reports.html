@@ -3,4 +3,46 @@
     <h1>Reports</h1>
     <p>Generate summaries, export results, and share dashboards.</p>
   </div>
+
+  <div class="panel" *ngIf="loading">
+    <p>Loading reports…</p>
+  </div>
+
+  <div class="panel" *ngIf="error">
+    <p class="error">{{ error }}</p>
+  </div>
+
+  <section class="panel" *ngIf="!loading && !error">
+    <div class="panel-header">
+      <h2>Closed audits</h2>
+      <span class="count">{{ reportAudits.length }} reports</span>
+    </div>
+    <div class="report-list" *ngIf="reportAudits.length; else emptyReports">
+      <article class="report-card" *ngFor="let audit of reportAudits">
+        <div>
+          <p class="code">{{ audit.code }}</p>
+          <h3>{{ audit.auditType }}</h3>
+          <p class="meta">
+            {{ audit.auditSubtype || '—' }} · {{ audit.auditorName || '—' }}
+          </p>
+          <p class="dates">
+            {{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}
+          </p>
+        </div>
+        <div class="actions">
+          <button
+            class="primary"
+            type="button"
+            (click)="downloadReport(audit)"
+            [disabled]="generating[audit.code]"
+          >
+            {{ generating[audit.code] ? 'Generating…' : 'Download PDF' }}
+          </button>
+        </div>
+      </article>
+    </div>
+    <ng-template #emptyReports>
+      <p class="muted">No closed audits available for reporting yet.</p>
+    </ng-template>
+  </section>
 </section>

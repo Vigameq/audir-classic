@@ -48,8 +48,8 @@ const env = {
 };
 
 app.use(cors({ origin: env.frontendOrigin, credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 const pool = new Pool({
   host: env.dbHost,
@@ -425,7 +425,7 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   }
   const { rows } = await pool.query(
     `SELECT id, audit_plan_id, question_index, question_text, response, response_is_negative,
-            assigned_nc, note, evidence_name, status, created_at, updated_at
+            assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at
      FROM audit_answers
      WHERE tenant_id = $1 AND audit_plan_id = $2
      ORDER BY question_index ASC`,
@@ -454,8 +454,8 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `INSERT INTO audit_answers
       (tenant_id, audit_plan_id, question_index, question_text, response, response_is_negative,
-       assigned_nc, note, evidence_name, status, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+       assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
      ON CONFLICT (tenant_id, audit_plan_id, question_index)
      DO UPDATE SET
        question_text = EXCLUDED.question_text,
@@ -464,10 +464,11 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
        assigned_nc = EXCLUDED.assigned_nc,
        note = EXCLUDED.note,
        evidence_name = EXCLUDED.evidence_name,
+       evidence_data_url = EXCLUDED.evidence_data_url,
        status = EXCLUDED.status,
        updated_at = NOW()
      RETURNING id, audit_plan_id, question_index, question_text, response, response_is_negative,
-               assigned_nc, note, evidence_name, status, created_at, updated_at`,
+               assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at`,
     [
       req.user?.tenant_id,
       planId,
@@ -478,6 +479,7 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
       payload.assigned_nc ?? null,
       payload.note ?? null,
       payload.evidence_name ?? null,
+      payload.evidence_data_url ?? null,
       payload.status ?? 'Saved',
     ]
   );
