@@ -19,7 +19,11 @@ export class ResponseService {
   readonly responses = this.responsesSignal.asReadonly();
 
   addResponse(response: ResponseDefinition): void {
-    const next = [response, ...this.responsesSignal()];
+    const current = this.responsesSignal();
+    if (this.hasName(current, response.name)) {
+      return;
+    }
+    const next = this.uniqueByName([response, ...current]);
     this.responsesSignal.set(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
@@ -33,6 +37,7 @@ export class ResponseService {
   syncFromApi(): Observable<ResponseDefinition[]> {
     return this.http.get<unknown[]>(`${this.baseUrl}/response-types`).pipe(
       map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      map((responses) => this.uniqueByName(responses)),
       tap((responses) => {
         this.responsesSignal.set(responses);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(responses));
@@ -57,15 +62,20 @@ export class ResponseService {
   }
 
   migrateFromLocal(): Observable<ResponseDefinition[]> {
-    const local = this.loadLocalRaw();
-    if (!local.length) {
-      return this.syncFromApi();
-    }
+    const local = this.uniqueByName(this.loadLocalRaw());
     return this.http.get<unknown[]>(`${this.baseUrl}/response-types`).pipe(
       map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
       switchMap((remote) => {
-        const remoteNames = remote.map((item) => item.name);
-        const toCreate = local.filter((item) => !remoteNames.includes(item.name));
+        const remoteUnique = this.uniqueByName(remote);
+        if (remoteUnique.length) {
+          this.responsesSignal.set(remoteUnique);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(remoteUnique));
+          return of(remoteUnique);
+        }
+        if (!local.length) {
+          return of(remoteUnique);
+        }
+        const toCreate = local.filter((item) => !this.hasName(remoteUnique, item.name));
         if (!toCreate.length) {
           return this.syncFromApi();
         }
@@ -90,11 +100,13 @@ export class ResponseService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed.map((entry) => ({
+        return this.uniqueByName(
+          parsed.map((entry) => ({
           name: String(entry?.name ?? ''),
           types: Array.isArray(entry?.types) ? entry.types : [],
           negativeTypes: Array.isArray(entry?.negativeTypes) ? entry.negativeTypes : [],
-        }));
+          }))
+        );
       }
     } catch {
       return [];
@@ -110,11 +122,13 @@ export class ResponseService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed.map((entry) => ({
+        return this.uniqueByName(
+          parsed.map((entry) => ({
           name: String(entry?.name ?? ''),
           types: Array.isArray(entry?.types) ? entry.types : [],
           negativeTypes: Array.isArray(entry?.negativeTypes) ? entry.negativeTypes : [],
-        }));
+          }))
+        );
       }
     } catch {
       return [];
@@ -132,5 +146,28 @@ export class ResponseService {
       types,
       negativeTypes,
     };
+  }
+
+  private uniqueByName(values: ResponseDefinition[]): ResponseDefinition[] {
+    const seen = new Set<string>();
+    const result: ResponseDefinition[] = [];
+    values.forEach((value) => {
+      const normalized = value.name.trim();
+      if (!normalized) {
+        return;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      result.push({ ...value, name: normalized });
+    });
+    return result;
+  }
+
+  private hasName(values: ResponseDefinition[], candidate: string): boolean {
+    const key = candidate.trim().toLowerCase();
+    return values.some((value) => value.name.trim().toLowerCase() === key);
   }
 }

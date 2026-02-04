@@ -57,6 +57,7 @@ export class TemplateService {
   syncFromApi(): Observable<TemplateRecord[]> {
     return this.http.get<unknown[]>(`${this.baseUrl}/templates`).pipe(
       map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      map((templates) => this.uniqueByName(templates)),
       tap((templates) => {
         this.templatesSignal.set(templates);
         localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates));
@@ -96,15 +97,20 @@ export class TemplateService {
   }
 
   migrateFromLocal(): Observable<TemplateRecord[]> {
-    const local = this.loadLocalRaw();
-    if (!local.length) {
-      return this.syncFromApi();
-    }
+    const local = this.uniqueByName(this.loadLocalRaw());
     return this.http.get<unknown[]>(`${this.baseUrl}/templates`).pipe(
       map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
+      map((remote) => this.uniqueByName(remote)),
       switchMap((remote) => {
-        const remoteNames = remote.map((item) => item.name);
-        const toCreate = local.filter((item) => !remoteNames.includes(item.name));
+        if (remote.length) {
+          this.templatesSignal.set(remote);
+          localStorage.setItem(TEMPLATE_KEY, JSON.stringify(remote));
+          return of(remote);
+        }
+        if (!local.length) {
+          return of(remote);
+        }
+        const toCreate = local.filter((item) => !this.hasName(remote, item.name));
         if (!toCreate.length) {
           return this.syncFromApi();
         }
@@ -146,7 +152,7 @@ export class TemplateService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed as TemplateRecord[];
+        return this.uniqueByName(parsed as TemplateRecord[]);
       }
     } catch {
       return [];
@@ -162,7 +168,7 @@ export class TemplateService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) {
-        return parsed as TemplateRecord[];
+        return this.uniqueByName(parsed as TemplateRecord[]);
       }
     } catch {
       return [];
@@ -179,5 +185,28 @@ export class TemplateService {
       questions: Array.isArray(payload?.questions) ? payload.questions : [],
       createdAt: String(payload?.created_at ?? ''),
     };
+  }
+
+  private uniqueByName(values: TemplateRecord[]): TemplateRecord[] {
+    const seen = new Set<string>();
+    const result: TemplateRecord[] = [];
+    values.forEach((value) => {
+      const normalized = value.name.trim();
+      if (!normalized) {
+        return;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      result.push({ ...value, name: normalized });
+    });
+    return result;
+  }
+
+  private hasName(values: TemplateRecord[], candidate: string): boolean {
+    const key = candidate.trim().toLowerCase();
+    return values.some((value) => value.name.trim().toLowerCase() === key);
   }
 }

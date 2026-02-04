@@ -19,10 +19,10 @@ export class RegionService {
       return;
     }
     const current = this.regionsSignal();
-    if (current.includes(value)) {
+    if (this.hasName(current, value)) {
       return;
     }
-    const next = [value, ...current];
+    const next = this.uniqueNames([value, ...current]);
     this.regionsSignal.set(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   }
@@ -41,7 +41,7 @@ export class RegionService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
-        return parsed;
+        return this.uniqueNames(parsed);
       }
     } catch {
       return [...DEFAULT_REGIONS];
@@ -56,6 +56,7 @@ export class RegionService {
           ? rows.map((row) => String((row as { name?: string })?.name ?? '')).filter(Boolean)
           : []
       ),
+      map((regions) => this.uniqueNames(regions)),
       tap((regions) => {
         this.regionsSignal.set(regions);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(regions));
@@ -76,18 +77,24 @@ export class RegionService {
   }
 
   migrateFromLocal(): Observable<string[]> {
-    const local = this.loadLocalRaw();
-    if (!local.length) {
-      return this.syncFromApi();
-    }
+    const local = this.uniqueNames(this.loadLocalRaw());
     return this.http.get<unknown[]>(`${this.baseUrl}/regions`).pipe(
       map((rows) =>
         Array.isArray(rows)
           ? rows.map((row) => String((row as { name?: string })?.name ?? '')).filter(Boolean)
           : []
       ),
+      map((remote) => this.uniqueNames(remote)),
       switchMap((remote) => {
-        const toCreate = local.filter((item) => !remote.includes(item));
+        if (remote.length) {
+          this.regionsSignal.set(remote);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+          return of(remote);
+        }
+        if (!local.length) {
+          return of(remote);
+        }
+        const toCreate = local.filter((item) => !this.hasName(remote, item));
         if (!toCreate.length) {
           return this.syncFromApi();
         }
@@ -106,11 +113,34 @@ export class RegionService {
     try {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.every((item) => typeof item === 'string')) {
-        return parsed;
+        return this.uniqueNames(parsed);
       }
     } catch {
       return [];
     }
     return [];
+  }
+
+  private uniqueNames(values: string[]): string[] {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    values.forEach((value) => {
+      const normalized = value.trim();
+      if (!normalized) {
+        return;
+      }
+      const key = normalized.toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      result.push(normalized);
+    });
+    return result;
+  }
+
+  private hasName(values: string[], candidate: string): boolean {
+    const key = candidate.trim().toLowerCase();
+    return values.some((value) => value.trim().toLowerCase() === key);
   }
 }

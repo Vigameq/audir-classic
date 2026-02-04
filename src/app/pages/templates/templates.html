@@ -30,7 +30,11 @@
             <ol class="question-list" *ngIf="editingTemplateId !== template.id">
               <li *ngFor="let question of template.questions">{{ question }}</li>
             </ol>
-            <div class="template-edit" *ngIf="editingTemplateId === template.id">
+            <div
+              class="template-edit"
+              *ngIf="editingTemplateId === template.id"
+              (click)="$event.stopPropagation()"
+            >
               <label>
                 Template name
                 <input

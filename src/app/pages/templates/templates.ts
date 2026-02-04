@@ -126,6 +126,9 @@ export class Templates implements OnInit {
   }
 
   protected toggleTemplate(id: string): void {
+    if (this.editingTemplateId === id) {
+      return;
+    }
     this.expandedTemplateId = this.expandedTemplateId === id ? null : id;
   }
 

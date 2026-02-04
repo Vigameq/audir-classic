@@ -69,7 +69,7 @@
       </nav>
     </div>
     <div class="header-actions" *ngIf="auth.isLoggedIn()">
-      <div class="notify-menu">
+      <div class="notify-menu" #notifyMenu>
         <button
           class="notify-button"
           type="button"
@@ -121,7 +121,7 @@
           </button>
         </div>
       </div>
-      <div class="user-menu">
+      <div class="user-menu" #userMenu>
         <button class="user-chip" type="button" (click)="toggleUserMenu()">
           <div class="avatar">{{ avatarText }}</div>
           <div class="user-name">{{ displayName }}</div>

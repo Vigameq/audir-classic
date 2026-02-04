@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, ElementRef, HostListener, ViewChild } from '@angular/core';
 import {
   NavigationCancel,
   NavigationEnd,
@@ -33,6 +33,8 @@ export class App {
   private readonly ncService = inject(NcService);
   protected isUserMenuOpen = false;
   protected isNotificationOpen = false;
+  @ViewChild('userMenu') private userMenuRef?: ElementRef<HTMLElement>;
+  @ViewChild('notifyMenu') private notifyMenuRef?: ElementRef<HTMLElement>;
 
   constructor() {
     effect(() => {
@@ -123,6 +125,23 @@ export class App {
 
   protected closeNotifications(): void {
     this.isNotificationOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected handleDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+    if (this.isUserMenuOpen && this.userMenuRef?.nativeElement) {
+      const inside = this.userMenuRef.nativeElement.contains(target);
+      if (!inside) {
+        this.isUserMenuOpen = false;
+      }
+    }
+    if (this.isNotificationOpen && this.notifyMenuRef?.nativeElement) {
+      const inside = this.notifyMenuRef.nativeElement.contains(target);
+      if (!inside) {
+        this.isNotificationOpen = false;
+      }
+    }
   }
 
   protected get notificationCount(): number {
