@@ -69,7 +69,7 @@
               class="ghost small"
               type="button"
               (click)="openEdit(audit)"
-              [disabled]="completionMap[audit.code] === 'Completed'"
+              [disabled]="activeTab !== 'created'"
             >
               Edit
             </button>
@@ -195,11 +195,12 @@
   <div class="modal-backdrop" *ngIf="viewAudit">
     <div class="modal">
       <header>
-        <h2>Submitted responses</h2>
+        <h2>Audit responses</h2>
       </header>
       <p class="modal-subtitle">
         {{ viewAudit.auditType }} · {{ viewAudit.auditSubtype || '—' }} ·
-        {{ formatDate(viewAudit.startDate) }} → {{ formatDate(viewAudit.endDate) }}
+        {{ formatDate(viewAudit.startDate) }} → {{ formatDate(viewAudit.endDate) }} ·
+        {{ viewAudit.department || '—' }}
       </p>
       <div class="view-list" *ngIf="viewResponses.length; else emptyResponses">
         <article class="view-card" *ngFor="let response of viewResponses">
@@ -217,8 +218,12 @@
               <strong>{{ response.assignedNc || '—' }}</strong>
             </div>
             <div>
-              <span>Auditor</span>
-              <strong>{{ response.auditorName || '—' }}</strong>
+              <span>Status</span>
+              <strong>{{ response.status || '—' }}</strong>
+            </div>
+            <div>
+              <span>NC Status</span>
+              <strong>{{ response.ncStatus || '—' }}</strong>
             </div>
             <div>
               <span>Submitted</span>
@@ -232,7 +237,7 @@
         </article>
       </div>
       <ng-template #emptyResponses>
-        <div class="empty">No submitted negative responses for this audit yet.</div>
+        <div class="empty">No submitted responses for this audit yet.</div>
       </ng-template>
       <footer>
         <button class="primary" type="button" (click)="closeView()">Done</button>

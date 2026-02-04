@@ -361,6 +361,13 @@ export class AuditPerform implements OnInit {
     return audit.auditorName.trim().toLowerCase() === fullName;
   }
 
+  protected canPerformAudit(audit: AuditPlanRecord): boolean {
+    if (this.auth.role() !== 'Auditor') {
+      return true;
+    }
+    return this.isAssignedToCurrentUser(audit);
+  }
+
   protected onEvidenceSelected(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];

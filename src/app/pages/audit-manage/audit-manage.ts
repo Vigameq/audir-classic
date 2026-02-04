@@ -48,7 +48,15 @@ export class AuditManage implements OnInit {
     responseType: '',
   };
   protected viewAudit: AuditPlanRecord | null = null;
-  protected viewResponses: NcRecord[] = [];
+  protected viewResponses: {
+    question: string;
+    response: string;
+    assignedNc: string;
+    note: string;
+    status: string;
+    submittedAt: string;
+    ncStatus: string;
+  }[] = [];
 
   protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
@@ -302,9 +310,20 @@ export class AuditManage implements OnInit {
 
   protected openView(audit: AuditPlanRecord): void {
     this.viewAudit = audit;
-    this.viewResponses = this.ncService
-      .records()
-      .filter((record) => record.auditCode === audit.code);
+    const cached = this.answersByAudit[audit.code];
+    if (cached) {
+      this.viewResponses = this.buildViewResponses(cached);
+      return;
+    }
+    this.auditAnswerService.listByAuditCode(audit.code).subscribe({
+      next: (answers) => {
+        this.answersByAudit[audit.code] = answers;
+        this.viewResponses = this.buildViewResponses(answers);
+      },
+      error: () => {
+        this.viewResponses = [];
+      },
+    });
   }
 
   protected closeView(): void {
@@ -415,6 +434,36 @@ export class AuditManage implements OnInit {
         this.answersByAudit = nextAnswers;
       },
     });
+  }
+
+  private buildViewResponses(answers: AuditAnswerRecord[]): {
+    question: string;
+    response: string;
+    assignedNc: string;
+    note: string;
+    status: string;
+    submittedAt: string;
+    ncStatus: string;
+  }[] {
+    const ncStatusByAnswer = new Map<string, string>();
+    this.ncService.records().forEach((record) => {
+      if (!record.answerId) {
+        return;
+      }
+      ncStatusByAnswer.set(record.answerId, record.status || '');
+    });
+
+    return [...answers]
+      .sort((a, b) => a.questionIndex - b.questionIndex)
+      .map((answer) => ({
+        question: answer.questionText || '—',
+        response: answer.response || '—',
+        assignedNc: answer.assignedNc || '',
+        note: answer.note || '',
+        status: answer.status || '—',
+        submittedAt: answer.updatedAt || answer.createdAt || '',
+        ncStatus: ncStatusByAnswer.get(answer.id) || '',
+      }));
   }
 
   private getTemplateQuestionCount(auditType: string): number {

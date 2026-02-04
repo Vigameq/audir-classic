@@ -300,6 +300,8 @@ button.small,
   display: grid;
   gap: 1rem;
   box-shadow: 0 30px 60px rgba(20, 10, 0, 0.2);
+  max-height: 85vh;
+  overflow: auto;
 }
 
 .modal header {

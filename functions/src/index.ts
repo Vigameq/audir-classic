@@ -588,6 +588,7 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
   const auditorName = String(auditRow?.auditor_name ?? '').toLowerCase();
   const assignedDepartment = String(auditRow?.assigned_nc ?? '').toLowerCase();
   const userFullName = `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim().toLowerCase();
+  const userRole = String(req.user?.role ?? '').trim().toLowerCase();
   if (assignedUserId) {
     const assigneeQuery = await pool.query(
       'SELECT department FROM users WHERE id = $1 AND tenant_id = $2',
@@ -600,7 +601,7 @@ router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
     }
   }
   if (requestedStatus === 'Closed' || requestedStatus === 'Rework') {
-    if (!userFullName || userFullName !== auditorName) {
+    if (userRole !== 'manager' && (!userFullName || userFullName !== auditorName)) {
       return res.status(403).json({ detail: 'Not authorized to change status' });
     }
   }

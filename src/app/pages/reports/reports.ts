@@ -101,7 +101,9 @@ export class Reports implements OnInit {
     answers: AuditAnswerRecord[],
     ncRecords: NcRecord[]
   ): boolean {
-    const totalQuestions = this.getTemplateQuestionCount(audit.auditType, answers);
+    if (!answers.length) {
+      return false;
+    }
     const submittedCount = answers.filter((answer) => answer.status === 'Submitted').length;
     const openStatuses = new Set([
       'Assigned',
@@ -111,7 +113,7 @@ export class Reports implements OnInit {
       'Pending Review',
     ]);
     const hasOpenNc = ncRecords.some((record) => openStatuses.has(record.status ?? ''));
-    return totalQuestions > 0 && submittedCount >= totalQuestions && !hasOpenNc;
+    return submittedCount >= answers.length && !hasOpenNc;
   }
 
   private getTemplateQuestionCount(auditType: string, answers: AuditAnswerRecord[]): number {

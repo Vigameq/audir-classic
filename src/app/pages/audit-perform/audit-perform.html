@@ -61,7 +61,12 @@
             >
               {{ isQrGenerating[audit.id] ? 'Generating…' : 'Download QR' }}
             </button>
-            <button class="primary small" type="button" (click)="openPerform(audit)">
+            <button
+              class="primary small"
+              type="button"
+              (click)="openPerform(audit)"
+              [disabled]="!canPerformAudit(audit)"
+            >
               Perform
             </button>
           </div>
