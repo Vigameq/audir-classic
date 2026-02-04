@@ -43,7 +43,7 @@
   padding: 1.5rem;
   border-radius: 1.25rem;
   border: 1px solid var(--color-line);
-  background: #ffffff;
+  background: var(--color-surface);
   display: grid;
   gap: 0.75rem;
 }
@@ -71,7 +71,7 @@
   padding: 0.6rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .tag-list {
@@ -94,13 +94,13 @@
 
 .tag.negative {
   background: rgba(202, 71, 45, 0.15);
-  color: #9f2f20;
+  color: var(--color-accent);
 }
 
 .tag .remove {
   border: none;
   background: rgba(255, 154, 0, 0.25);
-  color: #7a4300;
+  color: var(--color-muted);
   width: 1.2rem;
   height: 1.2rem;
   border-radius: 50%;
@@ -124,7 +124,7 @@
   padding: 0.6rem 0.75rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
-  background: #fffaf4;
+  background: var(--color-surface)af4;
   font-size: 0.85rem;
   position: relative;
 }
@@ -164,7 +164,7 @@
 
 .modal {
   width: min(520px, 100%);
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -208,7 +208,7 @@
   padding: 0.6rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .modal footer {
@@ -229,10 +229,10 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }

@@ -46,11 +46,11 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -72,7 +72,7 @@ button.small {
 }
 
 .file-trigger.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -94,12 +94,12 @@ button.small {
   padding: 0.45rem 0.7rem;
   border-radius: 0.65rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
   min-width: 140px;
 }
 
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -127,7 +127,7 @@ button.small {
   border-radius: 1.15rem;
   border: none;
   padding: 0.85rem 1.1rem;
-  background: #ffffff;
+  background: var(--color-surface);
   box-shadow: 0 18px 40px rgba(26, 33, 56, 0.08);
   display: grid;
   gap: 0.6rem;
@@ -148,7 +148,7 @@ button.small {
 
 .audit-title {
   font-weight: 600;
-  color: #2b2f38;
+  color: var(--color-ink);
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
@@ -164,7 +164,7 @@ button.small {
 }
 
 .divider {
-  color: #c4c9d4;
+  color: var(--color-line);
 }
 
 .audit-inline {
@@ -190,7 +190,7 @@ button.small {
 .code {
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: #7a4300;
+  color: var(--color-muted);
 }
 
 .note-cell {
@@ -215,7 +215,7 @@ button.small {
 }
 
 .drawer {
-  background: #ffffff;
+  background: var(--color-surface);
   width: min(90vw, 1100px);
   height: 100%;
   max-height: 100vh;
@@ -235,7 +235,7 @@ button.small {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #ffffff;
+  background: var(--color-surface);
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(20, 10, 0, 0.08);
 }
@@ -294,7 +294,7 @@ button.small {
 }
 
 .question-card {
-  background: #fffaf4;
+  background: var(--color-surface)af4;
   border: 1px solid rgba(20, 10, 0, 0.08);
   border-radius: 1rem;
   padding: 1rem 1.2rem;
@@ -337,7 +337,7 @@ button.small {
 
 .inline-fields .field-error {
   font-size: 0.75rem;
-  color: #8a1f2b;
+  color: var(--color-accent);
 }
 
 .inline-fields select {
@@ -345,11 +345,11 @@ button.small {
   padding: 0.4rem 0.7rem;
   border-radius: 0.65rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .inline-fields select:disabled {
-  background: #f7f4f0;
+  background: var(--color-surface-strong);
   color: var(--color-muted);
   border-color: rgba(20, 10, 0, 0.1);
   cursor: not-allowed;
@@ -408,7 +408,7 @@ button.small {
   padding: 0.5rem 0.8rem;
   border-radius: 0.7rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .note-row {
@@ -427,7 +427,7 @@ button.small {
   padding: 0.6rem 0.8rem;
   border-radius: 0.7rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .note-count {

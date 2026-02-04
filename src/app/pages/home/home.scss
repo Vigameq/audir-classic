@@ -40,7 +40,7 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.primary:hover {
@@ -48,7 +48,7 @@ button.primary:hover {
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 

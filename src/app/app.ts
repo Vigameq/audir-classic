@@ -152,7 +152,8 @@ export class App {
   }
 
   protected get notificationCount(): number {
-    return this.notifications.length;
+    const readMap = this.getReadMap();
+    return this.notifications.filter((item) => !readMap[item.id]).length;
   }
 
   protected get notifications(): NotificationItem[] {
@@ -169,6 +170,7 @@ export class App {
         .filter((audit) => this.isAssignedToCurrentUser(audit))
         .forEach((audit) => {
           items.push({
+            id: `audit-assigned-${audit.code}`,
             title: 'Audit assigned',
             detail: this.formatAuditLabel(audit.auditType, audit.auditSubtype, audit.code),
             route: ['/audit-perform', audit.code],
@@ -181,9 +183,11 @@ export class App {
         )
         .forEach((record) => {
           items.push({
+            id: `nc-review-${record.answerId}`,
             title: 'NC pending review',
             detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
-            route: ['/audit-manage'],
+            route: ['/nc-management'],
+            queryParams: { tab: 'pending', answerId: record.answerId, audit: record.auditCode },
           });
         });
       return items;
@@ -192,9 +196,11 @@ export class App {
     if (role === 'Manager' || role === 'Super Admin') {
       records.filter((record) => this.isPendingReview(record)).forEach((record) => {
         items.push({
+          id: `nc-review-${record.answerId}`,
           title: 'NC pending review',
           detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
-          route: ['/audit-manage'],
+          route: ['/nc-management'],
+          queryParams: { tab: 'pending', answerId: record.answerId, audit: record.auditCode },
         });
       });
       return items;
@@ -208,9 +214,11 @@ export class App {
       .filter((record) => this.isAssignedNc(record, department))
       .forEach((record) => {
         items.push({
+          id: `nc-assigned-${record.answerId}`,
           title: 'NC assigned',
           detail: this.formatAuditLabel(record.auditType, record.auditSubtype, record.auditCode),
           route: ['/nc-management'],
+          queryParams: { tab: 'flagged', answerId: record.answerId, audit: record.auditCode },
         });
       });
     return items;
@@ -218,7 +226,8 @@ export class App {
 
   protected openNotification(item: NotificationItem): void {
     this.isNotificationOpen = false;
-    this.router.navigate(item.route);
+    this.markNotificationRead(item.id);
+    this.router.navigate(item.route, { queryParams: item.queryParams });
   }
 
   private isAssignedToCurrentUser(audit: AuditPlanRecord): boolean {
@@ -259,10 +268,39 @@ export class App {
     const suffix = code ? ` • ${code}` : '';
     return `${base || 'Audit'}${suffix}`;
   }
+
+  private getReadKey(): string {
+    const email = this.auth.email() || 'guest';
+    return `audir_notification_reads_${email}`;
+  }
+
+  private getReadMap(): Record<string, number> {
+    if (!this.auth.isLoggedIn()) {
+      return {};
+    }
+    const stored = localStorage.getItem(this.getReadKey());
+    if (!stored) {
+      return {};
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private markNotificationRead(id: string): void {
+    const map = this.getReadMap();
+    map[id] = Date.now();
+    localStorage.setItem(this.getReadKey(), JSON.stringify(map));
+  }
 }
 
 type NotificationItem = {
+  id: string;
   title: string;
   detail: string;
   route: string[];
+  queryParams?: Record<string, string | number | boolean>;
 };

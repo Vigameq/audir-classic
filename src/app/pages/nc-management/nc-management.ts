@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { AuthState } from '../../auth-state';
 import { NcRecord, NcService } from '../../services/nc.service';
 import { DepartmentService } from '../../services/department.service';
@@ -17,6 +18,7 @@ export class NcManagement implements OnInit {
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
   private readonly departmentService = inject(DepartmentService);
+  private readonly route = inject(ActivatedRoute);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
   protected activeTab: 'flagged' | 'pending' = 'flagged';
@@ -37,6 +39,8 @@ export class NcManagement implements OnInit {
   protected pendingAssignedNc: Record<string, string> = {};
   private usersLoaded = false;
   private usersLoading = false;
+  private targetAnswerId: string | null = null;
+  private targetTab: 'flagged' | 'pending' | null = null;
 
   protected readonly ncRecords = computed(() => {
     const records = this.ncService.records();
@@ -86,9 +90,21 @@ export class NcManagement implements OnInit {
   });
 
   ngOnInit(): void {
-    this.ncService.listRecords().subscribe();
+    this.ncService.listRecords().subscribe({
+      next: () => this.applyDeepLink(),
+    });
     this.loadUsers();
     this.departmentService.migrateFromLocal().subscribe();
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const answerId = params.get('answerId');
+      this.targetTab = tab === 'pending' || tab === 'flagged' ? tab : null;
+      this.targetAnswerId = answerId;
+      if (this.targetTab) {
+        this.activeTab = this.targetTab;
+      }
+      this.applyDeepLink();
+    });
   }
 
   protected get departments(): string[] {
@@ -448,5 +464,23 @@ export class NcManagement implements OnInit {
     return this.usersForDepartment(record.assignedNc).some(
       (user) => user.id === assignedId
     );
+  }
+
+  private applyDeepLink(): void {
+    if (!this.targetAnswerId) {
+      return;
+    }
+    const match = this.ncService
+      .records()
+      .find((record) => String(record.answerId) === String(this.targetAnswerId));
+    if (!match) {
+      return;
+    }
+    if (this.targetTab === 'pending') {
+      this.openReview(match);
+    } else {
+      this.openRecord(match);
+    }
+    this.targetAnswerId = null;
   }
 }

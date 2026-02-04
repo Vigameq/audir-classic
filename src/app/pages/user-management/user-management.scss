@@ -45,11 +45,11 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -64,7 +64,7 @@ button:disabled {
 }
 
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -92,7 +92,7 @@ select {
   padding: 0.55rem 0.8rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .table-row {
@@ -127,10 +127,10 @@ select {
   padding: 0;
   border-radius: 50%;
   border: 1px solid rgba(255, 154, 0, 0.35);
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   display: grid;
   place-items: center;
-  color: #7a4300;
+  color: var(--color-muted);
 }
 
 .icon-button svg {
@@ -144,13 +144,13 @@ select {
 }
 
 .icon-button.danger {
-  color: #8a1f2b;
+  color: var(--color-accent);
   border-color: rgba(180, 35, 24, 0.35);
-  background: #fff1f1;
+  background: var(--color-surface)1f1;
 }
 
 .status {
-  color: #7a4300;
+  color: var(--color-muted);
   font-size: 0.8rem;
   font-weight: 600;
   display: inline-flex;
@@ -159,15 +159,15 @@ select {
 }
 
 .status.active {
-  color: #1f6b32;
+  color: var(--color-accent);
 }
 
 .status.pending {
-  color: #9a4d00;
+  color: var(--color-muted);
 }
 
 .status.suspended {
-  color: #8a1f2b;
+  color: var(--color-accent);
 }
 
 .status::before {
@@ -191,7 +191,7 @@ select {
 
 .modal {
   width: min(720px, 100%);
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -238,7 +238,7 @@ select {
 
 .error {
   margin: 0;
-  color: #b42318;
+  color: var(--color-accent);
   font-size: 0.85rem;
 }
 

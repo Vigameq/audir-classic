@@ -8,7 +8,7 @@
 .login-panel {
   padding: 2rem;
   border-radius: 1.5rem;
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   box-shadow: 0 18px 45px rgba(255, 154, 0, 0.08);
 }
@@ -37,7 +37,7 @@
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
   background: rgba(255, 154, 0, 0.16);
-  color: #7a4300;
+  color: var(--color-muted);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -60,7 +60,7 @@ select {
   padding: 0.65rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 input:focus,
@@ -80,18 +80,18 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
 .error {
   margin: 0;
   font-size: 0.85rem;
-  color: #b42318;
+  color: var(--color-accent);
 }
 
 .login-aside {
@@ -101,7 +101,7 @@ button.ghost {
 .accent-card {
   padding: 1.8rem;
   border-radius: 1.5rem;
-  background: linear-gradient(140deg, #ffffff 0%, #fff4e0 100%);
+  background: linear-gradient(140deg, var(--color-surface) 0%, var(--color-surface)4e0 100%);
   border: 1px solid rgba(255, 154, 0, 0.35);
   display: grid;
   gap: 1rem;

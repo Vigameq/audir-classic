@@ -45,11 +45,11 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -58,7 +58,7 @@ button.ghost {
 }
 
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -97,7 +97,7 @@ button.ghost {
   padding: 0.6rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .note input {
@@ -105,7 +105,7 @@ button.ghost {
   padding: 0.6rem 0.9rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .note-meta {
@@ -116,7 +116,7 @@ button.ghost {
 }
 
 .note-meta .limit {
-  color: #c0392b;
+  color: var(--color-accent);
   font-weight: 600;
 }
 
@@ -141,7 +141,7 @@ button.ghost {
   padding: 0.55rem 0.85rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .tag-list {
@@ -164,7 +164,7 @@ button.ghost {
 .tag .remove {
   border: none;
   background: rgba(255, 154, 0, 0.25);
-  color: #7a4300;
+  color: var(--color-muted);
   width: 1.2rem;
   height: 1.2rem;
   border-radius: 50%;
@@ -176,7 +176,7 @@ button.ghost {
 
 .error {
   margin: 0;
-  color: #b42318;
+  color: var(--color-accent);
   font-size: 0.85rem;
 }
 
@@ -211,7 +211,7 @@ button.ghost {
   padding: 0.75rem 0.8rem;
   border-radius: 0.9rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
-  background: #fffaf4;
+  background: var(--color-surface)af4;
   gap: 1rem;
   position: relative;
 }
@@ -229,7 +229,7 @@ button.ghost {
 
 .note-text {
   margin-top: 0.4rem;
-  color: #7a4300;
+  color: var(--color-muted);
   font-size: 0.85rem;
 }
 
@@ -258,10 +258,10 @@ button.ghost {
   padding: 0;
   border-radius: 50%;
   border: 1px solid rgba(255, 154, 0, 0.35);
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   display: grid;
   place-items: center;
-  color: #7a4300;
+  color: var(--color-muted);
 }
 
 .template-meta .icon-button svg {
@@ -275,9 +275,9 @@ button.ghost {
 }
 
 .template-meta .icon-button.danger {
-  color: #8a1f2b;
+  color: var(--color-accent);
   border-color: rgba(180, 35, 24, 0.35);
-  background: #fff1f1;
+  background: var(--color-surface)1f1;
 }
 
 .template-item .question-list {
@@ -313,7 +313,7 @@ button.ghost {
   padding: 0.6rem 0.8rem;
   border-radius: 0.8rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .question-edit {
@@ -346,7 +346,7 @@ button.ghost {
   padding: 0.55rem 0.75rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .edit-actions {
@@ -372,7 +372,7 @@ button.ghost {
 
 .modal {
   width: min(640px, 100%);
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -433,7 +433,7 @@ button.ghost {
 }
 
 .template-card {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 1.5rem;
   padding: 1.5rem;

@@ -47,12 +47,12 @@
   padding: 0.45rem 0.7rem;
   border-radius: 0.65rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
   min-width: 150px;
 }
 
 .panel {
-  background: #f7f9fc;
+  background: var(--color-surface-strong);
   border-radius: 1.5rem;
   border: 1px solid rgba(20, 10, 0, 0.05);
   padding: 1.5rem;
@@ -71,7 +71,7 @@
   gap: 0.35rem;
   padding: 0.2rem;
   border-radius: 999px;
-  background: #eef2f8;
+  background: var(--color-surface-strong);
 }
 
 .tab-switch button {
@@ -80,13 +80,13 @@
   padding: 0.4rem 0.95rem;
   border-radius: 999px;
   font-size: 0.8rem;
-  color: #5f6b80;
+  color: var(--color-muted);
   cursor: pointer;
 }
 
 .tab-switch button.active {
-  background: #ffffff;
-  color: #1f2a3d;
+  background: var(--color-surface);
+  color: var(--color-ink);
   box-shadow: 0 6px 16px rgba(26, 33, 56, 0.12);
 }
 
@@ -115,7 +115,7 @@
   border-radius: 1.15rem;
   border: none;
   padding: 1rem 1.2rem;
-  background: #ffffff;
+  background: var(--color-surface);
   box-shadow: 0 18px 40px rgba(26, 33, 56, 0.08);
   display: grid;
   gap: 0.6rem;
@@ -129,7 +129,7 @@
 .code {
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #2b2f38;
+  color: var(--color-ink);
 }
 
 .status-pill {
@@ -137,20 +137,20 @@
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 600;
-  background: #eef2f8;
-  color: #5f6b80;
+  background: var(--color-surface-strong);
+  color: var(--color-muted);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .status-pill.high {
-  background: #ffe9e5;
+  background: var(--color-surface-strong);
   color: #8f2e1d;
 }
 
 .status-pill.medium {
-  background: #fff0dd;
-  color: #8a5a10;
+  background: var(--color-surface)0dd;
+  color: var(--color-muted);
 }
 
 .status-pill.low {
@@ -173,7 +173,7 @@
 
 .nc-title {
   font-weight: 600;
-  color: #2b2f38;
+  color: var(--color-ink);
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
@@ -189,7 +189,7 @@
 }
 
 .divider {
-  color: #c4c9d4;
+  color: var(--color-line);
 }
 
 .nc-inline {
@@ -229,7 +229,7 @@
   padding: 0.4rem 0.7rem;
   border-radius: 0.65rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
   color: var(--color-ink);
   min-width: 150px;
 }
@@ -251,11 +251,11 @@ button {
 
 button.primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -279,7 +279,7 @@ button:disabled {
 }
 
 .drawer {
-  background: #ffffff;
+  background: var(--color-surface);
   width: min(90vw, 1100px);
   height: 100%;
   max-height: 100vh;
@@ -299,7 +299,7 @@ button:disabled {
   position: sticky;
   top: 0;
   z-index: 2;
-  background: #ffffff;
+  background: var(--color-surface);
   padding-bottom: 1rem;
   border-bottom: 1px solid rgba(20, 10, 0, 0.08);
 }
@@ -320,7 +320,7 @@ button:disabled {
   border-radius: 1.2rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
   padding: 1.5rem;
-  background: #ffffff;
+  background: var(--color-surface);
   display: grid;
   gap: 1rem;
 }
@@ -347,7 +347,7 @@ button:disabled {
   padding: 0.7rem 0.9rem;
   border-radius: 0.85rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
   resize: vertical;
 }
 
@@ -377,7 +377,7 @@ button:disabled {
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.2s ease;
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
@@ -397,7 +397,7 @@ button:disabled {
   border-radius: 1.2rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
   padding: 1.5rem;
-  background: #fffaf4;
+  background: var(--color-surface)af4;
   display: grid;
   gap: 1rem;
 }

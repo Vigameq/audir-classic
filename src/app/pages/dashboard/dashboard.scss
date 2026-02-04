@@ -32,7 +32,7 @@ h1 {
 }
 
 .metrics article {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 1.25rem;
   padding: 1.25rem;
@@ -44,8 +44,14 @@ h1 {
   font-size: 1.8rem;
 }
 
+.metrics em {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid var(--color-line);
   border-radius: 1.5rem;
   padding: 1.5rem;
@@ -95,7 +101,7 @@ h1 {
   padding: 0.8rem 1rem;
   border-radius: 1rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
-  background: #fffaf4;
+  background: var(--color-surface-strong);
 }
 
 .audit-row p {
@@ -109,8 +115,8 @@ h1 {
   margin-top: 0.35rem;
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  background: rgba(255, 154, 0, 0.15);
-  color: #7a4300;
+  background: var(--color-accent-soft);
+  color: var(--color-muted);
   font-size: 0.75rem;
 }
 
@@ -135,7 +141,7 @@ h1 {
 
 .bar {
   height: 0.5rem;
-  background: rgba(255, 154, 0, 0.12);
+  background: var(--color-accent-soft);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -147,15 +153,15 @@ h1 {
 }
 
 .fill.planned {
-  background: rgba(255, 154, 0, 0.6);
+  background: var(--color-accent);
 }
 
 .fill.completed {
-  background: rgba(255, 154, 0, 0.95);
+  background: var(--color-accent);
 }
 
 .fill.templates {
-  background: rgba(255, 154, 0, 0.75);
+  background: var(--color-accent);
 }
 
 .chart.stacked {
@@ -167,7 +173,7 @@ h1 {
   height: 0.8rem;
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 154, 0, 0.08);
+  background: var(--color-accent-soft);
 }
 
 .stack-fill {
@@ -176,15 +182,15 @@ h1 {
 }
 
 .stack-fill.auditors {
-  background: rgba(255, 154, 0, 0.9);
+  background: var(--color-accent);
 }
 
 .stack-fill.managers {
-  background: rgba(255, 154, 0, 0.55);
+  background: var(--color-accent);
 }
 
 .stack-fill.templates {
-  background: rgba(255, 154, 0, 0.35);
+  background: var(--color-accent);
 }
 
 .stack-legend {
@@ -205,15 +211,15 @@ h1 {
 }
 
 .stack-legend .dot.auditors {
-  background: rgba(255, 154, 0, 0.9);
+  background: var(--color-accent);
 }
 
 .stack-legend .dot.managers {
-  background: rgba(255, 154, 0, 0.55);
+  background: var(--color-accent);
 }
 
 .stack-legend .dot.templates {
-  background: rgba(255, 154, 0, 0.35);
+  background: var(--color-accent);
 }
 
 
@@ -227,8 +233,8 @@ button {
 }
 
 button.ghost {
-  background: #fff6eb;
-  border-color: rgba(255, 154, 0, 0.35);
+  background: var(--color-surface-strong);
+  border-color: var(--color-line);
 }
 
 @media (max-width: 720px) {

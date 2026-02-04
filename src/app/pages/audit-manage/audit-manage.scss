@@ -59,18 +59,18 @@ button,
 
 .primary {
   background: var(--color-accent);
-  color: #1a1406;
+  color: var(--color-ink);
 }
 
 button.ghost {
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
   border-color: rgba(255, 154, 0, 0.35);
 }
 
 button.ghost.danger {
   border-color: rgba(202, 71, 45, 0.4);
-  background: #fff2ef;
-  color: #9f2f20;
+  background: var(--color-surface)2ef;
+  color: var(--color-accent);
 }
 
 button.small,
@@ -80,7 +80,7 @@ button.small,
 }
 
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -99,7 +99,7 @@ button.small,
   gap: 0.35rem;
   padding: 0.2rem;
   border-radius: 999px;
-  background: #fff6eb;
+  background: var(--color-surface)6eb;
 }
 
 .tab-switch button {
@@ -108,13 +108,13 @@ button.small,
   padding: 0.4rem 0.95rem;
   border-radius: 999px;
   font-size: 0.8rem;
-  color: #7b6a50;
+  color: var(--color-muted);
   cursor: pointer;
 }
 
 .tab-switch button.active {
-  background: #ffffff;
-  color: #1f2a3d;
+  background: var(--color-surface);
+  color: var(--color-ink);
   box-shadow: 0 6px 16px rgba(26, 33, 56, 0.12);
 }
 
@@ -137,7 +137,7 @@ button.small,
   border-radius: 1.25rem;
   border: 1px solid rgba(20, 10, 0, 0.08);
   padding: 1.25rem 1.4rem;
-  background: linear-gradient(120deg, #ffffff 0%, #ffffff 70%, #fff2df 100%);
+  background: linear-gradient(120deg, var(--color-surface) 0%, var(--color-surface) 70%, var(--color-surface)2df 100%);
   display: grid;
   gap: 1rem;
 }
@@ -177,7 +177,7 @@ button.small,
 }
 
 .divider {
-  color: #d2c6b6;
+  color: var(--color-line);
 }
 
 .audit-inline {
@@ -244,7 +244,7 @@ button.small,
 .code {
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: #7a4300;
+  color: var(--color-muted);
 }
 
 .note-cell {
@@ -293,7 +293,7 @@ button.small,
 
 .modal {
   width: min(720px, 100%);
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 1.5rem;
   border: 1px solid var(--color-line);
   padding: 1.5rem;
@@ -342,7 +342,7 @@ button.small,
   padding: 0.6rem 0.8rem;
   border-radius: 0.7rem;
   border: 1px solid rgba(20, 10, 0, 0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 .form-grid textarea {
@@ -370,7 +370,7 @@ button.small,
   padding: 1rem;
   display: grid;
   gap: 0.75rem;
-  background: #fffaf4;
+  background: var(--color-surface)af4;
 }
 
 .view-row {
