@@ -30,13 +30,29 @@
       <span class="count">{{ audits.length }} total</span>
     </div>
     <div class="audit-grid" *ngIf="audits.length">
-      <article class="audit-card" *ngFor="let audit of audits">
-        <div class="audit-card-header">
-          <div>
-            <p class="audit-label">Audit code</p>
-            <p class="code">{{ audit.code }}</p>
+      <article class="audit-card compact" *ngFor="let audit of audits">
+        <div class="audit-row">
+          <div class="audit-main">
+            <div class="audit-title">
+              <span class="code">{{ audit.code }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.auditType }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.auditSubtype || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.department || '—' }}</span>
+            </div>
+            <div class="audit-sub">
+              <span>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</span>
+              <span class="divider">·</span>
+              <span>Auditor: {{ audit.auditorName || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.site || '—' }} · {{ audit.region || '—' }}</span>
+            </div>
           </div>
-          <div class="audit-actions">
+          <div class="audit-inline">
             <button
               class="ghost small"
               type="button"
@@ -48,36 +64,6 @@
             <button class="primary small" type="button" (click)="openPerform(audit)">
               Perform
             </button>
-          </div>
-        </div>
-        <div class="audit-meta">
-          <div class="meta-block">
-            <span>Dates</span>
-            <strong>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Audit type</span>
-            <strong>{{ audit.auditType }}</strong>
-            <em>{{ audit.auditSubtype || '—' }}</em>
-          </div>
-          <div class="meta-block">
-            <span>Auditor</span>
-            <strong>{{ audit.auditorName || '—' }}</strong>
-          </div>
-        </div>
-        <div class="audit-footer">
-          <div class="meta-block">
-            <span>Department</span>
-            <strong>{{ audit.department || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Location</span>
-            <strong>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</strong>
-            <em>{{ audit.site || '—' }} · {{ audit.region || '—' }}</em>
-          </div>
-          <div class="meta-block note-cell">
-            <span>Note</span>
-            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
           </div>
         </div>
       </article>

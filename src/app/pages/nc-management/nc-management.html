@@ -50,14 +50,29 @@
   <section class="panel wide">
     <div class="panel-header">
       <div class="section-title">
-        <h2>Flagged questions</h2>
-        <span class="count">{{ ncRecords().length }} flagged</span>
+        <h2>NC overview</h2>
+        <span class="count">
+          {{ activeTab === 'flagged' ? (ncRecords().length + ' flagged') : (pendingReviewRecords().length + ' pending') }}
+        </span>
       </div>
-      <button class="ghost small" type="button" (click)="toggleFlagged()">
-        {{ showFlagged ? 'Collapse' : 'Expand' }}
-      </button>
+      <div class="tab-switch">
+        <button
+          type="button"
+          [class.active]="activeTab === 'flagged'"
+          (click)="setTab('flagged')"
+        >
+          Flagged questions
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab === 'pending'"
+          (click)="setTab('pending')"
+        >
+          Pending review
+        </button>
+      </div>
     </div>
-    <div class="nc-grid" *ngIf="showFlagged && ncRecords().length">
+    <div class="nc-grid" *ngIf="activeTab === 'flagged' && ncRecords().length">
       <article class="nc-card compact" *ngFor="let record of ncRecords()">
         <div class="nc-row">
           <div class="nc-main">
@@ -86,6 +101,7 @@
               name="assigned-nc-{{ record.answerId }}"
               [ngModel]="pendingAssignedNc[record.answerId] ?? record.assignedNc || ''"
               (ngModelChange)="updateAssignedNc(record, $event)"
+              [disabled]="!!getAssignedUserId(record)"
             >
               <option value="">Assign NC</option>
               <option *ngFor="let department of departments" [ngValue]="department">
@@ -96,7 +112,7 @@
               class="ghost small"
               type="button"
               (click)="confirmAssignedNc(record)"
-              [disabled]="!isAssignedNcPending(record)"
+              [disabled]="!isAssignedNcPending(record) || !!getAssignedUserId(record)"
             >
               Assign
             </button>
@@ -104,10 +120,10 @@
               class="assignee-select"
               [ngModelOptions]="{ standalone: true }"
               name="assignee-{{ record.answerId }}"
-                [ngModel]="getAssignedUserId(record) || ''"
-                (ngModelChange)="assignUser(record, $event)"
-                [disabled]="!canAssignUser(record)"
-              >
+              [ngModel]="getAssignedUserId(record) || ''"
+              (ngModelChange)="assignUser(record, $event)"
+              [disabled]="!canAssignUser(record) || !!getAssignedUserId(record)"
+            >
               <option value="">Assigned user</option>
               <option
                 *ngIf="getAssignedUserId(record) && !hasAssignedUserOption(record)"
@@ -134,19 +150,10 @@
         </div>
       </article>
     </div>
-  </section>
-
-  <section class="panel wide">
-    <div class="panel-header">
-      <div class="section-title">
-        <h2>Pending review</h2>
-        <span class="count">{{ pendingReviewRecords().length }} total</span>
-      </div>
-      <button class="ghost small" type="button" (click)="togglePendingReview()">
-        {{ showPendingReview ? 'Collapse' : 'Expand' }}
-      </button>
+    <div class="empty" *ngIf="activeTab === 'flagged' && !ncRecords().length">
+      No flagged questions right now.
     </div>
-    <div class="audit-grid" *ngIf="showPendingReview && pendingReviewRecords().length">
+    <div class="audit-grid" *ngIf="activeTab === 'pending' && pendingReviewRecords().length">
       <article class="audit-card compact" *ngFor="let record of pendingReviewRecords()">
         <div class="nc-row">
           <div class="nc-main">
@@ -179,7 +186,7 @@
         </div>
       </article>
     </div>
-    <div class="empty" *ngIf="showPendingReview && !pendingReviewRecords().length">
+    <div class="empty" *ngIf="activeTab === 'pending' && !pendingReviewRecords().length">
       No resolutions pending review.
     </div>
   </section>

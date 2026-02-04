@@ -66,6 +66,30 @@
   justify-content: space-between;
 }
 
+.tab-switch {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: #eef2f8;
+}
+
+.tab-switch button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #5f6b80;
+  cursor: pointer;
+}
+
+.tab-switch button.active {
+  background: #ffffff;
+  color: #1f2a3d;
+  box-shadow: 0 6px 16px rgba(26, 33, 56, 0.12);
+}
+
 .section-title {
   display: grid;
   gap: 0.2rem;

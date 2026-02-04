@@ -94,6 +94,30 @@ button.small,
   justify-content: space-between;
 }
 
+.tab-switch {
+  display: inline-flex;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 999px;
+  background: #fff6eb;
+}
+
+.tab-switch button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: #7b6a50;
+  cursor: pointer;
+}
+
+.tab-switch button.active {
+  background: #ffffff;
+  color: #1f2a3d;
+  box-shadow: 0 6px 16px rgba(26, 33, 56, 0.12);
+}
+
 .section-title {
   display: grid;
   gap: 0.2rem;
@@ -116,6 +140,52 @@ button.small,
   background: linear-gradient(120deg, #ffffff 0%, #ffffff 70%, #fff2df 100%);
   display: grid;
   gap: 1rem;
+}
+
+.audit-card.compact {
+  padding: 0.9rem 1.2rem;
+}
+
+.audit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.audit-main {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.audit-title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.audit-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.divider {
+  color: #d2c6b6;
+}
+
+.audit-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .audit-card-header {
@@ -199,6 +269,15 @@ button.small,
   .audit-card-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .audit-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .audit-inline {
+    justify-content: flex-start;
   }
 }
 

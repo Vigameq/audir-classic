@@ -193,10 +193,24 @@ router.post('/users/:userId/reset-password', requireAuth, async (req: AuthedRequ
 
 router.delete('/users/:userId', requireAuth, async (req: AuthedRequest, res) => {
   const userId = Number(req.params.userId);
-  await pool.query('DELETE FROM users WHERE id = $1 AND tenant_id = $2', [
-    userId,
-    req.user?.tenant_id,
-  ]);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      'UPDATE nc_actions SET assigned_user_id = NULL WHERE assigned_user_id = $1 AND tenant_id = $2',
+      [userId, req.user?.tenant_id]
+    );
+    await client.query('DELETE FROM users WHERE id = $1 AND tenant_id = $2', [
+      userId,
+      req.user?.tenant_id,
+    ]);
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
   return res.status(204).send();
 });
 

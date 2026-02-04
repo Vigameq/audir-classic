@@ -21,21 +21,21 @@
           routerLinkActive="active"
           *ngIf="auth.role() !== 'Super Admin'"
         >
-          Audit Plan
+          Plan
         </a>
         <a
           routerLink="/audit-manage"
           routerLinkActive="active"
           *ngIf="auth.role() !== 'Super Admin'"
         >
-          Audit Manage
+          Manage
         </a>
         <a
           routerLink="/audit-perform"
           routerLinkActive="active"
           *ngIf="auth.role() !== 'Super Admin'"
         >
-          Audit Perform
+          Perform
         </a>
         <a
           routerLink="/nc-management"
@@ -127,6 +127,10 @@
           <div class="user-name">{{ displayName }}</div>
         </button>
         <div class="user-dropdown" *ngIf="isUserMenuOpen">
+          <div class="user-detail">
+            <span>User name</span>
+            <strong>{{ fullName }}</strong>
+          </div>
           <div class="user-detail">
             <span>Email ID</span>
             <strong>{{ auth.email() || '—' }}</strong>

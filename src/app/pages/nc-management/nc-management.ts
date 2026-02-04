@@ -19,8 +19,7 @@ export class NcManagement implements OnInit {
   private readonly departmentService = inject(DepartmentService);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
-  protected showFlagged = true;
-  protected showPendingReview = false;
+  protected activeTab: 'flagged' | 'pending' = 'flagged';
   protected assignedFilter = '';
   protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
@@ -277,12 +276,8 @@ export class NcManagement implements OnInit {
     return false;
   }
 
-  protected toggleFlagged(): void {
-    this.showFlagged = !this.showFlagged;
-  }
-
-  protected togglePendingReview(): void {
-    this.showPendingReview = !this.showPendingReview;
+  protected setTab(tab: 'flagged' | 'pending'): void {
+    this.activeTab = tab;
   }
 
   private getCurrentUserId(): number | null {
@@ -341,8 +336,7 @@ export class NcManagement implements OnInit {
       name: selectedUser ? this.userLabel(selectedUser) : undefined,
       email: selectedUser?.email,
     };
-    const status = record.status || 'Assigned';
-    this.ncService.assignUser(record.answerId, selectedId, status).subscribe({
+    this.ncService.assignUser(record.answerId, selectedId, 'Assigned').subscribe({
       next: () => {
         this.ncService.listRecords().subscribe();
       },

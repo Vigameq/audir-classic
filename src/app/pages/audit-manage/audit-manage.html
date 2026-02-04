@@ -10,21 +10,61 @@
   <section class="panel wide">
     <div class="panel-header">
       <div class="section-title">
-        <h2>Created audits</h2>
-        <span class="count">{{ createdAudits.length }} total</span>
+        <h2>Audit status</h2>
+        <span class="count">{{ activeAudits.length }} total</span>
       </div>
-      <button class="ghost small" type="button" (click)="toggleCreated()">
-        {{ showCreated ? 'Collapse' : 'Expand' }}
-      </button>
+      <div class="tab-switch">
+        <button
+          type="button"
+          [class.active]="activeTab === 'created'"
+          (click)="setTab('created')"
+        >
+          Created audits
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab === 'inProgress'"
+          (click)="setTab('inProgress')"
+        >
+          In-progress audits
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab === 'completed'"
+          (click)="setTab('completed')"
+        >
+          Completed audits
+        </button>
+      </div>
     </div>
-    <div class="audit-grid" *ngIf="showCreated && createdAudits.length">
-      <article class="audit-card" *ngFor="let audit of createdAudits">
-        <div class="audit-card-header">
-          <div>
-            <p class="audit-label">Audit code</p>
-            <p class="code">{{ audit.code }}</p>
+    <div class="audit-grid" *ngIf="activeAudits.length; else emptyAudits">
+      <article class="audit-card compact" *ngFor="let audit of activeAudits">
+        <div class="audit-row">
+          <div class="audit-main">
+            <div class="audit-title">
+              <span class="code">{{ audit.code }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.auditType }}</span>
+              <span *ngIf="audit.auditSubtype">
+                <span class="divider">·</span>
+                {{ audit.auditSubtype }}
+              </span>
+            </div>
+            <div class="audit-sub">
+              <span>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.department || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.locationCity || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ audit.auditorName || '—' }}</span>
+            </div>
           </div>
-          <div class="card-actions">
+          <div class="audit-inline">
+            <div class="meta-block">
+              <span>NCs</span>
+              <strong>{{ getAuditProgress(audit).nc }}</strong>
+            </div>
             <button
               class="ghost small"
               type="button"
@@ -38,186 +78,17 @@
               class="ghost small danger"
               type="button"
               (click)="deleteAudit(audit)"
-              *ngIf="auth.role() === 'Manager'"
+              *ngIf="activeTab === 'created' && auth.role() === 'Manager'"
             >
               Delete
             </button>
           </div>
         </div>
-        <div class="audit-meta">
-          <div class="meta-block">
-            <span>Dates</span>
-            <strong>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Audit type</span>
-            <strong>{{ audit.auditType }}</strong>
-            <em>{{ audit.auditSubtype || '—' }}</em>
-          </div>
-          <div class="meta-block">
-            <span>Auditor</span>
-            <strong>{{ audit.auditorName || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>NC count</span>
-            <strong>{{ getAuditProgress(audit).nc }}</strong>
-          </div>
-        </div>
-        <div class="audit-footer">
-          <div class="meta-block">
-            <span>Department</span>
-            <strong>{{ audit.department || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Location</span>
-            <strong>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</strong>
-            <em>{{ audit.site || '—' }} · {{ audit.region || '—' }}</em>
-          </div>
-          <div class="meta-block note-cell">
-            <span>Note</span>
-            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
-          </div>
-        </div>
       </article>
     </div>
-    <div class="empty" *ngIf="!createdAudits.length">
-      No created audits waiting to start.
-    </div>
-  </section>
-
-  <section class="panel wide">
-    <div class="panel-header">
-      <div class="section-title">
-        <h2>In progress audits</h2>
-        <span class="count">{{ inProgressAudits.length }} total</span>
-      </div>
-      <button class="ghost small" type="button" (click)="toggleInProgress()">
-        {{ showInProgress ? 'Collapse' : 'Expand' }}
-      </button>
-    </div>
-    <div class="audit-grid" *ngIf="showInProgress && inProgressAudits.length">
-      <article class="audit-card" *ngFor="let audit of inProgressAudits">
-        <div class="audit-card-header">
-          <div>
-            <p class="audit-label">Audit code</p>
-            <p class="code">{{ audit.code }}</p>
-          </div>
-          <div class="card-actions">
-            <button
-              class="ghost small"
-              type="button"
-              (click)="openEdit(audit)"
-              [disabled]="completionMap[audit.code] === 'Completed'"
-            >
-              Edit
-            </button>
-            <button class="ghost small" type="button" (click)="openView(audit)">View</button>
-          </div>
-        </div>
-        <div class="audit-meta">
-          <div class="meta-block">
-            <span>Dates</span>
-            <strong>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Audit type</span>
-            <strong>{{ audit.auditType }}</strong>
-            <em>{{ audit.auditSubtype || '—' }}</em>
-          </div>
-          <div class="meta-block">
-            <span>Auditor</span>
-            <strong>{{ audit.auditorName || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>NC count</span>
-            <strong>{{ getAuditProgress(audit).nc }}</strong>
-          </div>
-        </div>
-        <div class="audit-footer">
-          <div class="meta-block">
-            <span>Department</span>
-            <strong>{{ audit.department || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Location</span>
-            <strong>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</strong>
-            <em>{{ audit.site || '—' }} · {{ audit.region || '—' }}</em>
-          </div>
-          <div class="meta-block note-cell">
-            <span>Note</span>
-            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
-          </div>
-        </div>
-      </article>
-    </div>
-    <div class="empty" *ngIf="!inProgressAudits.length">
-      No in-progress audits right now.
-    </div>
-  </section>
-
-  <section class="panel wide">
-    <div class="panel-header">
-      <div class="section-title">
-        <h2>Completed audits</h2>
-        <span class="count">{{ completedAudits.length }} total</span>
-      </div>
-      <button class="ghost small" type="button" (click)="toggleCompleted()">
-        {{ showCompleted ? 'Collapse' : 'Expand' }}
-      </button>
-    </div>
-    <div class="audit-grid" *ngIf="showCompleted && completedAudits.length">
-      <article class="audit-card" *ngFor="let audit of completedAudits">
-        <div class="audit-card-header">
-          <div>
-            <p class="audit-label">Audit code</p>
-            <p class="code">{{ audit.code }}</p>
-          </div>
-          <div class="card-actions">
-            <button class="ghost small" type="button" (click)="openEdit(audit)" disabled>
-              Edit
-            </button>
-            <button class="ghost small" type="button" (click)="openView(audit)">View</button>
-          </div>
-        </div>
-        <div class="audit-meta">
-          <div class="meta-block">
-            <span>Dates</span>
-            <strong>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Audit type</span>
-            <strong>{{ audit.auditType }}</strong>
-            <em>{{ audit.auditSubtype || '—' }}</em>
-          </div>
-          <div class="meta-block">
-            <span>Auditor</span>
-            <strong>{{ audit.auditorName || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>NC count</span>
-            <strong>{{ getAuditProgress(audit).nc }}</strong>
-          </div>
-        </div>
-        <div class="audit-footer">
-          <div class="meta-block">
-            <span>Department</span>
-            <strong>{{ audit.department || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Location</span>
-            <strong>{{ audit.country || '—' }} · {{ audit.locationCity || '—' }}</strong>
-            <em>{{ audit.site || '—' }} · {{ audit.region || '—' }}</em>
-          </div>
-          <div class="meta-block note-cell">
-            <span>Note</span>
-            <p class="note-text">{{ audit.auditNote || 'No note provided' }}</p>
-          </div>
-        </div>
-      </article>
-    </div>
-    <div class="empty" *ngIf="!completedAudits.length">
-      No completed audits yet.
-    </div>
+    <ng-template #emptyAudits>
+      <div class="empty">No {{ activeTabLabel }} audits available.</div>
+    </ng-template>
   </section>
 
   <div class="modal-backdrop" *ngIf="activeAudit">

@@ -100,6 +100,13 @@ export class App {
     return 'User';
   }
 
+  protected get fullName(): string {
+    const first = this.auth.firstName();
+    const last = this.auth.lastName();
+    const combined = `${first} ${last}`.trim();
+    return combined || this.displayName;
+  }
+
   protected get avatarText(): string {
     const source = this.auth.email() || this.auth.role() || 'U';
     const cleaned = source.split('@')[0].replace(/[^a-zA-Z0-9]/g, '');

@@ -52,9 +52,7 @@ export class AuditManage implements OnInit {
 
   protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
-  protected showInProgress = false;
-  protected showCompleted = false;
-  protected showCreated = false;
+  protected activeTab: 'created' | 'inProgress' | 'completed' = 'created';
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
@@ -75,6 +73,26 @@ export class AuditManage implements OnInit {
 
   protected get createdAudits(): AuditPlanRecord[] {
     return this.audits.filter((audit) => this.isCreatedAudit(audit));
+  }
+
+  protected get activeAudits(): AuditPlanRecord[] {
+    if (this.activeTab === 'completed') {
+      return this.completedAudits;
+    }
+    if (this.activeTab === 'inProgress') {
+      return this.inProgressAudits;
+    }
+    return this.createdAudits;
+  }
+
+  protected get activeTabLabel(): string {
+    if (this.activeTab === 'completed') {
+      return 'completed';
+    }
+    if (this.activeTab === 'inProgress') {
+      return 'in-progress';
+    }
+    return 'created';
   }
 
   protected readonly citiesByCountry: Record<string, string[]> = {
@@ -317,16 +335,8 @@ export class AuditManage implements OnInit {
     });
   }
 
-  protected toggleInProgress(): void {
-    this.showInProgress = !this.showInProgress;
-  }
-
-  protected toggleCompleted(): void {
-    this.showCompleted = !this.showCompleted;
-  }
-
-  protected toggleCreated(): void {
-    this.showCreated = !this.showCreated;
+  protected setTab(tab: 'created' | 'inProgress' | 'completed'): void {
+    this.activeTab = tab;
   }
 
   protected getAuditProgress(audit: AuditPlanRecord): { nc: number; nonNc: number } {
