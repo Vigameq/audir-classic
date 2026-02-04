@@ -371,6 +371,14 @@ export class AuditPerform implements OnInit {
   protected onEvidenceSelected(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    const allowedTypes = new Set(['image/jpeg', 'image/png']);
+    if (file && !allowedTypes.has(file.type)) {
+      window.alert('Only JPG or PNG images are allowed.');
+      this.evidenceFiles[index] = '';
+      this.evidenceDataUrls[index] = '';
+      input.value = '';
+      return;
+    }
     this.evidenceFiles[index] = file ? file.name : '';
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();

@@ -131,71 +131,280 @@ export class Reports implements OnInit {
     ncRecords: NcRecord[]
   ): void {
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const margin = 40;
+    const margin = 36;
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    let y = margin;
+    let pageNumber = 1;
+
+    const brand = 'AuditX | TierX DCS';
+    const addHeaderFooter = (): void => {
+      doc.setFontSize(9);
+      doc.setTextColor(80, 90, 110);
+      doc.text(brand, margin, 26);
+      doc.text('Confidential', pageWidth - margin - 70, 26);
+      doc.setDrawColor(230);
+      doc.line(margin, 32, pageWidth - margin, 32);
+      doc.line(margin, pageHeight - 36, pageWidth - margin, pageHeight - 36);
+      doc.text(
+        `Page ${pageNumber}`,
+        pageWidth - margin - 40,
+        pageHeight - 18
+      );
+      doc.setTextColor(0, 0, 0);
+    };
+
+    const newPage = (): void => {
+      doc.addPage();
+      pageNumber += 1;
+      addHeaderFooter();
+    };
+
+    const ensureSpace = (needed: number): void => {
+      if (y + needed <= pageHeight - 50) {
+        return;
+      }
+      newPage();
+      y = 50;
+    };
+
+    const drawSectionTitle = (title: string): void => {
+      ensureSpace(32);
+      doc.setFontSize(12);
+      doc.setTextColor(32, 41, 57);
+      doc.text(title, margin, y);
+      y += 16;
+      doc.setDrawColor(235);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 14;
+      doc.setTextColor(0, 0, 0);
+    };
+
+    const drawCard = (x: number, top: number, w: number, h: number, title: string, lines: string[]) => {
+      doc.setDrawColor(230);
+      doc.setFillColor(248, 250, 255);
+      doc.roundedRect(x, top, w, h, 8, 8, 'FD');
+      doc.setFontSize(10);
+      doc.setTextColor(90, 100, 120);
+      doc.text(title, x + 10, top + 16);
+      doc.setFontSize(11);
+      doc.setTextColor(20, 25, 35);
+      let lineY = top + 34;
+      lines.forEach((line) => {
+        const parts = doc.splitTextToSize(line, w - 20);
+        doc.text(parts, x + 10, lineY);
+        lineY += parts.length * 13;
+      });
+      doc.setTextColor(0, 0, 0);
+    };
+
+    addHeaderFooter();
+    let y = 54;
 
     doc.setFontSize(18);
     doc.text('Audit Report', margin, y);
-    y += 24;
-
+    y += 22;
     doc.setFontSize(11);
-    const meta = [
-      `Audit code: ${audit.code}`,
-      `Audit type: ${audit.auditType || '—'}`,
-      `Audit subtype: ${audit.auditSubtype || '—'}`,
+    doc.setTextColor(90, 100, 120);
+    doc.text(`Audit code: ${audit.code}`, margin, y);
+    doc.setTextColor(0, 0, 0);
+    y += 18;
+
+    drawSectionTitle('Audit Metadata');
+    const colWidth = (pageWidth - margin * 2 - 16) / 2;
+    const cardHeight = 110;
+    ensureSpace(cardHeight + 16);
+    drawCard(margin, y, colWidth, cardHeight, 'Core details', [
+      `Type: ${audit.auditType || '—'}`,
+      `Subtype: ${audit.auditSubtype || '—'}`,
       `Auditor: ${audit.auditorName || '—'}`,
-      `Dates: ${this.formatDate(audit.startDate)} → ${this.formatDate(audit.endDate)}`,
+      `Response type: ${audit.responseType || '—'}`,
+    ]);
+    drawCard(margin + colWidth + 16, y, colWidth, cardHeight, 'Location', [
+      `Department: ${audit.department || '—'}`,
+      `Site: ${audit.site || '—'}`,
+      `City: ${audit.locationCity || '—'}`,
+      `Region/Country: ${audit.region || '—'} / ${audit.country || '—'}`,
+    ]);
+    y += cardHeight + 20;
+
+    drawSectionTitle('Scope');
+    const scopeText = audit.auditNote || audit.auditSubtype || '—';
+    const scopeLines = doc.splitTextToSize(scopeText, pageWidth - margin * 2);
+    ensureSpace(scopeLines.length * 14 + 16);
+    doc.setFontSize(10.5);
+    doc.text(scopeLines, margin, y);
+    y += scopeLines.length * 14 + 6;
+
+    drawSectionTitle('Methodology');
+    const methodology =
+      audit.responseType || 'On-site inspection with evidence capture and NC tracking.';
+    const methodLines = doc.splitTextToSize(methodology, pageWidth - margin * 2);
+    ensureSpace(methodLines.length * 14 + 16);
+    doc.setFontSize(10.5);
+    doc.text(methodLines, margin, y);
+    y += methodLines.length * 14 + 6;
+
+    drawSectionTitle('Findings Summary');
+    const total = answers.length || 1;
+    const negative = answers.filter((answer) => answer.responseIsNegative).length;
+    const positive = total - negative;
+    const statusCounts = ncRecords.reduce<Record<string, number>>((acc, record) => {
+      const key = record.status || 'Assigned';
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {});
+    const summaryLines = [
+      `Total questions: ${answers.length}`,
+      `Positive responses: ${positive}`,
+      `Negative responses: ${negative}`,
+      `NCs recorded: ${ncRecords.length}`,
     ];
-    meta.forEach((line) => {
-      doc.text(line, margin, y);
-      y += 16;
-    });
+    ensureSpace(90);
+    drawCard(margin, y, colWidth, 90, 'Response distribution', summaryLines);
+    const statusLines = Object.entries(statusCounts).map(([status, count]) => `${status}: ${count}`);
+    drawCard(margin + colWidth + 16, y, colWidth, 90, 'NC status', statusLines.length ? statusLines : ['—']);
+    y += 110;
 
-    y += 8;
-    y = this.drawCharts(doc, margin, y, pageWidth - margin * 2, answers, ncRecords);
-    y += 16;
+    drawSectionTitle('NC Register');
+    if (!ncRecords.length) {
+      ensureSpace(20);
+      doc.text('No NC records for this audit.', margin, y);
+      y += 14;
+    } else {
+      const sortedNc = [...ncRecords].sort((a, b) =>
+        (a.submittedAt || '').localeCompare(b.submittedAt || '')
+      );
+      sortedNc.forEach((record, idx) => {
+        const blockHeight = 86;
+        ensureSpace(blockHeight);
+        doc.setDrawColor(235);
+        doc.roundedRect(margin, y, pageWidth - margin * 2, blockHeight, 6, 6);
+        doc.setFontSize(10);
+        doc.setTextColor(90, 100, 120);
+        doc.text(`NC ${idx + 1}`, margin + 10, y + 18);
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10.5);
+        const ncLines = [
+          `Question: ${record.question || '—'}`,
+          `Assigned NC: ${record.assignedNc || '—'}`,
+          `Status: ${record.status || '—'}`,
+          `Owner: ${record.assignedUserName || '—'}`,
+        ];
+        let lineY = y + 34;
+        ncLines.forEach((line) => {
+          const lines = doc.splitTextToSize(line, pageWidth - margin * 2 - 20);
+          doc.text(lines, margin + 10, lineY);
+          lineY += lines.length * 12;
+        });
+        y += blockHeight + 10;
+      });
+    }
 
+    drawSectionTitle('Corrective Actions');
+    if (!ncRecords.length) {
+      ensureSpace(20);
+      doc.text('No corrective actions recorded.', margin, y);
+      y += 14;
+    } else {
+      ncRecords.forEach((record, idx) => {
+        const lines = [
+          `NC ${idx + 1}: ${record.question || '—'}`,
+          `Root cause: ${record.rootCause || '—'}`,
+          `Containment: ${record.containmentAction || '—'}`,
+          `Corrective: ${record.correctiveAction || '—'}`,
+          `Preventive: ${record.preventiveAction || '—'}`,
+          `Evidence: ${record.evidenceName || '—'}`,
+        ];
+        const height = lines.length * 13 + 14;
+        ensureSpace(height);
+        doc.setFontSize(10.5);
+        lines.forEach((line) => {
+          const parts = doc.splitTextToSize(line, pageWidth - margin * 2);
+          doc.text(parts, margin, y);
+          y += parts.length * 12;
+        });
+        y += 6;
+      });
+    }
+
+    drawSectionTitle('Question Responses');
     const sortedAnswers = [...answers].sort((a, b) => a.questionIndex - b.questionIndex);
     sortedAnswers.forEach((answer) => {
       const questionTitle = `Q${answer.questionIndex + 1}. ${answer.questionText || '—'}`;
-      y = this.ensureSpace(doc, y, pageHeight, 120);
-      doc.setFontSize(11);
-      const questionLines = doc.splitTextToSize(questionTitle, pageWidth - margin * 2);
-      doc.text(questionLines, margin, y);
-      y += questionLines.length * 14;
-
+      const blockHeight = 90;
+      ensureSpace(blockHeight);
+      doc.setDrawColor(235);
+      doc.roundedRect(margin, y, pageWidth - margin * 2, blockHeight, 6, 6);
+      doc.setFontSize(10);
+      doc.setTextColor(90, 100, 120);
+      doc.text(questionTitle, margin + 10, y + 18);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10.5);
       const detailLines = [
         `Response: ${answer.response || '—'}`,
         `Assigned NC: ${answer.assignedNc || '—'}`,
-        `Auditor note: ${answer.note || '—'}`,
+        `Status: ${answer.status || '—'}`,
+        `Note: ${answer.note || '—'}`,
       ];
-      doc.setFontSize(10);
+      let lineY = y + 34;
       detailLines.forEach((line) => {
-        const lines = doc.splitTextToSize(line, pageWidth - margin * 2);
-        doc.text(lines, margin, y);
-        y += lines.length * 13;
+        const lines = doc.splitTextToSize(line, pageWidth - margin * 2 - 20);
+        doc.text(lines, margin + 10, lineY);
+        lineY += lines.length * 12;
       });
-
-      const evidenceDataUrl =
-        answer.evidenceDataUrl || this.getEvidenceDataUrl(audit.code, answer.questionIndex);
-      if (evidenceDataUrl) {
-        const format = evidenceDataUrl.startsWith('data:image/png') ? 'PNG' : 'JPEG';
-        const imageWidth = 220;
-        const imageHeight = 140;
-        y = this.ensureSpace(doc, y, pageHeight, imageHeight + 20);
-        doc.text('Evidence:', margin, y);
-        y += 12;
-        doc.addImage(evidenceDataUrl, format, margin, y, imageWidth, imageHeight);
-        y += imageHeight + 12;
-      } else if (answer.evidenceName) {
-        doc.text(`Evidence: ${answer.evidenceName}`, margin, y);
-        y += 14;
-      }
-
-      y += 10;
+      y += blockHeight + 10;
     });
+
+    drawSectionTitle('Evidence Thumbnails');
+    const thumbnails: { url: string; label: string }[] = [];
+    sortedAnswers.forEach((answer) => {
+      const url =
+        answer.evidenceDataUrl || this.getEvidenceDataUrl(audit.code, answer.questionIndex);
+      if (url) {
+        thumbnails.push({
+          url,
+          label: `Q${answer.questionIndex + 1}`,
+        });
+      }
+    });
+    if (!thumbnails.length) {
+      ensureSpace(20);
+      doc.text('No evidence thumbnails available.', margin, y);
+      y += 14;
+    } else {
+      const thumbWidth = 120;
+      const thumbHeight = 80;
+      const gap = 14;
+      let x = margin;
+      thumbnails.forEach((thumb, index) => {
+        if (x + thumbWidth > pageWidth - margin) {
+          x = margin;
+          y += thumbHeight + 32;
+        }
+        ensureSpace(thumbHeight + 32);
+        const format = thumb.url.startsWith('data:image/png') ? 'PNG' : 'JPEG';
+        doc.setFontSize(9);
+        doc.setTextColor(90, 100, 120);
+        doc.text(thumb.label, x, y);
+        doc.setTextColor(0, 0, 0);
+        doc.addImage(thumb.url, format, x, y + 8, thumbWidth, thumbHeight);
+        x += thumbWidth + gap;
+        if ((index + 1) % 3 === 0) {
+          x = margin;
+          y += thumbHeight + 32;
+        }
+      });
+      y += thumbHeight + 18;
+    }
+
+    drawSectionTitle('Approvals & Sign-off');
+    ensureSpace(80);
+    doc.setFontSize(10.5);
+    doc.text(`Auditor: ${audit.auditorName || '—'}`, margin, y);
+    y += 16;
+    doc.text('Manager approval: ________________________________', margin, y);
+    y += 16;
+    doc.text('Date: ___________________', margin, y);
 
     doc.save(`audit-${audit.code}.pdf`);
   }

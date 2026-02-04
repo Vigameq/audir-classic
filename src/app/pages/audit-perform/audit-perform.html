@@ -152,7 +152,11 @@
                 <div class="evidence-actions">
                   <label class="ghost small file-trigger">
                     Upload file
-                    <input type="file" (change)="onEvidenceSelected(i, $event)" />
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                      (change)="onEvidenceSelected(i, $event)"
+                    />
                   </label>
                 </div>
                 <span class="evidence-name" *ngIf="evidenceFiles[i]">

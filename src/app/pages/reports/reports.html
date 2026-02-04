@@ -12,24 +12,48 @@
     <p class="error">{{ error }}</p>
   </div>
 
-  <section class="panel" *ngIf="!loading && !error">
+  <section class="panel report-panel" *ngIf="!loading && !error">
     <div class="panel-header">
-      <h2>Closed audits</h2>
+      <div>
+        <h2>Closed audits</h2>
+        <p class="panel-subtitle">Download finalized reports and summaries.</p>
+      </div>
       <span class="count">{{ reportAudits.length }} reports</span>
     </div>
-    <div class="report-list" *ngIf="reportAudits.length; else emptyReports">
+    <div class="report-grid" *ngIf="reportAudits.length; else emptyReports">
       <article class="report-card" *ngFor="let audit of reportAudits">
-        <div>
-          <p class="code">{{ audit.code }}</p>
-          <h3>{{ audit.auditType }}</h3>
-          <p class="meta">
-            {{ audit.auditSubtype || '—' }} · {{ audit.auditorName || '—' }}
-          </p>
-          <p class="dates">
-            {{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}
-          </p>
+        <header class="card-header">
+          <div class="avatar">
+            <span>{{ audit.auditType?.charAt(0) || '?' }}</span>
+          </div>
+          <div>
+            <p class="code">{{ audit.code }}</p>
+            <h3>{{ audit.auditType }}</h3>
+            <p class="meta">{{ audit.auditSubtype || '—' }}</p>
+          </div>
+          <span class="status-pill">Closed</span>
+        </header>
+
+        <div class="card-body">
+          <div class="detail">
+            <span>Auditor</span>
+            <strong>{{ audit.auditorName || '—' }}</strong>
+          </div>
+          <div class="detail">
+            <span>Department</span>
+            <strong>{{ audit.department || '—' }}</strong>
+          </div>
+          <div class="detail">
+            <span>Location</span>
+            <strong>{{ audit.locationCity || '—' }}</strong>
+          </div>
+          <div class="detail">
+            <span>Dates</span>
+            <strong>{{ formatDate(audit.startDate) }} → {{ formatDate(audit.endDate) }}</strong>
+          </div>
         </div>
-        <div class="actions">
+
+        <footer class="card-actions">
           <button
             class="primary"
             type="button"
@@ -38,7 +62,7 @@
           >
             {{ generating[audit.code] ? 'Generating…' : 'Download PDF' }}
           </button>
-        </div>
+        </footer>
       </article>
     </div>
     <ng-template #emptyReports>
