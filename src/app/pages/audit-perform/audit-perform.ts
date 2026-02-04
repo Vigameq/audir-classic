@@ -68,6 +68,7 @@ export class AuditPerform implements OnInit {
   protected evidenceFiles: string[] = [];
   protected evidenceDataUrls: string[] = [];
   protected noteEntries: string[] = [];
+  protected ncErrors: boolean[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
   private completedAuditCodes = new Set<string>();
@@ -149,7 +150,9 @@ export class AuditPerform implements OnInit {
     this.ncAssignments = [];
     this.savedQuestions = [];
     this.evidenceFiles = [];
+    this.evidenceDataUrls = [];
     this.noteEntries = [];
+    this.ncErrors = [];
     this.router.navigate(['/audit-perform'], { replaceUrl: true });
   }
 
@@ -158,6 +161,9 @@ export class AuditPerform implements OnInit {
   }
 
   protected saveQuestion(index: number): void {
+    if (!this.validateNcAssignment(index)) {
+      return;
+    }
     this.persistAnswer(index, 'Saved');
   }
 
@@ -167,6 +173,9 @@ export class AuditPerform implements OnInit {
     }
     const response = this.responseSelections[index];
     if (!response) {
+      return;
+    }
+    if (!this.validateNcAssignment(index)) {
       return;
     }
     this.persistAnswer(index, 'Submitted');
@@ -182,6 +191,11 @@ export class AuditPerform implements OnInit {
       this.responseSelections.every((response) => response?.trim());
     if (!hasAllAnswers) {
       window.alert('Please answer all questions before submitting.');
+      return;
+    }
+    const missingNc = this.responseSelections.some((_response, index) => !this.validateNcAssignment(index));
+    if (missingNc) {
+      window.alert('Please assign NC for all Not OK responses before submitting.');
       return;
     }
     const confirmed = window.confirm('Are you sure you want to submit this audit?');
@@ -205,7 +219,14 @@ export class AuditPerform implements OnInit {
   protected onResponseChange(index: number): void {
     if (!this.isNegativeSelection(index)) {
       this.ncAssignments[index] = '';
+      this.ncErrors[index] = false;
+      return;
     }
+    this.validateNcAssignment(index);
+  }
+
+  protected onNcChange(index: number): void {
+    this.validateNcAssignment(index);
   }
 
   private resetQuestionState(): void {
@@ -228,6 +249,9 @@ export class AuditPerform implements OnInit {
     this.noteEntries = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill('')
       : [];
+    this.ncErrors = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(false)
+      : [];
   }
 
   private applyAnswers(answers: {
@@ -248,7 +272,19 @@ export class AuditPerform implements OnInit {
       this.evidenceDataUrls[index] = answer.evidenceDataUrl ?? '';
       this.noteWords[index] = this.countWords(this.noteEntries[index]);
       this.savedQuestions[index] = !!answer.status;
+      this.ncErrors[index] = false;
     });
+  }
+
+  private validateNcAssignment(index: number): boolean {
+    if (!this.isNegativeSelection(index)) {
+      this.ncErrors[index] = false;
+      return true;
+    }
+    const assigned = this.ncAssignments[index]?.trim();
+    const valid = !!assigned;
+    this.ncErrors[index] = !valid;
+    return valid;
   }
 
   private persistAnswer(index: number, status: 'Saved' | 'Submitted'): Promise<void> {

@@ -339,6 +339,11 @@ button.small {
   color: var(--color-muted);
 }
 
+.inline-fields .field-error {
+  font-size: 0.75rem;
+  color: #8a1f2b;
+}
+
 .inline-fields select {
   font: inherit;
   padding: 0.4rem 0.7rem;
