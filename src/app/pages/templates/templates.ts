@@ -156,9 +156,7 @@ export class Templates implements OnInit {
   }
 
   protected updateQuestion(index: number, value: string): void {
-    this.editQuestions = this.editQuestions.map((question, i) =>
-      i === index ? value : question
-    );
+    this.editQuestions[index] = value;
   }
 
   protected saveTemplate(template: TemplateRecord): void {

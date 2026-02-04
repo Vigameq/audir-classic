@@ -18,77 +18,77 @@
       <span class="count">{{ templates.length }} total</span>
     </div>
     <div class="template-list">
-      <article class="template-item" *ngFor="let template of templates" (click)="toggleTemplate(template.id)">
-        <div>
+      <article class="template-item" *ngFor="let template of templates">
+        <div class="template-summary" (click)="toggleTemplate(template.id)">
           <h3>{{ template.name }}</h3>
           <p>{{ template.questions.length }} questions</p>
           <p class="note-text" *ngIf="template.note">{{ template.note }}</p>
           <div class="tag-list" *ngIf="template.tags.length">
             <span class="tag" *ngFor="let tag of template.tags">{{ tag }}</span>
           </div>
-          <ng-container *ngIf="expandedTemplateId === template.id">
-            <ol class="question-list" *ngIf="editingTemplateId !== template.id">
-              <li *ngFor="let question of template.questions">{{ question }}</li>
-            </ol>
-            <div
-              class="template-edit"
-              *ngIf="editingTemplateId === template.id"
-              (click)="$event.stopPropagation()"
-            >
-              <label>
-                Template name
-                <input
-                  type="text"
-                  [(ngModel)]="editName"
-                  name="edit-name-{{ template.id }}"
-                  (click)="$event.stopPropagation()"
-                />
-              </label>
-              <div class="question-edit">
-                <div class="question-edit-header">
-                  <span>Questions</span>
-                  <button class="ghost small" type="button" (click)="addQuestion(); $event.stopPropagation()">
-                    Add question
+        </div>
+        <ng-container *ngIf="expandedTemplateId === template.id">
+          <ol class="question-list" *ngIf="editingTemplateId !== template.id">
+            <li *ngFor="let question of template.questions">{{ question }}</li>
+          </ol>
+          <div
+            class="template-edit"
+            *ngIf="editingTemplateId === template.id"
+            (click)="$event.stopPropagation()"
+          >
+            <label>
+              Template name
+              <input
+                type="text"
+                [(ngModel)]="editName"
+                name="edit-name-{{ template.id }}"
+                (click)="$event.stopPropagation()"
+              />
+            </label>
+            <div class="question-edit">
+              <div class="question-edit-header">
+                <span>Questions</span>
+                <button class="ghost small" type="button" (click)="addQuestion(); $event.stopPropagation()">
+                  Add question
+                </button>
+              </div>
+              <div class="question-edit-list">
+                <div class="question-edit-row" *ngFor="let question of editQuestions; let i = index">
+                  <input
+                    type="text"
+                    [(ngModel)]="editQuestions[i]"
+                    name="edit-question-{{ template.id }}-{{ i }}"
+                    (input)="updateQuestion(i, editQuestions[i])"
+                    (click)="$event.stopPropagation()"
+                  />
+                  <button
+                    class="ghost small danger"
+                    type="button"
+                    (click)="removeQuestion(i); $event.stopPropagation()"
+                  >
+                    Remove
                   </button>
                 </div>
-                <div class="question-edit-list">
-                  <div class="question-edit-row" *ngFor="let question of editQuestions; let i = index">
-                    <input
-                      type="text"
-                      [(ngModel)]="editQuestions[i]"
-                      name="edit-question-{{ template.id }}-{{ i }}"
-                      (input)="updateQuestion(i, editQuestions[i])"
-                      (click)="$event.stopPropagation()"
-                    />
-                    <button
-                      class="ghost small danger"
-                      type="button"
-                      (click)="removeQuestion(i); $event.stopPropagation()"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <p class="error" *ngIf="editError">{{ editError }}</p>
-              <div class="edit-actions">
-                <button class="ghost" type="button" (click)="cancelEdit(); $event.stopPropagation()">
-                  Cancel
-                </button>
-                <button
-                  class="primary"
-                  type="button"
-                  (click)="saveTemplate(template); $event.stopPropagation()"
-                >
-                  Save changes
-                </button>
               </div>
             </div>
-          </ng-container>
-        </div>
+            <p class="error" *ngIf="editError">{{ editError }}</p>
+            <div class="edit-actions">
+              <button class="ghost" type="button" (click)="cancelEdit(); $event.stopPropagation()">
+                Cancel
+              </button>
+              <button
+                class="primary"
+                type="button"
+                (click)="saveTemplate(template); $event.stopPropagation()"
+              >
+                Save changes
+              </button>
+            </div>
+          </div>
+        </ng-container>
         <div class="template-meta">
           <div class="template-actions">
-          <button
+            <button
             class="icon-button"
             type="button"
             (click)="startEdit(template); $event.stopPropagation()"
@@ -114,7 +114,7 @@
               />
             </svg>
           </button>
-          <button
+            <button
             class="icon-button danger"
             type="button"
             (click)="$event.stopPropagation(); deleteTemplate(template.id)"
@@ -146,7 +146,7 @@
                 stroke-linejoin="round"
               />
             </svg>
-          </button>
+            </button>
           </div>
           <span class="meta">{{ template.createdAt | date:'mediumDate' }}</span>
         </div>
