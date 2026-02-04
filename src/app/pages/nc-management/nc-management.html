@@ -95,7 +95,7 @@
                 name="assignee-{{ record.answerId }}"
                 [ngModel]="getAssignedUserId(record) || ''"
                 (ngModelChange)="assignUser(record, $event)"
-                [disabled]="(!!getAssignedUserId(record) && auth.role() !== 'Manager') || (record.status || '').toLowerCase() === 'rework'"
+                [disabled]="!canAssignUser(record) || (!!getAssignedUserId(record) && auth.role() !== 'Manager') || (record.status || '').toLowerCase() === 'rework'"
               >
                 <option value="">Select user</option>
                 <option

@@ -396,6 +396,17 @@ export class NcManagement implements OnInit {
     return null;
   }
 
+  protected canAssignUser(record: NcRecord): boolean {
+    const recordDept = (record.assignedNc || '').trim().toLowerCase();
+    let department = this.auth.department().trim().toLowerCase();
+    if (!department) {
+      const currentId = this.currentUserId();
+      const currentUser = this.users.find((user) => user.id === currentId);
+      department = String(currentUser?.department ?? '').trim().toLowerCase();
+    }
+    return !!recordDept && recordDept === department;
+  }
+
   protected hasAssignedUserOption(record: NcRecord): boolean {
     const assignedId = this.getAssignedUserId(record);
     if (!assignedId) {
