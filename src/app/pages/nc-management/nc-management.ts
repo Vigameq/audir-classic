@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthState } from '../../auth-state';
 import { NcRecord, NcService } from '../../services/nc.service';
+import { DepartmentService } from '../../services/department.service';
 import { User, UserService } from '../../services/user.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class NcManagement implements OnInit {
   protected readonly auth = inject(AuthState);
   private readonly ncService = inject(NcService);
   private readonly userService = inject(UserService);
+  private readonly departmentService = inject(DepartmentService);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
   protected showFlagged = false;
@@ -80,6 +82,19 @@ export class NcManagement implements OnInit {
   ngOnInit(): void {
     this.ncService.listRecords().subscribe();
     this.loadUsers();
+    this.departmentService.migrateFromLocal().subscribe();
+  }
+
+  protected get departments(): string[] {
+    return this.departmentService.departments();
+  }
+
+  protected updateAssignedNc(record: NcRecord, value: string): void {
+    record.assignedNc = value.trim();
+    record.assignedUserId = undefined;
+    record.assignedUserName = undefined;
+    record.assignedUserEmail = undefined;
+    delete this.assignedOverrides[record.answerId];
   }
 
   protected openRecord(record: NcRecord): void {

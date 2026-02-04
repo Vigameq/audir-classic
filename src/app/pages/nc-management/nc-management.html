@@ -74,7 +74,18 @@
             </div>
             <div class="meta-block">
               <span>Assigned NC</span>
-              <strong>{{ record.assignedNc || '—' }}</strong>
+              <select
+                class="assignee-select"
+                [ngModelOptions]="{ standalone: true }"
+                name="assigned-nc-{{ record.answerId }}"
+                [ngModel]="record.assignedNc || ''"
+                (ngModelChange)="updateAssignedNc(record, $event)"
+              >
+                <option value="">Select department</option>
+                <option *ngFor="let department of departments" [ngValue]="department">
+                  {{ department }}
+                </option>
+              </select>
             </div>
             <div class="meta-block">
               <span>Assigned user</span>
