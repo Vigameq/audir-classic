@@ -63,6 +63,12 @@ export class NcService {
     });
   }
 
+  updateAssignedNc(answerId: string, assignedNc: string): Observable<unknown> {
+    return this.http.put(`${this.baseUrl}/audit-answers/${answerId}/assigned-nc`, {
+      assigned_nc: assignedNc,
+    });
+  }
+
   private mapFromApi(payload: any): NcRecord {
     const firstName = String(payload?.assigned_user_first_name ?? '').trim();
     const lastName = String(payload?.assigned_user_last_name ?? '').trim();

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthState } from '../../auth-state';
 import { DepartmentService } from '../../services/department.service';
 import { RegionService } from '../../services/region.service';
 import { ResponseDefinition, ResponseService } from '../../services/response.service';
@@ -13,6 +15,8 @@ import { SiteService } from '../../services/site.service';
   styleUrl: './settings.scss',
 })
 export class Settings implements OnInit {
+  private readonly auth = inject(AuthState);
+  private readonly router = inject(Router);
   private readonly departmentService = inject(DepartmentService);
   private readonly siteService = inject(SiteService);
   private readonly regionService = inject(RegionService);
@@ -158,6 +162,10 @@ export class Settings implements OnInit {
   }
 
   ngOnInit(): void {
+    if (this.auth.role() !== 'Super Admin') {
+      this.router.navigate(['/dashboard']);
+      return;
+    }
     this.departmentService.migrateFromLocal().subscribe();
     this.siteService.migrateFromLocal().subscribe();
     this.regionService.migrateFromLocal().subscribe();

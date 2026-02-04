@@ -486,6 +486,25 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   return res.status(201).json(rows[0]);
 });
 
+router.put('/audit-answers/:id/assigned-nc', requireAuth, async (req: AuthedRequest, res) => {
+  const answerId = Number(req.params.id);
+  if (!answerId) {
+    return res.status(400).json({ detail: 'Missing answer id' });
+  }
+  const assignedNc = String(req.body?.assigned_nc ?? '').trim();
+  const { rows } = await pool.query(
+    `UPDATE audit_answers
+     SET assigned_nc = $1, updated_at = NOW()
+     WHERE id = $2 AND tenant_id = $3
+     RETURNING id, assigned_nc`,
+    [assignedNc || null, answerId, req.user?.tenant_id]
+  );
+  if (!rows.length) {
+    return res.status(404).json({ detail: 'Answer not found' });
+  }
+  return res.json(rows[0]);
+});
+
 router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `SELECT a.id AS answer_id,

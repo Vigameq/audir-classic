@@ -27,6 +27,15 @@
         </select>
       </label>
       <label class="filter">
+        Assigned NC
+        <select [(ngModel)]="assignedFilter" [ngModelOptions]="{ standalone: true }">
+          <option value="">All departments</option>
+          <option *ngFor="let department of departments" [value]="department">
+            {{ department }}
+          </option>
+        </select>
+      </label>
+      <label class="filter">
         Time range
         <select>
           <option>Last 30 days</option>
@@ -49,88 +58,79 @@
       </button>
     </div>
     <div class="nc-grid" *ngIf="showFlagged && ncRecords().length">
-      <article class="nc-card" *ngFor="let record of ncRecords()">
-        <div class="nc-card-header">
-          <div>
-            <p class="audit-label">Audit</p>
-            <p class="code">
-              {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
-            </p>
-            <p class="meta">
-              {{ formatDate(record.startDate) }} → {{ formatDate(record.endDate) }}
-            </p>
-          </div>
-          <span class="status-pill medium">Submitted</span>
-        </div>
-        <div class="nc-body">
-          <div class="question-block">
-            <span>Question</span>
-            <strong>{{ record.question }}</strong>
-          </div>
-          <div class="meta-row">
-            <div class="meta-block">
-              <span>Response</span>
-              <strong>{{ record.response }}</strong>
+      <article class="nc-card compact" *ngFor="let record of ncRecords()">
+        <div class="nc-row">
+          <div class="nc-main">
+            <div class="nc-title">
+              <span class="code">{{ record.auditCode }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditType }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditSubtype || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.question }}</span>
             </div>
-            <div class="meta-block">
-              <span>Assigned NC</span>
-              <select
-                class="assignee-select"
-                [ngModelOptions]="{ standalone: true }"
-                name="assigned-nc-{{ record.answerId }}"
-                [ngModel]="record.assignedNc || ''"
-                (ngModelChange)="updateAssignedNc(record, $event)"
-              >
-                <option value="">Select department</option>
-                <option *ngFor="let department of departments" [ngValue]="department">
-                  {{ department }}
-                </option>
-              </select>
+            <div class="nc-sub">
+              <span>{{ formatDate(record.startDate) }} → {{ formatDate(record.endDate) }}</span>
+              <span class="divider">·</span>
+              <span>Response: {{ record.response }}</span>
+              <span class="divider">·</span>
+              <span>Auditor: {{ record.auditorName || '—' }}</span>
             </div>
-            <div class="meta-block">
-              <span>Assigned user</span>
-              <select
-                class="assignee-select"
-                [ngModelOptions]="{ standalone: true }"
-                name="assignee-{{ record.answerId }}"
+          </div>
+          <div class="nc-inline">
+            <span class="status-pill medium">Submitted</span>
+            <select
+              class="assignee-select"
+              [ngModelOptions]="{ standalone: true }"
+              name="assigned-nc-{{ record.answerId }}"
+              [ngModel]="pendingAssignedNc[record.answerId] ?? record.assignedNc || ''"
+              (ngModelChange)="updateAssignedNc(record, $event)"
+            >
+              <option value="">Assign NC</option>
+              <option *ngFor="let department of departments" [ngValue]="department">
+                {{ department }}
+              </option>
+            </select>
+            <button
+              class="ghost small"
+              type="button"
+              (click)="confirmAssignedNc(record)"
+              [disabled]="!isAssignedNcPending(record)"
+            >
+              Assign
+            </button>
+            <select
+              class="assignee-select"
+              [ngModelOptions]="{ standalone: true }"
+              name="assignee-{{ record.answerId }}"
                 [ngModel]="getAssignedUserId(record) || ''"
                 (ngModelChange)="assignUser(record, $event)"
-                [disabled]="!canAssignUser(record) || (!!getAssignedUserId(record) && auth.role() !== 'Manager') || (record.status || '').toLowerCase() === 'rework'"
+                [disabled]="!canAssignUser(record)"
               >
-                <option value="">Select user</option>
-                <option
-                  *ngIf="getAssignedUserId(record) && !hasAssignedUserOption(record)"
-                  [ngValue]="getAssignedUserId(record)"
-                >
-                  {{ getAssignedUserLabel(record) }}
-                </option>
-                <option
-                  *ngFor="let user of usersForDepartment(record.assignedNc)"
-                  [ngValue]="user.id"
-                >
-                  {{ userLabel(user) }} ({{ user.email }})
-                </option>
-              </select>
-            </div>
-            <div class="meta-block">
-              <span>Auditor</span>
-              <strong>{{ record.auditorName || '—' }}</strong>
-            </div>
+              <option value="">Assigned user</option>
+              <option
+                *ngIf="getAssignedUserId(record) && !hasAssignedUserOption(record)"
+                [ngValue]="getAssignedUserId(record)"
+              >
+                {{ getAssignedUserLabel(record) }}
+              </option>
+              <option
+                *ngFor="let user of usersForDepartment(record.assignedNc)"
+                [ngValue]="user.id"
+              >
+                {{ userLabel(user) }} ({{ user.email }})
+              </option>
+            </select>
+            <button
+              class="primary small"
+              type="button"
+              (click)="openRecord(record)"
+              [disabled]="!canPerformNc(record)"
+            >
+              Perform NC
+            </button>
           </div>
-          <div class="note-block">
-            <span>Auditor note</span>
-            <p>{{ record.note || '—' }}</p>
-          </div>
-        </div>
-        <div class="nc-actions">
-          <button
-            class="primary small"
-            type="button"
-            (click)="openRecord(record)"
-            [disabled]="!canPerformNc(record)"
-          >
-            Perform NC
-          </button>
         </div>
       </article>
     </div>
@@ -147,15 +147,25 @@
       </button>
     </div>
     <div class="audit-grid" *ngIf="showPendingReview && pendingReviewRecords().length">
-      <article class="audit-card" *ngFor="let record of pendingReviewRecords()">
-        <div class="audit-card-header">
-          <div>
-            <p class="audit-label">Audit</p>
-            <p class="code">
-              {{ record.auditCode }} · {{ record.auditType }} · {{ record.auditSubtype }}
-            </p>
+      <article class="audit-card compact" *ngFor="let record of pendingReviewRecords()">
+        <div class="nc-row">
+          <div class="nc-main">
+            <div class="nc-title">
+              <span class="code">{{ record.auditCode }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditType }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditSubtype || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.question }}</span>
+            </div>
+            <div class="nc-sub">
+              <span>Response: {{ record.response }}</span>
+              <span class="divider">·</span>
+              <span>Assigned NC: {{ record.assignedNc || '—' }}</span>
+            </div>
           </div>
-          <div class="card-actions">
+          <div class="nc-inline">
             <button class="ghost small" type="button" (click)="openReview(record)">
               View
             </button>
@@ -165,38 +175,6 @@
             <button class="primary small" type="button" (click)="approveNc(record)">
               Close NC
             </button>
-          </div>
-        </div>
-        <div class="audit-meta">
-          <div class="meta-block">
-            <span>Question</span>
-            <strong>{{ record.question }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Response</span>
-            <strong>{{ record.response }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Assigned NC</span>
-            <strong>{{ record.assignedNc || '—' }}</strong>
-          </div>
-        </div>
-        <div class="audit-footer">
-          <div class="meta-block">
-            <span>Root cause</span>
-            <strong>{{ record.rootCause || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Containment</span>
-            <strong>{{ record.containmentAction || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Corrective</span>
-            <strong>{{ record.correctiveAction || '—' }}</strong>
-          </div>
-          <div class="meta-block">
-            <span>Preventive</span>
-            <strong>{{ record.preventiveAction || '—' }}</strong>
           </div>
         </div>
       </article>

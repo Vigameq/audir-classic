@@ -19,8 +19,9 @@ export class NcManagement implements OnInit {
   private readonly departmentService = inject(DepartmentService);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
-  protected showFlagged = false;
+  protected showFlagged = true;
   protected showPendingReview = false;
+  protected assignedFilter = '';
   protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
     rootCause: '',
@@ -34,6 +35,7 @@ export class NcManagement implements OnInit {
     string,
     { id: number; name?: string; email?: string }
   > = {};
+  protected pendingAssignedNc: Record<string, string> = {};
   private usersLoaded = false;
   private usersLoading = false;
 
@@ -45,7 +47,7 @@ export class NcManagement implements OnInit {
       const currentUser = this.users.find((user) => user.id === currentUserId);
       department = String(currentUser?.department ?? '').trim().toLowerCase();
     }
-    return records.filter((record) => {
+    const filtered = records.filter((record) => {
       const status = (record.status || 'Assigned').toLowerCase();
       const allowed = status === 'assigned' || status === 'rework' || status === 'in progress';
       if (!allowed) {
@@ -60,6 +62,11 @@ export class NcManagement implements OnInit {
       }
       return record.assignedNc?.trim().toLowerCase() === department;
     });
+    const filterValue = this.assignedFilter.trim().toLowerCase();
+    if (!filterValue) {
+      return filtered;
+    }
+    return filtered.filter((record) => record.assignedNc?.trim().toLowerCase() === filterValue);
   });
 
   protected readonly pendingReviewRecords = computed(() => {
@@ -90,11 +97,35 @@ export class NcManagement implements OnInit {
   }
 
   protected updateAssignedNc(record: NcRecord, value: string): void {
-    record.assignedNc = value.trim();
-    record.assignedUserId = undefined;
-    record.assignedUserName = undefined;
-    record.assignedUserEmail = undefined;
-    delete this.assignedOverrides[record.answerId];
+    this.pendingAssignedNc[record.answerId] = value.trim();
+  }
+
+  protected confirmAssignedNc(record: NcRecord): void {
+    const next = this.pendingAssignedNc[record.answerId];
+    if (!next) {
+      return;
+    }
+    const confirmed = window.confirm(`Assign NC to ${next}?`);
+    if (!confirmed) {
+      return;
+    }
+    this.ncService.updateAssignedNc(record.answerId, next).subscribe({
+      next: () => {
+        record.assignedNc = next;
+        record.assignedUserId = undefined;
+        record.assignedUserName = undefined;
+        record.assignedUserEmail = undefined;
+        delete this.assignedOverrides[record.answerId];
+        delete this.pendingAssignedNc[record.answerId];
+        this.ncService.listRecords().subscribe();
+      },
+    });
+  }
+
+  protected isAssignedNcPending(record: NcRecord): boolean {
+    const pending = this.pendingAssignedNc[record.answerId] ?? '';
+    const current = record.assignedNc ?? '';
+    return pending.trim() !== '' && pending.trim() !== current.trim();
   }
 
   protected openRecord(record: NcRecord): void {
@@ -398,13 +429,21 @@ export class NcManagement implements OnInit {
 
   protected canAssignUser(record: NcRecord): boolean {
     const recordDept = (record.assignedNc || '').trim().toLowerCase();
-    let department = this.auth.department().trim().toLowerCase();
-    if (!department) {
-      const currentId = this.currentUserId();
-      const currentUser = this.users.find((user) => user.id === currentId);
-      department = String(currentUser?.department ?? '').trim().toLowerCase();
+    if (!recordDept) {
+      return false;
     }
-    return !!recordDept && recordDept === department;
+    let department = this.auth.department().trim().toLowerCase();
+    if (department) {
+      return recordDept === department;
+    }
+    const currentId = this.currentUserId();
+    const currentUser = this.users.find((user) => user.id === currentId);
+    const inferred = String(currentUser?.department ?? '').trim().toLowerCase();
+    if (inferred) {
+      return recordDept === inferred;
+    }
+    // If we don't have user info yet, keep the dropdown enabled.
+    return true;
   }
 
   protected hasAssignedUserOption(record: NcRecord): boolean {

@@ -155,10 +155,6 @@ export class Templates implements OnInit {
     this.editQuestions = this.editQuestions.filter((_, i) => i !== index);
   }
 
-  protected updateQuestion(index: number, value: string): void {
-    this.editQuestions[index] = value;
-  }
-
   protected saveTemplate(template: TemplateRecord): void {
     const name = this.editName.trim();
     if (!name) {
@@ -188,5 +184,13 @@ export class Templates implements OnInit {
           this.editError = 'Unable to save changes. Please try again.';
         },
       });
+  }
+
+  protected trackByTemplateId(_index: number, template: TemplateRecord): string {
+    return template.id;
+  }
+
+  protected trackByIndex(index: number): number {
+    return index;
   }
 }

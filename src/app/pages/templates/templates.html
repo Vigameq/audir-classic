@@ -18,7 +18,7 @@
       <span class="count">{{ templates.length }} total</span>
     </div>
     <div class="template-list">
-      <article class="template-item" *ngFor="let template of templates">
+      <article class="template-item" *ngFor="let template of templates; trackBy: trackByTemplateId">
         <div class="template-summary" (click)="toggleTemplate(template.id)">
           <h3>{{ template.name }}</h3>
           <p>{{ template.questions.length }} questions</p>
@@ -53,12 +53,11 @@
                 </button>
               </div>
               <div class="question-edit-list">
-                <div class="question-edit-row" *ngFor="let question of editQuestions; let i = index">
+                <div class="question-edit-row" *ngFor="let question of editQuestions; let i = index; trackBy: trackByIndex">
                   <input
                     type="text"
                     [(ngModel)]="editQuestions[i]"
                     name="edit-question-{{ template.id }}-{{ i }}"
-                    (input)="updateQuestion(i, editQuestions[i])"
                     (click)="$event.stopPropagation()"
                   />
                   <button
