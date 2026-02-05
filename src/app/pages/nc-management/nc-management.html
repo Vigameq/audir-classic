@@ -51,8 +51,14 @@
     <div class="panel-header">
       <div class="section-title">
         <h2>NC overview</h2>
-        <span class="count">
-          {{ activeTab === 'flagged' ? (ncRecords().length + ' flagged') : (pendingReviewRecords().length + ' pending') }}
+        <span class="count" *ngIf="activeTab === 'flagged'">
+          {{ ncRecords().length }} flagged
+        </span>
+        <span class="count" *ngIf="activeTab === 'pending'">
+          {{ pendingReviewRecords().length }} pending
+        </span>
+        <span class="count" *ngIf="activeTab === 'closed'">
+          {{ closedRecords().length }} closed
         </span>
       </div>
       <div class="tab-switch">
@@ -69,6 +75,13 @@
           (click)="setTab('pending')"
         >
           Pending review
+        </button>
+        <button
+          type="button"
+          [class.active]="activeTab === 'closed'"
+          (click)="setTab('closed')"
+        >
+          Closed NCs
         </button>
       </div>
     </div>
@@ -176,9 +189,6 @@
             <button class="ghost small" type="button" (click)="openReview(record)">
               View
             </button>
-            <button class="ghost small" type="button" (click)="requestRework(record)">
-              Request rework
-            </button>
             <button class="primary small" type="button" (click)="approveNc(record)">
               Close NC
             </button>
@@ -188,6 +198,38 @@
     </div>
     <div class="empty" *ngIf="activeTab === 'pending' && !pendingReviewRecords().length">
       No resolutions pending review.
+    </div>
+    <div class="audit-grid" *ngIf="activeTab === 'closed' && closedRecords().length">
+      <article class="audit-card compact" *ngFor="let record of closedRecords()">
+        <div class="nc-row">
+          <div class="nc-main">
+            <div class="nc-title">
+              <span class="code">{{ record.auditCode }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditType }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.auditSubtype || '—' }}</span>
+              <span class="divider">·</span>
+              <span>{{ record.question }}</span>
+            </div>
+            <div class="nc-sub">
+              <span>Response: {{ record.response }}</span>
+              <span class="divider">·</span>
+              <span>Assigned NC: {{ record.assignedNc || '—' }}</span>
+              <span class="divider">·</span>
+              <span>Status: {{ record.status || 'Closed' }}</span>
+            </div>
+          </div>
+          <div class="nc-inline">
+            <button class="ghost small" type="button" (click)="openClosed(record)">
+              View
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+    <div class="empty" *ngIf="activeTab === 'closed' && !closedRecords().length">
+      No closed NCs yet.
     </div>
   </section>
 
@@ -276,7 +318,7 @@
     <aside class="drawer">
       <header class="drawer-header">
         <div>
-          <h2>Pending review</h2>
+          <h2>{{ viewRecord?.status?.toLowerCase() === 'closed' ? 'Closed NC' : 'Pending review' }}</h2>
           <p class="subtitle">
             {{ viewRecord.auditCode }} · {{ viewRecord.auditType }} ·
             {{ viewRecord.auditSubtype }} ·
@@ -335,6 +377,14 @@
             <div>
               <span>Evidence</span>
               <strong>{{ viewRecord.evidenceName || '—' }}</strong>
+            </div>
+            <div>
+              <span>Status</span>
+              <strong>{{ viewRecord.status || '—' }}</strong>
+            </div>
+            <div>
+              <span>Assigned user</span>
+              <strong>{{ viewRecord.assignedUserName || viewRecord.assignedUserEmail || '—' }}</strong>
             </div>
           </div>
         </div>

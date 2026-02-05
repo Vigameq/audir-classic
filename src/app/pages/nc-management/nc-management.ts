@@ -21,7 +21,7 @@ export class NcManagement implements OnInit {
   private readonly route = inject(ActivatedRoute);
   protected activeRecord: NcRecord | null = null;
   protected viewRecord: NcRecord | null = null;
-  protected activeTab: 'flagged' | 'pending' = 'flagged';
+  protected activeTab: 'flagged' | 'pending' | 'closed' = 'flagged';
   protected assignedFilter = '';
   protected readonly currentUserId = signal<number | null>(null);
   protected ncResponse = {
@@ -40,7 +40,7 @@ export class NcManagement implements OnInit {
   private usersLoaded = false;
   private usersLoading = false;
   private targetAnswerId: string | null = null;
-  private targetTab: 'flagged' | 'pending' | null = null;
+  private targetTab: 'flagged' | 'pending' | 'closed' | null = null;
 
   protected readonly ncRecords = computed(() => {
     const records = this.ncService.records();
@@ -89,6 +89,13 @@ export class NcManagement implements OnInit {
     );
   });
 
+  protected readonly closedRecords = computed(() => {
+    return this.ncService.records().filter((record) => {
+      const status = (record.status || '').toLowerCase();
+      return status === 'closed';
+    });
+  });
+
   ngOnInit(): void {
     this.ncService.listRecords().subscribe({
       next: () => this.applyDeepLink(),
@@ -98,7 +105,7 @@ export class NcManagement implements OnInit {
     this.route.queryParamMap.subscribe((params) => {
       const tab = params.get('tab');
       const answerId = params.get('answerId');
-      this.targetTab = tab === 'pending' || tab === 'flagged' ? tab : null;
+      this.targetTab = tab === 'pending' || tab === 'flagged' || tab === 'closed' ? tab : null;
       this.targetAnswerId = answerId;
       if (this.targetTab) {
         this.activeTab = this.targetTab;
@@ -166,6 +173,11 @@ export class NcManagement implements OnInit {
 
   protected closeReview(): void {
     this.viewRecord = null;
+  }
+
+  protected openClosed(record: NcRecord): void {
+    this.activeRecord = null;
+    this.viewRecord = record;
   }
 
   protected onEvidenceSelected(event: Event): void {
@@ -273,6 +285,20 @@ export class NcManagement implements OnInit {
     if (record.assignedUserEmail && email) {
       return record.assignedUserEmail.trim().toLowerCase() === email;
     }
+    // If not explicitly assigned, allow any user in the assigned department.
+    const recordDept = (record.assignedNc || '').trim().toLowerCase();
+    if (recordDept) {
+      const directDept = this.auth.department().trim().toLowerCase();
+      if (directDept) {
+        return recordDept === directDept;
+      }
+      const currentUserId = this.getCurrentUserId();
+      const currentUser = this.users.find((user) => user.id === currentUserId);
+      const inferredDept = String(currentUser?.department ?? '').trim().toLowerCase();
+      if (inferredDept) {
+        return recordDept === inferredDept;
+      }
+    }
     const currentUser = email
       ? this.users.find((user) => user.email.trim().toLowerCase() === email)
       : undefined;
@@ -292,7 +318,7 @@ export class NcManagement implements OnInit {
     return false;
   }
 
-  protected setTab(tab: 'flagged' | 'pending'): void {
+  protected setTab(tab: 'flagged' | 'pending' | 'closed'): void {
     this.activeTab = tab;
   }
 
@@ -476,7 +502,7 @@ export class NcManagement implements OnInit {
     if (!match) {
       return;
     }
-    if (this.targetTab === 'pending') {
+    if (this.targetTab === 'pending' || this.targetTab === 'closed') {
       this.openReview(match);
     } else {
       this.openRecord(match);
