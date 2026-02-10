@@ -18,6 +18,7 @@ export type AuditPlanRecord = {
   auditNote: string;
   responseType: string;
   assetScope?: number[];
+  assetScopeCount?: number;
   createdAt: string;
 };
 
@@ -195,6 +196,14 @@ export class AuditPlanService {
   }
 
   private mapFromApi(payload: any): AuditPlanRecord {
+    const assetScopeValues = Array.isArray(payload?.asset_scope)
+      ? payload.asset_scope
+          .map((value: any) => Number(value))
+          .filter((value: number) => !Number.isNaN(value))
+      : [];
+    const assetScopeCount = assetScopeValues.length
+      ? Math.max(...assetScopeValues)
+      : undefined;
     return {
       id: String(payload?.id ?? ''),
       code: String(payload?.code ?? ''),
@@ -210,9 +219,8 @@ export class AuditPlanService {
       region: String(payload?.region ?? ''),
       auditNote: String(payload?.audit_note ?? ''),
       responseType: String(payload?.response_type ?? ''),
-      assetScope: Array.isArray(payload?.asset_scope)
-        ? payload.asset_scope.map((value: any) => Number(value)).filter((value: number) => !Number.isNaN(value))
-        : undefined,
+      assetScope: assetScopeValues.length ? assetScopeValues : undefined,
+      assetScopeCount,
       createdAt: String(payload?.created_at ?? ''),
     };
   }

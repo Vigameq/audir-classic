@@ -46,7 +46,9 @@ export class AuditManage implements OnInit {
     region: '',
     auditNote: '',
     responseType: '',
+    assetScopeCount: 1,
   };
+  protected readonly assetScopeOptions = Array.from({ length: 150 }, (_, index) => index + 1);
   protected viewAudit: AuditPlanRecord | null = null;
   protected viewResponses: {
     question: string;
@@ -275,6 +277,9 @@ export class AuditManage implements OnInit {
       region: audit.region,
       auditNote: audit.auditNote,
       responseType: audit.responseType,
+      assetScopeCount:
+        audit.assetScopeCount ??
+        (audit.assetScope?.length ? Math.max(...audit.assetScope) : 1),
     };
   }
 
@@ -302,6 +307,10 @@ export class AuditManage implements OnInit {
         region: this.editForm.region,
         auditNote: this.editForm.auditNote,
         responseType: this.editForm.responseType,
+        assetScope: Array.from(
+          { length: Number(this.editForm.assetScopeCount) || 1 },
+          (_, index) => index + 1
+        ),
       })
       .subscribe({
         next: () => this.closeEdit(form),

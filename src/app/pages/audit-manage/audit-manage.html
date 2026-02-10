@@ -125,6 +125,14 @@
           </select>
         </label>
         <label>
+          Assets in scope
+          <select name="assetScopeCount" [(ngModel)]="editForm.assetScopeCount">
+            <option *ngFor="let count of assetScopeOptions" [value]="count">
+              {{ count }}
+            </option>
+          </select>
+        </label>
+        <label>
           Auditor
           <select name="auditorName" [(ngModel)]="editForm.auditorName">
             <option value="">Select auditor</option>

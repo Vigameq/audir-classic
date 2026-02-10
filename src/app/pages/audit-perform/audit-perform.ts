@@ -564,6 +564,9 @@ export class AuditPerform implements OnInit {
     if (!this.activeAudit) {
       return [];
     }
+    if (typeof this.activeAudit.assetScopeCount === 'number' && this.activeAudit.assetScopeCount > 0) {
+      return Array.from({ length: this.activeAudit.assetScopeCount }, (_, index) => String(index + 1));
+    }
     const scope = this.activeAudit.assetScope;
     if (Array.isArray(scope) && scope.length) {
       const numeric = scope.map((value) => Number(value)).filter((value) => Number.isFinite(value));
