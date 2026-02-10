@@ -344,27 +344,8 @@ router.delete('/templates/:id', requireAuth, async (req: AuthedRequest, res) => 
 
 router.get('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
-    `SELECT p.id,
-            p.code,
-            p.start_date,
-            p.end_date,
-            t.name AS audit_type,
-            p.audit_subtype,
-            p.auditor_name,
-            p.department,
-            p.location_city,
-            p.site,
-            p.country,
-            p.region,
-            p.audit_note,
-            p.response_type,
-            p.asset_scope,
-            p.created_at,
-            p.updated_at
-     FROM audit_plans p
-     JOIN audit_types t ON t.id = p.audit_type_id AND t.tenant_id = p.tenant_id
-     WHERE p.tenant_id = $1
-     ORDER BY p.created_at DESC`,
+    `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at
+     FROM audit_plans WHERE tenant_id = $1 ORDER BY created_at DESC`,
     [req.user?.tenant_id]
   );
   return res.json(rows);
@@ -378,37 +359,20 @@ const generateCode = () => {
 router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   const payload = req.body ?? {};
   const code = payload.code ? String(payload.code) : generateCode();
-  let auditTypeId = payload.audit_type_id ? Number(payload.audit_type_id) : null;
-  if (!auditTypeId && payload.audit_type) {
-    const { rows: typeRows } = await pool.query(
-      `SELECT id FROM audit_types WHERE tenant_id = $1 AND name = $2`,
-      [req.user?.tenant_id, payload.audit_type]
-    );
-    auditTypeId = typeRows[0]?.id ?? null;
-    if (!auditTypeId) {
-      const { rows: createdRows } = await pool.query(
-        `INSERT INTO audit_types (tenant_id, name, active, created_at)
-         VALUES ($1, $2, TRUE, NOW())
-         ON CONFLICT (tenant_id, name) DO UPDATE SET name = EXCLUDED.name
-         RETURNING id`,
-        [req.user?.tenant_id, payload.audit_type]
-      );
-      auditTypeId = createdRows[0]?.id ?? null;
-    }
-  }
-  if (!auditTypeId) {
+  const auditType = payload.audit_type ? String(payload.audit_type) : null;
+  if (!auditType) {
     return res.status(400).json({ detail: 'Invalid audit_type' });
   }
   const { rows } = await pool.query(
-    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type_id, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at)
+    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
-     RETURNING id, code, start_date, end_date, audit_type_id, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
     [
       req.user?.tenant_id,
       code,
       payload.start_date,
       payload.end_date,
-      auditTypeId,
+      auditType,
       payload.audit_subtype ?? null,
       payload.auditor_name ?? null,
       payload.department ?? null,
@@ -421,63 +385,16 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
       payload.asset_scope ?? null,
     ]
   );
-  const { rows: planRows } = await pool.query(
-    `SELECT p.id,
-            p.code,
-            p.start_date,
-            p.end_date,
-            t.name AS audit_type,
-            p.audit_subtype,
-            p.auditor_name,
-            p.department,
-            p.location_city,
-            p.site,
-            p.country,
-            p.region,
-            p.audit_note,
-            p.response_type,
-            p.asset_scope,
-            p.created_at,
-            p.updated_at
-     FROM audit_plans p
-     JOIN audit_types t ON t.id = p.audit_type_id AND t.tenant_id = p.tenant_id
-     WHERE p.id = $1 AND p.tenant_id = $2`,
-    [rows[0].id, req.user?.tenant_id]
-  );
-  return res.status(201).json(planRows[0] ?? rows[0]);
+  return res.status(201).json(rows[0]);
 });
 
 router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
   const planId = Number(req.params.id);
   const payload = req.body ?? {};
-  let auditTypeId: number | null = null;
-  if (payload.audit_type_id !== undefined || payload.audit_type !== undefined) {
-    if (payload.audit_type_id !== undefined) {
-      auditTypeId = Number(payload.audit_type_id);
-    } else if (payload.audit_type) {
-      const { rows: typeRows } = await pool.query(
-        `SELECT id FROM audit_types WHERE tenant_id = $1 AND name = $2`,
-        [req.user?.tenant_id, payload.audit_type]
-      );
-      auditTypeId = typeRows[0]?.id ?? null;
-      if (!auditTypeId) {
-        const { rows: createdRows } = await pool.query(
-          `INSERT INTO audit_types (tenant_id, name, active, created_at)
-           VALUES ($1, $2, TRUE, NOW())
-           ON CONFLICT (tenant_id, name) DO UPDATE SET name = EXCLUDED.name
-           RETURNING id`,
-          [req.user?.tenant_id, payload.audit_type]
-        );
-        auditTypeId = createdRows[0]?.id ?? null;
-      }
-    }
-    if (!auditTypeId) {
-      return res.status(400).json({ detail: 'Invalid audit_type' });
-    }
-  }
   const fields = [
     ['start_date', payload.start_date],
     ['end_date', payload.end_date],
+    ['audit_type', payload.audit_type],
     ['auditor_name', payload.auditor_name],
     ['department', payload.department],
     ['location_city', payload.location_city],
@@ -487,7 +404,6 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
     ['audit_note', payload.audit_note],
     ['response_type', payload.response_type],
     ['asset_scope', payload.asset_scope],
-    ['audit_type_id', auditTypeId],
   ].filter(([, value]) => value !== undefined);
   if (!fields.length) {
     return res.status(400).json({ detail: 'No updates provided' });
@@ -497,36 +413,13 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `UPDATE audit_plans SET ${setClause}, updated_at = NOW()
      WHERE id = $1 AND tenant_id = $${fields.length + 2}
-     RETURNING id`,
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
     [planId, ...values, req.user?.tenant_id]
   );
   if (!rows[0]) {
     return res.status(404).json({ detail: 'Audit plan not found' });
   }
-  const { rows: planRows } = await pool.query(
-    `SELECT p.id,
-            p.code,
-            p.start_date,
-            p.end_date,
-            t.name AS audit_type,
-            p.audit_subtype,
-            p.auditor_name,
-            p.department,
-            p.location_city,
-            p.site,
-            p.country,
-            p.region,
-            p.audit_note,
-            p.response_type,
-            p.asset_scope,
-            p.created_at,
-            p.updated_at
-     FROM audit_plans p
-     JOIN audit_types t ON t.id = p.audit_type_id AND t.tenant_id = p.tenant_id
-     WHERE p.id = $1 AND p.tenant_id = $2`,
-    [planId, req.user?.tenant_id]
-  );
-  return res.json(planRows[0]);
+  return res.json(rows[0]);
 });
 
 router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
@@ -642,7 +535,7 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `SELECT a.id AS answer_id,
             p.code AS audit_code,
-            t.name AS audit_type,
+            p.audit_type,
             p.audit_subtype,
             p.start_date,
             p.end_date,
@@ -665,7 +558,6 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
             COALESCE(n.status, 'Assigned') AS nc_status
      FROM audit_answers a
      JOIN audit_plans p ON p.id = a.audit_plan_id
-     JOIN audit_types t ON t.id = p.audit_type_id AND t.tenant_id = p.tenant_id
      LEFT JOIN nc_actions n ON n.audit_answer_id = a.id AND n.tenant_id = a.tenant_id
      LEFT JOIN users u ON u.id = n.assigned_user_id AND u.tenant_id = a.tenant_id
      WHERE a.tenant_id = $1 AND a.status = 'Submitted' AND a.response_is_negative = TRUE
