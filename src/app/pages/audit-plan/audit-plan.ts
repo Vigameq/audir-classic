@@ -39,7 +39,9 @@ export class AuditPlan implements OnInit {
     region: '',
     auditNote: '',
     responseType: '',
+    assetScopeCount: 1,
   };
+  protected readonly assetScopeOptions = Array.from({ length: 150 }, (_, index) => index + 1);
   protected auditors: User[] = [];
   protected showSuccessModal = false;
   protected successSummary = {
@@ -234,6 +236,7 @@ export class AuditPlan implements OnInit {
       region: '',
       auditNote: '',
       responseType: '',
+      assetScopeCount: 1,
     };
     this.noteChars = 0;
     form.resetForm(this.auditForm);
@@ -262,6 +265,10 @@ export class AuditPlan implements OnInit {
         region: this.auditForm.region,
         auditNote: this.auditForm.auditNote,
         responseType: this.auditForm.responseType,
+        assetScope: Array.from(
+          { length: this.auditForm.assetScopeCount || 1 },
+          (_, index) => index + 1
+        ),
       })
       .subscribe({
         next: () => {

@@ -24,7 +24,7 @@
       <article class="report-card" *ngFor="let audit of reportAudits">
         <header class="card-header">
           <div class="avatar">
-            <span>{{ audit.auditType?.charAt(0) || '?' }}</span>
+            <span>{{ audit.auditType.charAt(0) || '?' }}</span>
           </div>
           <div>
             <p class="code">{{ audit.code }}</p>

@@ -270,6 +270,8 @@ button.small {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .progress {
@@ -278,6 +280,90 @@ button.small {
   font-size: 0.8rem;
   color: var(--color-muted);
   min-width: 180px;
+}
+
+.asset-controls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+  align-items: end;
+  padding: 0.75rem 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.08);
+}
+
+.asset-controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  width: 100%;
+}
+
+.asset-controls select {
+  font: inherit;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: var(--color-surface);
+  min-width: 130px;
+  font-size: 0.85rem;
+}
+
+.asset-controls select[multiple] {
+  min-height: 4.4rem;
+}
+
+.chip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+}
+
+.chip-row.scroll {
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scrollbar-width: thin;
+  width: 100%;
+}
+
+.chip {
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 154, 0, 0.35);
+  box-shadow: 0 4px 10px rgba(255, 154, 0, 0.18);
+}
+
+.chip.selected {
+  border-color: rgba(255, 154, 0, 0.9);
+  background: rgba(255, 154, 0, 0.9);
+  color: #2a1b00;
+}
+
+.chip.complete {
+  background: transparent;
+  border-color: rgba(46, 125, 50, 0.7);
+  color: #1b5e20;
+}
+
+.close-button {
+  align-self: flex-end;
+  padding: 0.5rem 1.2rem;
 }
 
 .progress-bar {
@@ -341,6 +427,14 @@ button.small {
 }
 
 .inline-fields select {
+  font: inherit;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: var(--color-surface);
+}
+
+.inline-fields input {
   font: inherit;
   padding: 0.4rem 0.7rem;
   border-radius: 0.65rem;
@@ -423,6 +517,14 @@ button.small {
 }
 
 .note-row textarea {
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.7rem;
+  border: 1px solid rgba(20, 10, 0, 0.15);
+  background: var(--color-surface);
+}
+
+.note-row input {
   font: inherit;
   padding: 0.6rem 0.8rem;
   border-radius: 0.7rem;

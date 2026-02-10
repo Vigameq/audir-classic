@@ -10,6 +10,7 @@ export type NcRecord = {
   startDate: string;
   endDate: string;
   auditorName: string;
+  assetNumber?: number;
   question: string;
   response: string;
   assignedNc: string;
@@ -81,6 +82,10 @@ export class NcService {
       startDate: String(payload?.start_date ?? ''),
       endDate: String(payload?.end_date ?? ''),
       auditorName: String(payload?.auditor_name ?? ''),
+      assetNumber:
+        payload?.asset_number !== undefined && payload?.asset_number !== null
+          ? Number(payload.asset_number)
+          : undefined,
       question: String(payload?.question_text ?? ''),
       response: String(payload?.response ?? ''),
       assignedNc: String(payload?.assigned_nc ?? ''),

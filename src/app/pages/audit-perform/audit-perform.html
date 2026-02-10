@@ -88,10 +88,27 @@
             {{ activeAudit.code }} ·
             {{ activeAudit.responseType || 'Response type not set' }}
           </p>
+          <div class="asset-controls">
+            <label>
+              Assets in scope
+              <div class="chip-row scroll">
+                <button
+                  class="chip"
+                  type="button"
+                  *ngFor="let asset of assetNumberOptions"
+                  [class.selected]="assetScope.includes(asset)"
+                  [class.complete]="assetScope.includes(asset) && isAssetComplete(asset)"
+                  (click)="onAssetChipClick(asset)"
+                >
+                  {{ asset }}
+                </button>
+              </div>
+            </label>
+          </div>
         </div>
         <div class="drawer-meta">
           <div class="progress">
-            <span>{{ answeredCount }}/{{ totalQuestions }} answered</span>
+            <span>{{ answeredCount }}/{{ totalQuestions }} answered · Asset {{ activeAsset || '1' }}</span>
             <div class="progress-bar">
               <div
                 class="progress-fill"
@@ -99,7 +116,9 @@
               ></div>
             </div>
           </div>
-          <button class="ghost small" type="button" (click)="closePerform()">Close</button>
+          <button class="ghost small close-button" type="button" (click)="closePerform()">
+            Close
+          </button>
         </div>
       </header>
 
@@ -115,6 +134,8 @@
                 <span class="question-index">Q{{ i + 1 }}</span>
                 <p class="question-text">{{ question }}</p>
               </div>
+            </div>
+            <div class="question-body">
               <div class="inline-fields">
                 <div class="field">
                   <label>Select response</label>
@@ -145,22 +166,24 @@
                   <span class="field-error" *ngIf="ncErrors[i]">Assign NC is required.</span>
                 </div>
               </div>
-            </div>
-            <div class="question-body">
               <div class="evidence-row">
                 <span>Attach evidence</span>
                 <div class="evidence-actions">
                   <label class="ghost small file-trigger">
-                    Upload file
+                    Upload files
                     <input
                       type="file"
-                      accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                      accept=".jpg,.jpeg,.png,.mp4,.webm,.mov,image/jpeg,image/png,video/mp4,video/webm,video/quicktime"
+                      multiple
                       (change)="onEvidenceSelected(i, $event)"
                     />
                   </label>
                 </div>
                 <span class="evidence-name" *ngIf="evidenceFiles[i]">
                   {{ evidenceFiles[i] }}
+                </span>
+                <span class="evidence-name" *ngIf="evidenceItems[i]?.length">
+                  {{ evidenceItems[i].length }} files attached
                 </span>
               </div>
               <div class="note-row">
@@ -185,7 +208,7 @@
         </ol>
         <div class="submit-all">
           <button class="primary" type="button" (click)="submitAllQuestions()">
-            Submit audit
+            Submit asset
           </button>
         </div>
       </section>

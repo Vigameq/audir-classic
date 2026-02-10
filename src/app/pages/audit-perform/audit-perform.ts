@@ -67,7 +67,20 @@ export class AuditPerform implements OnInit {
   protected savedQuestions: boolean[] = [];
   protected evidenceFiles: string[] = [];
   protected evidenceDataUrls: string[] = [];
+  protected evidenceItems: { name: string; type: string; dataUrl?: string }[][] = [];
   protected noteEntries: string[] = [];
+  protected readonly assetNumberOptions = Array.from({ length: 100 }, (_, i) => String(i + 1));
+  protected assetScope: string[] = [];
+  protected activeAsset = '';
+  protected responsesByAsset: Record<string, string[]> = {};
+  protected notesByAsset: Record<string, string[]> = {};
+  protected ncByAsset: Record<string, string[]> = {};
+  protected savedByAsset: Record<string, boolean[]> = {};
+  protected statusByAsset: Record<string, ('Saved' | 'Submitted' | '')[]> = {};
+  protected evidenceFilesByAsset: Record<string, string[]> = {};
+  protected evidenceDataUrlsByAsset: Record<string, string[]> = {};
+  protected evidenceItemsByAsset: Record<string, { name: string; type: string; dataUrl?: string }[][]> =
+    {};
   protected ncErrors: boolean[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
@@ -151,7 +164,18 @@ export class AuditPerform implements OnInit {
     this.savedQuestions = [];
     this.evidenceFiles = [];
     this.evidenceDataUrls = [];
+    this.evidenceItems = [];
     this.noteEntries = [];
+    this.assetScope = [];
+    this.activeAsset = '';
+    this.responsesByAsset = {};
+    this.notesByAsset = {};
+    this.ncByAsset = {};
+    this.savedByAsset = {};
+    this.statusByAsset = {};
+    this.evidenceFilesByAsset = {};
+    this.evidenceDataUrlsByAsset = {};
+    this.evidenceItemsByAsset = {};
     this.ncErrors = [];
     this.router.navigate(['/audit-perform'], { replaceUrl: true });
   }
@@ -198,7 +222,9 @@ export class AuditPerform implements OnInit {
       window.alert('Please assign NC for all Not OK responses before submitting.');
       return;
     }
-    const confirmed = window.confirm('Are you sure you want to submit this audit?');
+    const confirmed = window.confirm(
+      `Are you sure you want to submit asset ${this.activeAsset || '1'}?`
+    );
     if (!confirmed) {
       return;
     }
@@ -206,8 +232,16 @@ export class AuditPerform implements OnInit {
       this.persistAnswer(index, 'Submitted')
     );
     Promise.all(submissions).then(() => {
-      this.markAuditSubmitted(this.activeAudit?.code ?? '');
-      this.closePerform();
+      if (this.areAllAssetsSubmitted()) {
+        this.markAuditSubmitted(this.activeAudit?.code ?? '');
+        this.closePerform();
+        return;
+      }
+      const next = this.getNextIncompleteAsset();
+      if (next) {
+        this.setActiveAsset(next);
+        window.alert(`Asset ${this.activeAsset} submitted. Continue with asset ${next}.`);
+      }
     });
   }
 
@@ -229,26 +263,93 @@ export class AuditPerform implements OnInit {
     this.validateNcAssignment(index);
   }
 
+  protected onAssetScopeChange(): void {
+    if (!this.assetScope.length) {
+      this.assetScope = ['1'];
+    }
+    const sorted = [...new Set(this.assetScope)].sort(
+      (a, b) => Number(a) - Number(b)
+    );
+    this.assetScope = sorted;
+    this.persistAssetScope();
+    if (this.activeAudit) {
+      this.auditPlanService.updatePlanApi(this.activeAudit.id, {
+        assetScope: this.assetScope.map((value) => Number(value)).filter((value) => !Number.isNaN(value)),
+      }).subscribe();
+    }
+    if (!this.assetScope.includes(this.activeAsset)) {
+      this.setActiveAsset(this.assetScope[0]);
+    }
+    this.assetScope.forEach((asset) => this.ensureAssetState(asset));
+  }
+
+  onAssetChipClick(asset: string): void {
+    if (!asset) {
+      return;
+    }
+    if (this.assetScope.length !== 1 || this.assetScope[0] !== asset) {
+      this.assetScope = [asset];
+      this.onAssetScopeChange();
+    }
+    this.setActiveAsset(asset);
+  }
+
+  protected onActiveAssetChange(): void {
+    if (!this.activeAsset) {
+      this.activeAsset = this.assetScope[0] ?? '1';
+    }
+    this.setActiveAsset(this.activeAsset);
+  }
+
+  isAssetComplete(asset: string): boolean {
+    if (!this.activeTemplate) {
+      return false;
+    }
+    const statuses = this.statusByAsset[asset];
+    if (!statuses || statuses.length < this.activeTemplate.questions.length) {
+      return false;
+    }
+    return this.activeTemplate.questions.every((_, index) => statuses[index] === 'Submitted');
+  }
+
+  protected setActiveAsset(asset: string): void {
+    if (!asset) {
+      return;
+    }
+    this.ensureAssetState(asset);
+    this.loadEvidenceForAsset(asset);
+    this.activeAsset = asset;
+    this.responseSelections = this.responsesByAsset[asset];
+    this.noteEntries = this.notesByAsset[asset];
+    this.ncAssignments = this.ncByAsset[asset];
+    this.savedQuestions = this.savedByAsset[asset];
+    this.evidenceFiles = this.evidenceFilesByAsset[asset];
+    this.evidenceDataUrls = this.evidenceDataUrlsByAsset[asset];
+    this.evidenceItems = this.evidenceItemsByAsset[asset];
+    this.noteWords = this.noteEntries.map((value) => this.countWords(value));
+    this.ncErrors = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(false)
+      : [];
+  }
+
   private resetQuestionState(): void {
-    this.responseSelections = [];
+    this.responsesByAsset = {};
+    this.notesByAsset = {};
+    this.ncByAsset = {};
+    this.savedByAsset = {};
+    this.statusByAsset = {};
+    this.evidenceFilesByAsset = {};
+    this.evidenceDataUrlsByAsset = {};
+    this.evidenceItemsByAsset = {};
     this.noteWords = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(0)
       : [];
-    this.ncAssignments = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.savedQuestions = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill(false)
-      : [];
-    this.evidenceFiles = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.evidenceDataUrls = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
-    this.noteEntries = this.activeTemplate
-      ? new Array(this.activeTemplate.questions.length).fill('')
-      : [];
+    this.assetScope = this.loadAssetScope();
+    if (!this.assetScope.length) {
+      this.assetScope = ['1'];
+    }
+    this.assetScope.forEach((asset) => this.ensureAssetState(asset));
+    this.setActiveAsset(this.assetScope[0]);
     this.ncErrors = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(false)
       : [];
@@ -256,6 +357,7 @@ export class AuditPerform implements OnInit {
 
   private applyAnswers(answers: {
     questionIndex: number;
+    assetNumber?: number | null;
     response?: string | null;
     assignedNc?: string | null;
     note?: string | null;
@@ -265,15 +367,40 @@ export class AuditPerform implements OnInit {
   }[]): void {
     answers.forEach((answer) => {
       const index = answer.questionIndex;
-      this.responseSelections[index] = answer.response ?? '';
-      this.ncAssignments[index] = answer.assignedNc ?? '';
-      this.noteEntries[index] = answer.note ?? '';
-      this.evidenceFiles[index] = answer.evidenceName ?? '';
-      this.evidenceDataUrls[index] = answer.evidenceDataUrl ?? '';
-      this.noteWords[index] = this.countWords(this.noteEntries[index]);
-      this.savedQuestions[index] = !!answer.status;
-      this.ncErrors[index] = false;
+      const asset = String(answer.assetNumber ?? 1);
+      if (!this.assetScope.includes(asset)) {
+        return;
+      }
+      this.ensureAssetState(asset);
+      const responses = this.responsesByAsset[asset];
+      const nc = this.ncByAsset[asset];
+      const notes = this.notesByAsset[asset];
+      const saved = this.savedByAsset[asset];
+      const statuses = this.statusByAsset[asset];
+      const files = this.evidenceFilesByAsset[asset];
+      const dataUrls = this.evidenceDataUrlsByAsset[asset];
+      const items = this.evidenceItemsByAsset[asset];
+      responses[index] = answer.response ?? '';
+      nc[index] = answer.assignedNc ?? '';
+      notes[index] = answer.note ?? '';
+      files[index] = answer.evidenceName ?? '';
+      dataUrls[index] = answer.evidenceDataUrl ?? '';
+      items[index] = dataUrls[index]
+        ? [{ name: files[index] || 'Evidence', type: 'image', dataUrl: dataUrls[index] }]
+        : [];
+      saved[index] = !!answer.status;
+      statuses[index] =
+        (answer.status as 'Saved' | 'Submitted' | '') ?? '';
     });
+    if (this.assetScope.length && !this.assetScope.includes(this.activeAsset)) {
+      this.activeAsset = this.assetScope[0];
+    }
+    if (this.assetScope.length) {
+      this.setActiveAsset(this.activeAsset || this.assetScope[0]);
+    }
+    this.ncErrors = this.activeTemplate
+      ? new Array(this.activeTemplate.questions.length).fill(false)
+      : [];
   }
 
   private validateNcAssignment(index: number): boolean {
@@ -298,6 +425,7 @@ export class AuditPerform implements OnInit {
       this.auditAnswerService
         .upsertAnswer({
           audit_code: this.activeAudit?.code ?? '',
+          asset_number: this.activeAsset ? Number(this.activeAsset) : 1,
           question_index: index,
           question_text: questionText,
           response,
@@ -311,6 +439,9 @@ export class AuditPerform implements OnInit {
         .subscribe({
           next: () => {
             this.savedQuestions[index] = true;
+            if (this.activeAsset && this.statusByAsset[this.activeAsset]) {
+              this.statusByAsset[this.activeAsset][index] = status;
+            }
             resolve();
           },
           error: () => resolve(),
@@ -328,10 +459,25 @@ export class AuditPerform implements OnInit {
       this.auditAnswerService.listByAuditCode(audit.code).subscribe({
         next: (answers) => {
           const totalQuestions = this.getTemplateQuestionCount(audit.auditType);
-          const submittedCount = answers.filter(
-            (answer) => answer.status === 'Submitted'
-          ).length;
-          if (totalQuestions > 0 && submittedCount >= totalQuestions) {
+          if (!answers.length) {
+            return;
+          }
+          const submittedByAsset = new Map<string, number>();
+          const assetsSeen = new Set<string>();
+          answers.forEach((answer) => {
+            const asset = String(answer.assetNumber ?? 1);
+            assetsSeen.add(asset);
+            if (answer.status === 'Submitted') {
+              submittedByAsset.set(asset, (submittedByAsset.get(asset) ?? 0) + 1);
+            }
+          });
+          if (!assetsSeen.size) {
+            return;
+          }
+          const allAssetsComplete = Array.from(assetsSeen).every(
+            (asset) => (submittedByAsset.get(asset) ?? 0) >= totalQuestions
+          );
+          if (totalQuestions > 0 && allAssetsComplete) {
             this.completedAuditCodes.add(audit.code);
           }
         },
@@ -349,6 +495,137 @@ export class AuditPerform implements OnInit {
   private getTemplateQuestionCount(auditType: string): number {
     const template = this.templateService.templates().find((item) => item.name === auditType);
     return template?.questions.length ?? 0;
+  }
+
+  private ensureAssetState(asset: string): void {
+    if (!this.activeTemplate) {
+      return;
+    }
+    const total = this.activeTemplate.questions.length;
+    if (!this.responsesByAsset[asset]) {
+      this.responsesByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.notesByAsset[asset]) {
+      this.notesByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.ncByAsset[asset]) {
+      this.ncByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.savedByAsset[asset]) {
+      this.savedByAsset[asset] = new Array(total).fill(false);
+    }
+    if (!this.statusByAsset[asset]) {
+      this.statusByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.evidenceFilesByAsset[asset]) {
+      this.evidenceFilesByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.evidenceDataUrlsByAsset[asset]) {
+      this.evidenceDataUrlsByAsset[asset] = new Array(total).fill('');
+    }
+    if (!this.evidenceItemsByAsset[asset]) {
+      this.evidenceItemsByAsset[asset] = new Array(total).fill(null).map(() => []);
+    }
+  }
+
+  private loadEvidenceForAsset(asset: string): void {
+    if (!this.activeAudit || !this.activeTemplate) {
+      return;
+    }
+    const total = this.activeTemplate.questions.length;
+    for (let index = 0; index < total; index += 1) {
+      const key = `audir_evidence_list_${this.activeAudit.code}_${asset}_${index}`;
+      const stored = localStorage.getItem(key);
+      if (!stored) {
+        continue;
+      }
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          this.evidenceItemsByAsset[asset][index] = parsed;
+          const firstImage = parsed.find((entry) => entry?.type?.startsWith?.('image/'));
+          if (firstImage?.dataUrl) {
+            this.evidenceDataUrlsByAsset[asset][index] = firstImage.dataUrl;
+            this.evidenceFilesByAsset[asset][index] =
+              firstImage.name || this.evidenceFilesByAsset[asset][index];
+          }
+        }
+      } catch {
+        // ignore invalid cached evidence
+      }
+    }
+  }
+
+  private getAssetScopeKey(): string {
+    return this.activeAudit ? `audir_asset_scope_${this.activeAudit.code}` : 'audir_asset_scope';
+  }
+
+  private loadAssetScope(): string[] {
+    if (!this.activeAudit) {
+      return [];
+    }
+    const scope = this.activeAudit.assetScope;
+    if (Array.isArray(scope) && scope.length) {
+      const numeric = scope.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+      const max = Math.max(...numeric);
+      if (max > 0) {
+        return Array.from({ length: max }, (_, index) => String(index + 1));
+      }
+      return scope.map((value) => String(value)).filter(Boolean);
+    }
+    if (typeof scope === 'number' && Number.isFinite(scope) && scope > 0) {
+      return Array.from({ length: scope }, (_, index) => String(index + 1));
+    }
+    const stored = localStorage.getItem(this.getAssetScopeKey());
+    if (!stored) {
+      return [];
+    }
+    try {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item)).filter(Boolean);
+      }
+    } catch {
+      return [];
+    }
+    return [];
+  }
+
+  private persistAssetScope(): void {
+    if (!this.activeAudit) {
+      return;
+    }
+    localStorage.setItem(this.getAssetScopeKey(), JSON.stringify(this.assetScope));
+  }
+
+  private areAllAssetsSubmitted(): boolean {
+    if (!this.activeTemplate) {
+      return false;
+    }
+    const total = this.activeTemplate.questions.length;
+    if (!this.assetScope.length) {
+      return false;
+    }
+    return this.assetScope.every((asset) => {
+      const statuses = this.statusByAsset[asset] ?? [];
+      return statuses.filter((status) => status === 'Submitted').length >= total;
+    });
+  }
+
+  private getNextIncompleteAsset(): string | null {
+    if (!this.activeTemplate) {
+      return null;
+    }
+    const total = this.activeTemplate.questions.length;
+    const ordered = this.assetScope;
+    for (const asset of ordered) {
+      const statuses = this.statusByAsset[asset] ?? [];
+      const submitted = statuses.filter((status) => status === 'Submitted').length;
+      if (submitted < total) {
+        return asset;
+      }
+    }
+    return null;
   }
 
   private isAssignedToCurrentUser(audit: AuditPlanRecord): boolean {
@@ -370,28 +647,54 @@ export class AuditPerform implements OnInit {
 
   protected onEvidenceSelected(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    const allowedTypes = new Set(['image/jpeg', 'image/png']);
-    if (file && !allowedTypes.has(file.type)) {
-      window.alert('Only JPG or PNG images are allowed.');
+    const files = Array.from(input.files ?? []);
+    const allowedImageTypes = new Set(['image/jpeg', 'image/png']);
+    const allowedVideoTypes = new Set(['video/mp4', 'video/webm', 'video/quicktime']);
+    const validFiles = files.filter(
+      (file) => allowedImageTypes.has(file.type) || allowedVideoTypes.has(file.type)
+    );
+    if (!validFiles.length) {
+      window.alert('Only JPG/PNG images and MP4/WEBM/MOV videos are allowed.');
       this.evidenceFiles[index] = '';
       this.evidenceDataUrls[index] = '';
+      this.evidenceItems[index] = [];
       input.value = '';
       return;
     }
-    this.evidenceFiles[index] = file ? file.name : '';
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = typeof reader.result === 'string' ? reader.result : '';
-        if (dataUrl) {
-          this.evidenceDataUrls[index] = dataUrl;
-        }
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.evidenceDataUrls[index] = '';
-    }
+
+    this.evidenceItems[index] = [];
+    const firstImage = validFiles.find((file) => file.type.startsWith('image/')) ?? null;
+    this.evidenceFiles[index] = firstImage ? firstImage.name : validFiles[0].name;
+
+    const imageReaders = validFiles
+      .filter((file) => file.type.startsWith('image/'))
+      .map(
+        (file) =>
+          new Promise<{ name: string; type: string; dataUrl?: string }>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+              resolve({ name: file.name, type: file.type, dataUrl });
+            };
+            reader.readAsDataURL(file);
+          })
+      );
+
+    Promise.all(imageReaders).then((images) => {
+      this.evidenceItems[index] = images.concat(
+        validFiles
+          .filter((file) => file.type.startsWith('video/'))
+          .map((file) => ({ name: file.name, type: file.type, dataUrl: undefined }))
+      );
+      this.evidenceDataUrls[index] = images[0]?.dataUrl ?? '';
+      if (!this.evidenceDataUrls[index]) {
+        this.evidenceFiles[index] = validFiles[0]?.name ?? '';
+      }
+      if (this.activeAudit) {
+        const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
+        localStorage.setItem(key, JSON.stringify(this.evidenceItems[index]));
+      }
+    });
     input.value = '';
   }
 

@@ -344,7 +344,7 @@ router.delete('/templates/:id', requireAuth, async (req: AuthedRequest, res) => 
 
 router.get('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
-    `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, created_at, updated_at
+    `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at
      FROM audit_plans WHERE tenant_id = $1 ORDER BY created_at DESC`,
     [req.user?.tenant_id]
   );
@@ -360,9 +360,9 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   const payload = req.body ?? {};
   const code = payload.code ? String(payload.code) : generateCode();
   const { rows } = await pool.query(
-    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
-     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, created_at, updated_at`,
+    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
     [
       req.user?.tenant_id,
       code,
@@ -378,6 +378,7 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
       payload.region ?? null,
       payload.audit_note ?? null,
       payload.response_type ?? null,
+      payload.asset_scope ?? null,
     ]
   );
   return res.status(201).json(rows[0]);
@@ -397,6 +398,7 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
     ['region', payload.region],
     ['audit_note', payload.audit_note],
     ['response_type', payload.response_type],
+    ['asset_scope', payload.asset_scope],
   ].filter(([, value]) => value !== undefined);
   if (!fields.length) {
     return res.status(400).json({ detail: 'No updates provided' });
@@ -406,7 +408,7 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `UPDATE audit_plans SET ${setClause}, updated_at = NOW()
      WHERE id = $1 AND tenant_id = $${fields.length + 2}
-     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, created_at, updated_at`,
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
     [planId, ...values, req.user?.tenant_id]
   );
   if (!rows[0]) {
@@ -438,11 +440,11 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
     return res.status(400).json({ detail: 'Missing audit identifier' });
   }
   const { rows } = await pool.query(
-    `SELECT id, audit_plan_id, question_index, question_text, response, response_is_negative,
+    `SELECT id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
             assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at
      FROM audit_answers
      WHERE tenant_id = $1 AND audit_plan_id = $2
-     ORDER BY question_index ASC`,
+     ORDER BY asset_number ASC, question_index ASC`,
     [req.user?.tenant_id, planId]
   );
   return res.json(rows);
@@ -462,15 +464,19 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   }
   const questionIndex =
     payload.question_index !== undefined ? Number(payload.question_index) : null;
+  const assetNumber =
+    payload.asset_number !== undefined && payload.asset_number !== null
+      ? Number(payload.asset_number)
+      : 1;
   if (!planId || questionIndex === null) {
     return res.status(400).json({ detail: 'Missing audit answer fields' });
   }
   const { rows } = await pool.query(
     `INSERT INTO audit_answers
-      (tenant_id, audit_plan_id, question_index, question_text, response, response_is_negative,
+      (tenant_id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
        assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
-     ON CONFLICT (tenant_id, audit_plan_id, question_index)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+     ON CONFLICT (tenant_id, audit_plan_id, asset_number, question_index)
      DO UPDATE SET
        question_text = EXCLUDED.question_text,
        response = EXCLUDED.response,
@@ -481,11 +487,12 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
        evidence_data_url = EXCLUDED.evidence_data_url,
        status = EXCLUDED.status,
        updated_at = NOW()
-     RETURNING id, audit_plan_id, question_index, question_text, response, response_is_negative,
+     RETURNING id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
                assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at`,
     [
       req.user?.tenant_id,
       planId,
+      assetNumber,
       questionIndex,
       payload.question_text ?? '',
       payload.response ?? null,
@@ -528,6 +535,7 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
             p.start_date,
             p.end_date,
             p.auditor_name,
+            a.asset_number,
             a.question_text,
             a.response,
             a.assigned_nc,

@@ -100,6 +100,14 @@
               </option>
             </select>
           </div>
+          <div class="field">
+            <label>Assets in scope</label>
+            <select name="assetScopeCount" [(ngModel)]="auditForm.assetScopeCount">
+              <option *ngFor="let count of assetScopeOptions" [value]="count">
+                {{ count }}
+              </option>
+            </select>
+          </div>
         </div>
       </section>
 
@@ -222,6 +230,10 @@
       <div class="summary-row">
         <span>Response type</span>
         <strong>{{ auditForm.responseType || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Assets in scope</span>
+        <strong>{{ auditForm.assetScopeCount || '—' }}</strong>
       </div>
       <div class="summary-row">
         <span>Audit note</span>

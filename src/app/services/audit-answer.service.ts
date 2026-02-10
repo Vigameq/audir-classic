@@ -5,6 +5,7 @@ import { Observable, map } from 'rxjs';
 export type AuditAnswerRecord = {
   id: string;
   auditPlanId: string;
+  assetNumber: number | null;
   questionIndex: number;
   questionText: string;
   response: string;
@@ -32,6 +33,7 @@ export class AuditAnswerService {
 
   upsertAnswer(payload: {
     audit_code: string;
+    asset_number?: number | null;
     question_index: number;
     question_text: string;
     response?: string | null;
@@ -49,6 +51,10 @@ export class AuditAnswerService {
     return {
       id: String(payload?.id ?? ''),
       auditPlanId: String(payload?.audit_plan_id ?? ''),
+      assetNumber:
+        payload?.asset_number !== undefined && payload?.asset_number !== null
+          ? Number(payload.asset_number)
+          : null,
       questionIndex: Number(payload?.question_index ?? 0),
       questionText: String(payload?.question_text ?? ''),
       response: String(payload?.response ?? ''),

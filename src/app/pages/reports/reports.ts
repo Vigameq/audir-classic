@@ -285,6 +285,7 @@ export class Reports implements OnInit {
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(10.5);
         const ncLines = [
+          `Asset: ${record.assetNumber ?? '—'}`,
           `Question: ${record.question || '—'}`,
           `Assigned NC: ${record.assignedNc || '—'}`,
           `Status: ${record.status || '—'}`,
@@ -308,7 +309,7 @@ export class Reports implements OnInit {
     } else {
       ncRecords.forEach((record, idx) => {
         const lines = [
-          `NC ${idx + 1}: ${record.question || '—'}`,
+          `NC ${idx + 1} (Asset ${record.assetNumber ?? '—'}): ${record.question || '—'}`,
           `Root cause: ${record.rootCause || '—'}`,
           `Containment: ${record.containmentAction || '—'}`,
           `Corrective: ${record.correctiveAction || '—'}`,
@@ -328,9 +329,17 @@ export class Reports implements OnInit {
     }
 
     drawSectionTitle('Question Responses');
-    const sortedAnswers = [...answers].sort((a, b) => a.questionIndex - b.questionIndex);
+    const sortedAnswers = [...answers].sort((a, b) => {
+      const assetA = a.assetNumber ?? 1;
+      const assetB = b.assetNumber ?? 1;
+      if (assetA !== assetB) {
+        return assetA - assetB;
+      }
+      return a.questionIndex - b.questionIndex;
+    });
     sortedAnswers.forEach((answer) => {
-      const questionTitle = `Q${answer.questionIndex + 1}. ${answer.questionText || '—'}`;
+      const assetLabel = answer.assetNumber ? `Asset ${answer.assetNumber} · ` : '';
+      const questionTitle = `${assetLabel}Q${answer.questionIndex + 1}. ${answer.questionText || '—'}`;
       const blockHeight = 90;
       ensureSpace(blockHeight);
       doc.setDrawColor(235);

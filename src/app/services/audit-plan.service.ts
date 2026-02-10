@@ -17,6 +17,7 @@ export type AuditPlanRecord = {
   region: string;
   auditNote: string;
   responseType: string;
+  assetScope?: number[];
   createdAt: string;
 };
 
@@ -71,7 +72,9 @@ export class AuditPlanService {
     );
   }
 
-  createPlan(plan: Omit<AuditPlanRecord, 'id' | 'createdAt' | 'code'> & { code?: string }): Observable<AuditPlanRecord[]> {
+  createPlan(
+    plan: Omit<AuditPlanRecord, 'id' | 'createdAt' | 'code'> & { code?: string }
+  ): Observable<AuditPlanRecord[]> {
     return this.http
       .post(`${this.baseUrl}/audit-plans`, {
         code: plan.code ?? null,
@@ -87,6 +90,7 @@ export class AuditPlanService {
         region: plan.region || null,
         audit_note: plan.auditNote || null,
         response_type: plan.responseType || null,
+        asset_scope: plan.assetScope ?? null,
       })
       .pipe(switchMap(() => this.syncFromApi()));
   }
@@ -95,19 +99,20 @@ export class AuditPlanService {
     planId: string,
     updates: Partial<Omit<AuditPlanRecord, 'id' | 'code' | 'createdAt'>>
   ): Observable<AuditPlanRecord[]> {
+    const payload: Record<string, unknown> = {};
+    if (updates.startDate !== undefined) payload['start_date'] = updates.startDate;
+    if (updates.endDate !== undefined) payload['end_date'] = updates.endDate;
+    if (updates.auditorName !== undefined) payload['auditor_name'] = updates.auditorName;
+    if (updates.department !== undefined) payload['department'] = updates.department;
+    if (updates.locationCity !== undefined) payload['location_city'] = updates.locationCity;
+    if (updates.site !== undefined) payload['site'] = updates.site;
+    if (updates.country !== undefined) payload['country'] = updates.country;
+    if (updates.region !== undefined) payload['region'] = updates.region;
+    if (updates.auditNote !== undefined) payload['audit_note'] = updates.auditNote;
+    if (updates.responseType !== undefined) payload['response_type'] = updates.responseType;
+    if (updates.assetScope !== undefined) payload['asset_scope'] = updates.assetScope;
     return this.http
-      .put(`${this.baseUrl}/audit-plans/${planId}`, {
-        start_date: updates.startDate,
-        end_date: updates.endDate,
-        auditor_name: updates.auditorName,
-        department: updates.department,
-        location_city: updates.locationCity,
-        site: updates.site,
-        country: updates.country,
-        region: updates.region,
-        audit_note: updates.auditNote,
-        response_type: updates.responseType,
-      })
+      .put(`${this.baseUrl}/audit-plans/${planId}`, payload)
       .pipe(switchMap(() => this.syncFromApi()));
   }
 
@@ -146,6 +151,7 @@ export class AuditPlanService {
               region: plan.region || null,
               audit_note: plan.auditNote || null,
               response_type: plan.responseType || null,
+              asset_scope: plan.assetScope ?? null,
             })
           )
         ).pipe(switchMap(() => this.syncFromApi()));
@@ -204,6 +210,9 @@ export class AuditPlanService {
       region: String(payload?.region ?? ''),
       auditNote: String(payload?.audit_note ?? ''),
       responseType: String(payload?.response_type ?? ''),
+      assetScope: Array.isArray(payload?.asset_scope)
+        ? payload.asset_scope.map((value: any) => Number(value)).filter((value: number) => !Number.isNaN(value))
+        : undefined,
       createdAt: String(payload?.created_at ?? ''),
     };
   }
