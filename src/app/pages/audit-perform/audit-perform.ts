@@ -69,7 +69,9 @@ export class AuditPerform implements OnInit {
   protected evidenceDataUrls: string[] = [];
   protected evidenceItems: { name: string; type: string; dataUrl?: string }[][] = [];
   protected noteEntries: string[] = [];
-  protected readonly assetNumberOptions = Array.from({ length: 100 }, (_, i) => String(i + 1));
+  protected get assetNumberOptions(): string[] {
+    return this.assetScope.length ? this.assetScope : ['1'];
+  }
   protected assetScope: string[] = [];
   protected activeAsset = '';
   protected responsesByAsset: Record<string, string[]> = {};
@@ -286,10 +288,6 @@ export class AuditPerform implements OnInit {
   onAssetChipClick(asset: string): void {
     if (!asset) {
       return;
-    }
-    if (this.assetScope.length !== 1 || this.assetScope[0] !== asset) {
-      this.assetScope = [asset];
-      this.onAssetScopeChange();
     }
     this.setActiveAsset(asset);
   }
@@ -648,7 +646,7 @@ export class AuditPerform implements OnInit {
     return this.isAssignedToCurrentUser(audit);
   }
 
-  protected onEvidenceSelected(index: number, event: Event): void {
+  protected async onEvidenceSelected(index: number, event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const files = Array.from(input.files ?? []);
     const allowedImageTypes = new Set(['image/jpeg', 'image/png']);
@@ -668,6 +666,45 @@ export class AuditPerform implements OnInit {
     this.evidenceItems[index] = [];
     const firstImage = validFiles.find((file) => file.type.startsWith('image/')) ?? null;
     this.evidenceFiles[index] = firstImage ? firstImage.name : validFiles[0].name;
+
+    if (this.activeAudit && this.activeAsset) {
+      try {
+        const uploadInfo = await firstValueFrom(
+          this.auditAnswerService.getEvidenceUploadUrls({
+            audit_code: this.activeAudit.code,
+            asset_number: Number(this.activeAsset),
+            question_index: index,
+            files: validFiles.map((file) => ({ name: file.name, type: file.type })),
+          })
+        );
+        await Promise.all(
+          uploadInfo.uploads.map((upload, fileIndex) =>
+            fetch(upload.uploadUrl, {
+              method: 'PUT',
+              headers: { 'Content-Type': validFiles[fileIndex].type || 'application/octet-stream' },
+              body: validFiles[fileIndex],
+            })
+          )
+        );
+        const uploadsByName = new Map(uploadInfo.uploads.map((u) => [u.name, u.publicUrl]));
+        this.evidenceItems[index] = validFiles.map((file) => ({
+          name: file.name,
+          type: file.type,
+          dataUrl: uploadsByName.get(file.name),
+        }));
+        const firstPublic = uploadsByName.get(firstImage?.name ?? '') ?? uploadsByName.get(validFiles[0].name) ?? '';
+        this.evidenceDataUrls[index] = firstPublic;
+        if (this.activeAudit) {
+          const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
+          localStorage.setItem(key, JSON.stringify(this.evidenceItems[index]));
+        }
+        input.value = '';
+        return;
+      } catch (error) {
+        console.error('Evidence upload failed', error);
+        window.alert('Evidence upload failed. Please try again.');
+      }
+    }
 
     const imageReaders = validFiles
       .filter((file) => file.type.startsWith('image/'))

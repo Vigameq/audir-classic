@@ -176,6 +176,16 @@ button.small,
   font-size: 0.85rem;
 }
 
+.evidence-link {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.evidence-link:hover {
+  text-decoration: underline;
+}
+
 .divider {
   color: var(--color-line);
 }

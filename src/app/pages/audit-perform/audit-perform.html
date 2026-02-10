@@ -96,8 +96,8 @@
                   class="chip"
                   type="button"
                   *ngFor="let asset of assetNumberOptions"
-                  [class.selected]="assetScope.includes(asset)"
-                  [class.complete]="assetScope.includes(asset) && isAssetComplete(asset)"
+                  [class.selected]="activeAsset === asset"
+                  [class.complete]="isAssetComplete(asset)"
                   (click)="onAssetChipClick(asset)"
                 >
                   {{ asset }}

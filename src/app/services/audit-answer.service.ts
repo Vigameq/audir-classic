@@ -47,6 +47,21 @@ export class AuditAnswerService {
     return this.http.post<AuditAnswerRecord>(`${this.baseUrl}/audit-answers`, payload);
   }
 
+  getEvidenceUploadUrls(payload: {
+    audit_code: string;
+    asset_number: number;
+    question_index: number;
+    files: { name: string; type: string }[];
+  }): Observable<{
+    folderUrl: string;
+    uploads: { name: string; key: string; uploadUrl: string; publicUrl: string }[];
+  }> {
+    return this.http.post<{
+      folderUrl: string;
+      uploads: { name: string; key: string; uploadUrl: string; publicUrl: string }[];
+    }>(`${this.baseUrl}/evidence/presign`, payload);
+  }
+
   private mapFromApi(payload: any): AuditAnswerRecord {
     return {
       id: String(payload?.id ?? ''),

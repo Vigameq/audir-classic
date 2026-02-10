@@ -244,6 +244,12 @@ export class AuditManage implements OnInit {
     return this.responseService.responses().map((response) => response.name);
   }
 
+  private readonly evidenceBaseUrl = 'https://tierx-internal.sgp1.digitaloceanspaces.com';
+
+  protected getEvidenceFolderUrl(audit: AuditPlanRecord): string {
+    return `${this.evidenceBaseUrl}/${audit.code}/`;
+  }
+
   ngOnInit(): void {
     this.auditPlanService.migrateFromLocal().subscribe();
     this.departmentService.migrateFromLocal().subscribe();

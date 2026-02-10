@@ -13,6 +13,8 @@ import * as functions from 'firebase-functions/v1';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type AuthPayload = {
   sub: string;
@@ -60,6 +62,30 @@ const pool = new Pool({
   ssl: env.dbSslMode === "require" ? { rejectUnauthorized: false } : undefined,
   options: `-c search_path=${env.dbSchema}`,
 });
+
+const spacesBucket = String(functions.config().app?.spaces_bucket ?? '');
+const spacesRegion = String(functions.config().app?.spaces_region ?? '');
+const spacesAccessKey = String(functions.config().app?.spaces_key ?? '');
+const spacesSecretKey = String(functions.config().app?.spaces_secret ?? '');
+const spacesPublicBase = String(functions.config().app?.spaces_public_base ?? '');
+
+const spacesClient =
+  spacesBucket && spacesRegion && spacesAccessKey && spacesSecretKey
+    ? new S3Client({
+        region: spacesRegion,
+        endpoint: `https://${spacesRegion}.digitaloceanspaces.com`,
+        credentials: {
+          accessKeyId: spacesAccessKey,
+          secretAccessKey: spacesSecretKey,
+        },
+      })
+    : null;
+
+const buildAssetFolder = (auditCode: string, assetNumber: number) =>
+  `${auditCode}/${String(assetNumber).padStart(2, '0')}`;
+
+const sanitizeFilename = (name: string) =>
+  name.replace(/[^a-zA-Z0-9._-]+/g, '_');
 
 const jwtSecret = env.jwtSecret;
 const jwtExpiryMinutes = Number(env.accessTokenExpireMinutes);
@@ -494,6 +520,40 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
     [req.user?.tenant_id, planId]
   );
   return res.json(rows);
+});
+
+router.post('/evidence/presign', requireAuth, async (req: AuthedRequest, res) => {
+  if (!spacesClient || !spacesBucket || !spacesPublicBase) {
+    return res.status(500).json({ detail: 'Spaces configuration missing' });
+  }
+  const payload = req.body ?? {};
+  const auditCode = String(payload.audit_code ?? '').trim();
+  const assetNumber = Number(payload.asset_number ?? 0);
+  const questionIndex = Number(payload.question_index ?? 0);
+  const files = Array.isArray(payload.files) ? payload.files : [];
+  if (!auditCode || !assetNumber || !files.length) {
+    return res.status(400).json({ detail: 'Missing upload details' });
+  }
+  const folder = buildAssetFolder(auditCode, assetNumber);
+  const uploads = await Promise.all(
+    files.map(async (file: any, index: number) => {
+      const originalName = String(file?.name ?? `evidence-${index + 1}`);
+      const contentType = String(file?.type ?? 'application/octet-stream');
+      const safeName = sanitizeFilename(originalName);
+      const key = `${folder}/${questionIndex + 1}-${Date.now()}-${safeName}`;
+      const command = new PutObjectCommand({
+        Bucket: spacesBucket,
+        Key: key,
+        ContentType: contentType,
+        ACL: 'public-read',
+      });
+      const uploadUrl = await getSignedUrl(spacesClient, command, { expiresIn: 900 });
+      const publicUrl = `${spacesPublicBase.replace(/\/$/, '')}/${key}`;
+      return { name: originalName, key, uploadUrl, publicUrl };
+    })
+  );
+  const folderUrl = `${spacesPublicBase.replace(/\/$/, '')}/${folder}/`;
+  return res.json({ folderUrl, uploads });
 });
 
 router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {

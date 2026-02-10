@@ -58,6 +58,10 @@
               <span>{{ audit.locationCity || '—' }}</span>
               <span class="divider">·</span>
               <span>{{ audit.auditorName || '—' }}</span>
+              <span class="divider">·</span>
+              <a class="evidence-link" [href]="getEvidenceFolderUrl(audit)" target="_blank" rel="noopener">
+                Evidence folder
+              </a>
             </div>
           </div>
           <div class="audit-inline">
