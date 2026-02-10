@@ -385,6 +385,16 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
       [req.user?.tenant_id, payload.audit_type]
     );
     auditTypeId = typeRows[0]?.id ?? null;
+    if (!auditTypeId) {
+      const { rows: createdRows } = await pool.query(
+        `INSERT INTO audit_types (tenant_id, name, active, created_at)
+         VALUES ($1, $2, TRUE, NOW())
+         ON CONFLICT (tenant_id, name) DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [req.user?.tenant_id, payload.audit_type]
+      );
+      auditTypeId = createdRows[0]?.id ?? null;
+    }
   }
   if (!auditTypeId) {
     return res.status(400).json({ detail: 'Invalid audit_type' });
@@ -450,6 +460,16 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
         [req.user?.tenant_id, payload.audit_type]
       );
       auditTypeId = typeRows[0]?.id ?? null;
+      if (!auditTypeId) {
+        const { rows: createdRows } = await pool.query(
+          `INSERT INTO audit_types (tenant_id, name, active, created_at)
+           VALUES ($1, $2, TRUE, NOW())
+           ON CONFLICT (tenant_id, name) DO UPDATE SET name = EXCLUDED.name
+           RETURNING id`,
+          [req.user?.tenant_id, payload.audit_type]
+        );
+        auditTypeId = createdRows[0]?.id ?? null;
+      }
     }
     if (!auditTypeId) {
       return res.status(400).json({ detail: 'Invalid audit_type' });
