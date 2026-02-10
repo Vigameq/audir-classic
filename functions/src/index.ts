@@ -363,6 +363,25 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   if (!auditType) {
     return res.status(400).json({ detail: 'Invalid audit_type' });
   }
+  const assetScope = (() => {
+    if (Array.isArray(payload.asset_scope)) {
+      return payload.asset_scope.map((value: any) => Number(value)).filter((value: number) => Number.isFinite(value));
+    }
+    if (typeof payload.asset_scope === 'string' && payload.asset_scope.trim()) {
+      try {
+        const parsed = JSON.parse(payload.asset_scope);
+        if (Array.isArray(parsed)) {
+          return parsed.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+        }
+      } catch {
+        return null;
+      }
+    }
+    if (typeof payload.asset_scope === 'number' && Number.isFinite(payload.asset_scope)) {
+      return [payload.asset_scope];
+    }
+    return null;
+  })();
   const { rows } = await pool.query(
     `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW())
@@ -382,7 +401,7 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
       payload.region ?? null,
       payload.audit_note ?? null,
       payload.response_type ?? null,
-      payload.asset_scope ?? null,
+      assetScope,
     ]
   );
   return res.status(201).json(rows[0]);
@@ -391,6 +410,25 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
 router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
   const planId = Number(req.params.id);
   const payload = req.body ?? {};
+  const assetScope = (() => {
+    if (Array.isArray(payload.asset_scope)) {
+      return payload.asset_scope.map((value: any) => Number(value)).filter((value: number) => Number.isFinite(value));
+    }
+    if (typeof payload.asset_scope === 'string' && payload.asset_scope.trim()) {
+      try {
+        const parsed = JSON.parse(payload.asset_scope);
+        if (Array.isArray(parsed)) {
+          return parsed.map((value) => Number(value)).filter((value) => Number.isFinite(value));
+        }
+      } catch {
+        return undefined;
+      }
+    }
+    if (typeof payload.asset_scope === 'number' && Number.isFinite(payload.asset_scope)) {
+      return [payload.asset_scope];
+    }
+    return undefined;
+  })();
   const fields = [
     ['start_date', payload.start_date],
     ['end_date', payload.end_date],
@@ -403,7 +441,7 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
     ['region', payload.region],
     ['audit_note', payload.audit_note],
     ['response_type', payload.response_type],
-    ['asset_scope', payload.asset_scope],
+    ['asset_scope', assetScope],
   ].filter(([, value]) => value !== undefined);
   if (!fields.length) {
     return res.status(400).json({ detail: 'No updates provided' });
