@@ -72,4 +72,12 @@ export class Evidence implements OnInit {
         items: list.sort((a, b) => a.key.localeCompare(b.key)),
       }));
   }
+
+  protected isImage(item: EvidenceItem): boolean {
+    return /\.(png|jpe?g|gif|webp)$/i.test(item.key);
+  }
+
+  protected isVideo(item: EvidenceItem): boolean {
+    return /\.(mp4|webm|mov)$/i.test(item.key);
+  }
 }

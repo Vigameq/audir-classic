@@ -87,6 +87,29 @@
   box-shadow: 0 10px 20px rgba(16, 24, 40, 0.08);
 }
 
+.file-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 0.6rem;
+  overflow: hidden;
+  border: 1px solid rgba(20, 10, 0, 0.08);
+  background: #f6f3ef;
+  display: grid;
+  place-items: center;
+}
+
+.file-preview img,
+.file-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.file-fallback {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
 .file-name {
   font-weight: 600;
   word-break: break-all;
