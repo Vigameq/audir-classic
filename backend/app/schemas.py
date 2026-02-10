@@ -121,6 +121,7 @@ class AuditPlanBase(BaseModel):
     region: str | None = None
     audit_note: str | None = None
     response_type: str | None = None
+    asset_scope: list[int] | None = None
 
 
 class AuditPlanCreate(AuditPlanBase):
@@ -138,6 +139,7 @@ class AuditPlanUpdate(BaseModel):
     region: str | None = None
     audit_note: str | None = None
     response_type: str | None = None
+    asset_scope: list[int] | None = None
 
 
 class AuditPlanOut(AuditPlanBase):

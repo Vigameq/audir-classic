@@ -251,6 +251,7 @@ def create_audit_plan(db: Session, tenant_id: int, payload: AuditPlanCreate) -> 
         region=payload.region,
         audit_note=payload.audit_note,
         response_type=payload.response_type,
+        asset_scope=payload.asset_scope,
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow(),
     )

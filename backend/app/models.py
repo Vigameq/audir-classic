@@ -101,5 +101,6 @@ class AuditPlan(Base):
     region: Mapped[str | None] = mapped_column(String, nullable=True)
     audit_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     response_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    asset_scope: Mapped[list[int] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
