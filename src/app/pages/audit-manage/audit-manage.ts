@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthState } from '../../auth-state';
 import { AuditAnswerRecord, AuditAnswerService } from '../../services/audit-answer.service';
@@ -15,7 +16,7 @@ import { User, UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-audit-manage',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './audit-manage.html',
   styleUrl: './audit-manage.scss',
 })

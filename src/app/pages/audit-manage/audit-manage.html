@@ -59,8 +59,8 @@
               <span class="divider">·</span>
               <span>{{ audit.auditorName || '—' }}</span>
               <span class="divider">·</span>
-              <a class="evidence-link" [href]="getEvidenceFolderUrl(audit)" target="_blank" rel="noopener">
-                Evidence folder
+              <a class="evidence-link" [attr.href]="'/evidence/' + audit.code">
+                Evidence index
               </a>
             </div>
           </div>

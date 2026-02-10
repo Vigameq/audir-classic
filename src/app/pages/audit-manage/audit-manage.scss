@@ -177,9 +177,13 @@ button.small,
 }
 
 .evidence-link {
+  background: transparent;
+  border: none;
   color: var(--color-accent);
   font-weight: 600;
   text-decoration: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .evidence-link:hover {

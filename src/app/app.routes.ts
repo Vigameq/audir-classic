@@ -68,6 +68,11 @@ export const routes: Routes = [
     title: 'Templates',
   },
   {
+    path: 'evidence/:code',
+    loadComponent: () => import('./pages/evidence/evidence').then((m) => m.Evidence),
+    title: 'Evidence',
+  },
+  {
     path: 'auditor',
     loadComponent: () => import('./pages/auditor/auditor').then((m) => m.Auditor),
     title: 'Auditor Workspace',

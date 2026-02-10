@@ -13,7 +13,7 @@ import * as functions from 'firebase-functions/v1';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type AuthPayload = {
@@ -577,6 +577,35 @@ router.post('/evidence/presign', requireAuth, async (req: AuthedRequest, res) =>
   );
   const folderUrl = `${spacesPublicBase.replace(/\/$/, '')}/${folder}/`;
   return res.json({ folderUrl, uploads });
+});
+
+router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
+  if (!spacesClient || !spacesBucket || !spacesPublicBase) {
+    return res.status(500).json({ detail: 'Spaces configuration missing' });
+  }
+  const auditCode = String(req.query.audit_code ?? '').trim();
+  if (!auditCode) {
+    return res.status(400).json({ detail: 'Missing audit code' });
+  }
+  const prefix = `${auditCode}/`;
+  const { Contents } = await spacesClient.send(
+    new ListObjectsV2Command({
+      Bucket: spacesBucket,
+      Prefix: prefix,
+    })
+  );
+  const items =
+    Contents?.filter((item) => item.Key && !item.Key.endsWith('/')).map((item) => {
+      const key = item.Key as string;
+      return {
+        key,
+        url: `${spacesPublicBase.replace(/\/$/, '')}/${key}`,
+        size: item.Size ?? 0,
+        lastModified: item.LastModified ? item.LastModified.toISOString() : '',
+      };
+    }) ?? [];
+  const folderUrl = `${spacesPublicBase.replace(/\/$/, '')}/${prefix}`;
+  return res.json({ folderUrl, items });
 });
 
 router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
