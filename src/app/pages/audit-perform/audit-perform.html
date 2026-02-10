@@ -185,6 +185,21 @@
                 <span class="evidence-name" *ngIf="evidenceItems[i]?.length">
                   {{ evidenceItems[i].length }} files attached
                 </span>
+                <div class="evidence-preview" *ngIf="evidenceItems[i]?.length">
+                  <ng-container *ngFor="let item of evidenceItems[i]">
+                    <img
+                      *ngIf="item.type?.startsWith('image/')"
+                      [src]="item.dataUrl"
+                      [alt]="item.name"
+                      loading="lazy"
+                    />
+                    <video
+                      *ngIf="item.type?.startsWith('video/')"
+                      [src]="item.dataUrl"
+                      controls
+                    ></video>
+                  </ng-container>
+                </div>
               </div>
               <div class="note-row">
                 <label>Auditor note</label>

@@ -38,7 +38,7 @@
       </div>
     </div>
     <div class="audit-grid" *ngIf="activeAudits.length; else emptyAudits">
-      <article class="audit-card compact" *ngFor="let audit of activeAudits">
+      <article class="audit-card compact" *ngFor="let audit of pagedAudits">
         <div class="audit-row">
           <div class="audit-main">
             <div class="audit-title">
@@ -89,6 +89,15 @@
           </div>
         </div>
       </article>
+    </div>
+    <div class="pagination" *ngIf="activeAudits.length > pageSize">
+      <button class="ghost small" type="button" (click)="prevPage()" [disabled]="pageIndex === 1">
+        Prev
+      </button>
+      <span>Page {{ pageIndex }} of {{ totalPages }}</span>
+      <button class="ghost small" type="button" (click)="nextPage()" [disabled]="pageIndex === totalPages">
+        Next
+      </button>
     </div>
     <ng-template #emptyAudits>
       <div class="empty">No {{ activeTabLabel }} audits available.</div>

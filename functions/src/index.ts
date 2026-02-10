@@ -84,6 +84,28 @@ const spacesClient =
 const buildAssetFolder = (auditCode: string, assetNumber: number) =>
   `${auditCode}/${String(assetNumber).padStart(2, '0')}`;
 
+const ensureFolderMarkers = async (auditCode: string, assetNumber: number) => {
+  if (!spacesClient || !spacesBucket) {
+    return;
+  }
+  const rootKey = `${auditCode}/`;
+  const assetKey = `${buildAssetFolder(auditCode, assetNumber)}/`;
+  const markers = [rootKey, assetKey];
+  await Promise.all(
+    markers.map((key) =>
+      spacesClient.send(
+        new PutObjectCommand({
+          Bucket: spacesBucket,
+          Key: key,
+          Body: '',
+          ContentType: 'application/x-directory',
+          ACL: 'public-read',
+        })
+      )
+    )
+  );
+};
+
 const sanitizeFilename = (name: string) =>
   name.replace(/[^a-zA-Z0-9._-]+/g, '_');
 
@@ -534,6 +556,7 @@ router.post('/evidence/presign', requireAuth, async (req: AuthedRequest, res) =>
   if (!auditCode || !assetNumber || !files.length) {
     return res.status(400).json({ detail: 'Missing upload details' });
   }
+  await ensureFolderMarkers(auditCode, assetNumber);
   const folder = buildAssetFolder(auditCode, assetNumber);
   const uploads = await Promise.all(
     files.map(async (file: any, index: number) => {

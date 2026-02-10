@@ -198,6 +198,16 @@ button.small,
   justify-content: flex-end;
 }
 
+.pagination {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
 .audit-card-header {
   display: flex;
   align-items: center;

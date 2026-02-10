@@ -63,6 +63,8 @@ export class AuditManage implements OnInit {
   protected completionMap: Record<string, 'Completed' | 'In Progress'> = {};
   protected answersByAudit: Record<string, AuditAnswerRecord[]> = {};
   protected activeTab: 'created' | 'inProgress' | 'completed' = 'created';
+  protected readonly pageSize = 10;
+  protected pageIndex = 1;
 
   protected get audits(): AuditPlanRecord[] {
     return [...this.auditPlanService.plans()].sort((a, b) =>
@@ -93,6 +95,15 @@ export class AuditManage implements OnInit {
       return this.inProgressAudits;
     }
     return this.createdAudits;
+  }
+
+  protected get pagedAudits(): AuditPlanRecord[] {
+    const start = (this.pageIndex - 1) * this.pageSize;
+    return this.activeAudits.slice(start, start + this.pageSize);
+  }
+
+  protected get totalPages(): number {
+    return Math.max(1, Math.ceil(this.activeAudits.length / this.pageSize));
   }
 
   protected get activeTabLabel(): string {
@@ -371,6 +382,19 @@ export class AuditManage implements OnInit {
 
   protected setTab(tab: 'created' | 'inProgress' | 'completed'): void {
     this.activeTab = tab;
+    this.pageIndex = 1;
+  }
+
+  protected goToPage(page: number): void {
+    this.pageIndex = Math.min(Math.max(page, 1), this.totalPages);
+  }
+
+  protected nextPage(): void {
+    this.goToPage(this.pageIndex + 1);
+  }
+
+  protected prevPage(): void {
+    this.goToPage(this.pageIndex - 1);
   }
 
   protected getAuditProgress(audit: AuditPlanRecord): { nc: number; nonNc: number } {

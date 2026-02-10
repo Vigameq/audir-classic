@@ -486,6 +486,23 @@ button.small {
   color: var(--color-muted);
 }
 
+.evidence-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.evidence-preview img,
+.evidence-preview video {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(20, 10, 0, 0.1);
+  background: var(--color-surface);
+}
+
 .nc-row {
   display: grid;
   gap: 0.4rem;
