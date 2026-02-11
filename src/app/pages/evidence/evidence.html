@@ -5,9 +5,6 @@
       <h1>Evidence: {{ auditCode || '—' }}</h1>
       <p class="subtitle">Public folder link and evidence list by asset.</p>
     </div>
-    <a class="ghost small" [href]="folderUrl" target="_blank" rel="noopener" *ngIf="folderUrl">
-      Open Folder
-    </a>
   </header>
 
   <div class="status" *ngIf="loading">Loading evidence…</div>

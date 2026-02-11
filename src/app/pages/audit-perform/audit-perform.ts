@@ -361,6 +361,7 @@ export class AuditPerform implements OnInit {
     note?: string | null;
     evidenceName?: string | null;
     evidenceDataUrl?: string | null;
+    evidenceUrls?: string[] | null;
     status?: string | null;
   }[]): void {
     answers.forEach((answer) => {
@@ -383,9 +384,16 @@ export class AuditPerform implements OnInit {
       notes[index] = answer.note ?? '';
       files[index] = answer.evidenceName ?? '';
       dataUrls[index] = answer.evidenceDataUrl ?? '';
-      items[index] = dataUrls[index]
-        ? [{ name: files[index] || 'Evidence', type: 'image', dataUrl: dataUrls[index] }]
-        : [];
+      const urls = Array.isArray(answer.evidenceUrls)
+        ? answer.evidenceUrls
+        : dataUrls[index]
+          ? [dataUrls[index]]
+          : [];
+      items[index] = urls.map((url, itemIndex) => ({
+        name: itemIndex === 0 ? files[index] || 'Evidence' : `Evidence ${itemIndex + 1}`,
+        type: url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') ? 'video/mp4' : 'image/png',
+        dataUrl: url,
+      }));
       saved[index] = !!answer.status;
       statuses[index] =
         (answer.status as 'Saved' | 'Submitted' | '') ?? '';
@@ -432,6 +440,10 @@ export class AuditPerform implements OnInit {
           note: this.noteEntries[index] || null,
           evidence_name: this.evidenceFiles[index] || null,
           evidence_data_url: this.evidenceDataUrls[index] || null,
+          evidence_urls:
+            this.evidenceItems[index]
+              ?.map((item) => item.dataUrl)
+              .filter((url): url is string => !!url) ?? null,
           status,
         })
         .subscribe({

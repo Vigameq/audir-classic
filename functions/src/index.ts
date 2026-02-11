@@ -535,7 +535,7 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   }
   const { rows } = await pool.query(
     `SELECT id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
-            assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at
+            assigned_nc, note, evidence_name, evidence_data_url, evidence_urls, status, created_at, updated_at
      FROM audit_answers
      WHERE tenant_id = $1 AND audit_plan_id = $2
      ORDER BY asset_number ASC, question_index ASC`,
@@ -632,8 +632,8 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `INSERT INTO audit_answers
       (tenant_id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
-       assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW())
+       assigned_nc, note, evidence_name, evidence_data_url, evidence_urls, status, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
      ON CONFLICT (tenant_id, audit_plan_id, asset_number, question_index)
      DO UPDATE SET
        question_text = EXCLUDED.question_text,
@@ -643,10 +643,11 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
        note = EXCLUDED.note,
        evidence_name = EXCLUDED.evidence_name,
        evidence_data_url = EXCLUDED.evidence_data_url,
+       evidence_urls = EXCLUDED.evidence_urls,
        status = EXCLUDED.status,
        updated_at = NOW()
      RETURNING id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
-               assigned_nc, note, evidence_name, evidence_data_url, status, created_at, updated_at`,
+               assigned_nc, note, evidence_name, evidence_data_url, evidence_urls, status, created_at, updated_at`,
     [
       req.user?.tenant_id,
       planId,
@@ -659,6 +660,7 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
       payload.note ?? null,
       payload.evidence_name ?? null,
       payload.evidence_data_url ?? null,
+      payload.evidence_urls ?? null,
       payload.status ?? 'Saved',
     ]
   );

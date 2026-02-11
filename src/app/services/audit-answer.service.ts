@@ -14,6 +14,7 @@ export type AuditAnswerRecord = {
   note: string;
   evidenceName: string;
   evidenceDataUrl: string;
+  evidenceUrls: string[];
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -42,6 +43,7 @@ export class AuditAnswerService {
     note?: string | null;
     evidence_name?: string | null;
     evidence_data_url?: string | null;
+    evidence_urls?: string[] | null;
     status?: string;
   }): Observable<AuditAnswerRecord> {
     return this.http.post<AuditAnswerRecord>(`${this.baseUrl}/audit-answers`, payload);
@@ -78,6 +80,9 @@ export class AuditAnswerService {
       note: String(payload?.note ?? ''),
       evidenceName: String(payload?.evidence_name ?? ''),
       evidenceDataUrl: String(payload?.evidence_data_url ?? ''),
+      evidenceUrls: Array.isArray(payload?.evidence_urls)
+        ? payload.evidence_urls.map((url: any) => String(url)).filter(Boolean)
+        : [],
       status: String(payload?.status ?? ''),
       createdAt: String(payload?.created_at ?? ''),
       updatedAt: String(payload?.updated_at ?? ''),
