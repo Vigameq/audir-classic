@@ -682,9 +682,6 @@ export class AuditPerform implements OnInit {
   }
 
   protected canPerformAudit(audit: AuditPlanRecord): boolean {
-    if (this.auth.role() !== 'Auditor') {
-      return true;
-    }
     return this.isAssignedToCurrentUser(audit);
   }
 
