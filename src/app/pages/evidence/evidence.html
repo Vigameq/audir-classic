@@ -26,8 +26,8 @@
       <div class="file-grid">
         <a class="file-card" *ngFor="let item of group.items" [href]="item.url" target="_blank" rel="noopener">
           <div class="file-preview">
-            <img *ngIf="isImage(item)" [src]="item.url" [alt]="item.key" loading="lazy" />
-            <video *ngIf="isVideo(item)" [src]="item.url" muted></video>
+            <img *ngIf="isImage(item)" [src]="getItemUrl(item)" [alt]="item.key" loading="lazy" />
+            <video *ngIf="isVideo(item)" [src]="getItemUrl(item)" muted></video>
             <div class="file-fallback" *ngIf="!isImage(item) && !isVideo(item)">
               File
             </div>

@@ -80,4 +80,8 @@ export class Evidence implements OnInit {
   protected isVideo(item: EvidenceItem): boolean {
     return /\.(mp4|webm|mov)$/i.test(item.key);
   }
+
+  protected getItemUrl(item: EvidenceItem): string {
+    return encodeURI(item.url);
+  }
 }
