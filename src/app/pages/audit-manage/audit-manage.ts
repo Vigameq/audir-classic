@@ -100,11 +100,6 @@ export class AuditManage implements OnInit {
     return this.createdAudits;
   }
 
-  protected get pagedAudits(): AuditPlanRecord[] {
-    const start = (this.pageIndex - 1) * this.pageSize;
-    return this.activeAudits.slice(start, start + this.pageSize);
-  }
-
   protected get totalPages(): number {
     return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
