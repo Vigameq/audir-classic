@@ -39,6 +39,7 @@ export class App {
   constructor() {
     effect(() => {
       if (this.auth.isLoggedIn()) {
+        this.auditPlanService.clearCache();
         this.dataSync.syncAll().subscribe();
         this.loadUserDepartment();
         this.ncService.listRecords().subscribe();

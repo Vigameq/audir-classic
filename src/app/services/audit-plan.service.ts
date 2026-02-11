@@ -33,6 +33,11 @@ export class AuditPlanService {
 
   readonly plans = this.plansSignal.asReadonly();
 
+  clearCache(): void {
+    this.plansSignal.set([]);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
   addPlan(plan: Omit<AuditPlanRecord, 'id' | 'createdAt' | 'code'>): void {
     const next = [
       {
