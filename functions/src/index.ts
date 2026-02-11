@@ -13,7 +13,7 @@ import * as functions from 'firebase-functions/v1';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
-import { S3Client, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type AuthPayload = {
@@ -595,17 +595,23 @@ router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
     })
   );
   const items =
-    Contents?.filter((item) => item.Key && !item.Key.endsWith('/')).map((item) => {
+    Contents?.filter((item) => item.Key && !item.Key.endsWith('/')).map(async (item) => {
       const key = item.Key as string;
+      const command = new GetObjectCommand({
+        Bucket: spacesBucket,
+        Key: key,
+      });
+      const signedUrl = await getSignedUrl(spacesClient, command, { expiresIn: 3600 });
       return {
         key,
-        url: `${spacesPublicBase.replace(/\/$/, '')}/${key}`,
+        url: signedUrl,
         size: item.Size ?? 0,
         lastModified: item.LastModified ? item.LastModified.toISOString() : '',
       };
     }) ?? [];
+  const resolvedItems = await Promise.all(items);
   const folderUrl = `${spacesPublicBase.replace(/\/$/, '')}/${prefix}`;
-  return res.json({ folderUrl, items });
+  return res.json({ folderUrl, items: resolvedItems });
 });
 
 router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
