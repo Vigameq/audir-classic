@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, forkJoin, map, of, switchMap, tap } from 'rxjs';
 
@@ -77,6 +77,26 @@ export class AuditPlanService {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(plans));
       })
     );
+  }
+
+  fetchPage(pageIndex: number, pageSize: number): Observable<{ items: AuditPlanRecord[]; total: number }> {
+    const safePage = Math.max(1, Math.floor(pageIndex));
+    const safeSize = Math.max(1, Math.floor(pageSize));
+    const params = new HttpParams()
+      .set('limit', String(safeSize))
+      .set('offset', String((safePage - 1) * safeSize));
+    return this.http
+      .get<unknown[]>(`${this.baseUrl}/audit-plans`, { params, observe: 'response' })
+      .pipe(
+        map((response) => {
+          const rows = Array.isArray(response.body) ? response.body : [];
+          const items = rows.map((row) => this.mapFromApi(row));
+          const totalHeader =
+            response.headers.get('X-Total-Count') ?? response.headers.get('x-total-count');
+          const total = Number(totalHeader ?? rows.length ?? 0);
+          return { items, total: Number.isFinite(total) ? total : items.length };
+        })
+      );
   }
 
   createPlan(

@@ -68,11 +68,11 @@ export class AuditManage implements OnInit {
   protected activeTab: 'created' | 'inProgress' | 'completed' = 'created';
   protected readonly pageSize = 10;
   protected pageIndex = 1;
+  protected totalCount = 0;
+  protected pagedAudits: AuditPlanRecord[] = [];
 
   protected get audits(): AuditPlanRecord[] {
-    return [...this.auditPlanService.plans()].sort((a, b) =>
-      b.createdAt.localeCompare(a.createdAt)
-    );
+    return this.pagedAudits;
   }
 
   protected get completedAudits(): AuditPlanRecord[] {
@@ -106,7 +106,7 @@ export class AuditManage implements OnInit {
   }
 
   protected get totalPages(): number {
-    return Math.max(1, Math.ceil(this.activeAudits.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
   }
 
   protected get activeTabLabel(): string {
@@ -265,14 +265,13 @@ export class AuditManage implements OnInit {
   }
 
   ngOnInit(): void {
-    this.auditPlanService.migrateFromLocal().subscribe();
     this.departmentService.migrateFromLocal().subscribe();
     this.siteService.migrateFromLocal().subscribe();
     this.regionService.migrateFromLocal().subscribe();
     this.responseService.migrateFromLocal().subscribe();
     this.templateService.migrateFromLocal().subscribe();
     this.ncService.listRecords().subscribe({
-      next: () => this.loadAuditProgress(),
+      next: () => this.loadPage(),
     });
     this.userService.listUsers().subscribe({
       next: (users) => {
@@ -280,7 +279,7 @@ export class AuditManage implements OnInit {
         this.customers = users.filter((user) => user.role === 'Customer');
       },
     });
-    this.loadAuditProgress();
+    this.loadPage();
   }
 
   protected openEdit(audit: AuditPlanRecord): void {
@@ -381,7 +380,7 @@ export class AuditManage implements OnInit {
     }
     this.auditPlanService.deletePlanApi(audit.id).subscribe({
       next: () => {
-        this.loadAuditProgress();
+        this.loadPage();
       },
     });
   }
@@ -389,10 +388,12 @@ export class AuditManage implements OnInit {
   protected setTab(tab: 'created' | 'inProgress' | 'completed'): void {
     this.activeTab = tab;
     this.pageIndex = 1;
+    this.loadPage();
   }
 
   protected goToPage(page: number): void {
     this.pageIndex = Math.min(Math.max(page, 1), this.totalPages);
+    this.loadPage();
   }
 
   protected nextPage(): void {
@@ -434,6 +435,7 @@ export class AuditManage implements OnInit {
     const audits = this.audits;
     if (!audits.length) {
       this.completionMap = {};
+      this.answersByAudit = {};
       return;
     }
     forkJoin(
@@ -481,6 +483,16 @@ export class AuditManage implements OnInit {
     });
   }
 
+  private loadPage(): void {
+    this.auditPlanService.fetchPage(this.pageIndex, this.pageSize).subscribe({
+      next: ({ items, total }) => {
+        this.pagedAudits = items;
+        this.totalCount = total;
+        this.loadAuditProgress();
+      },
+    });
+  }
+
   private buildViewResponses(answers: AuditAnswerRecord[]): {
     question: string;
     response: string;
@@ -517,7 +529,7 @@ export class AuditManage implements OnInit {
   }
 
   private isAuditOwnedByCurrentAuditor(code: string): boolean {
-    const audit = this.auditPlanService.plans().find((item) => item.code === code);
+    const audit = this.pagedAudits.find((item) => item.code === code);
     if (!audit) {
       return false;
     }

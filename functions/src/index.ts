@@ -410,14 +410,26 @@ router.get('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   res.set('Cache-Control', 'no-store');
   res.set('Pragma', 'no-cache');
   const customerEmail = await getCustomerEmail(req);
+  const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
+  const params = customerEmail
+    ? [req.user?.tenant_id, customerEmail]
+    : [req.user?.tenant_id];
+  const whereClause = `WHERE tenant_id = $1 ${customerEmail ? 'AND customer_id = $2' : ''}`;
+  const countResult = await pool.query(
+    `SELECT COUNT(*)::int AS count FROM audit_plans ${whereClause}`,
+    params
+  );
+  const totalCount = Number(countResult.rows[0]?.count ?? 0);
   const { rows } = await pool.query(
     `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at
      FROM audit_plans
-     WHERE tenant_id = $1
-     ${customerEmail ? 'AND customer_id = $2' : ''}
-     ORDER BY created_at DESC`,
-    customerEmail ? [req.user?.tenant_id, customerEmail] : [req.user?.tenant_id]
+     ${whereClause}
+     ORDER BY created_at DESC
+     LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+    [...params, limit, offset]
   );
+  res.set('X-Total-Count', String(totalCount));
   return res.json(rows);
 });
 

@@ -11,7 +11,7 @@
     <div class="panel-header">
       <div class="section-title">
         <h2>Audit status</h2>
-        <span class="count">{{ activeAudits.length }} total</span>
+        <span class="count">{{ totalCount }} total</span>
       </div>
       <div class="tab-switch">
         <button
@@ -90,7 +90,7 @@
         </div>
       </article>
     </div>
-    <div class="pagination" *ngIf="activeAudits.length > pageSize">
+    <div class="pagination" *ngIf="totalCount > pageSize">
       <button class="ghost small" type="button" (click)="prevPage()" [disabled]="pageIndex === 1">
         Prev
       </button>

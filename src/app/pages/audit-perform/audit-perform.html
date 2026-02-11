@@ -27,7 +27,7 @@
   <section class="panel wide">
     <div class="panel-header">
       <h2>Created audits</h2>
-      <span class="count">{{ audits.length }} total</span>
+      <span class="count">{{ totalCount }} total</span>
     </div>
     <div class="audit-grid" *ngIf="audits.length">
       <article class="audit-card compact" *ngFor="let audit of audits">
@@ -75,6 +75,15 @@
     </div>
     <div class="empty" *ngIf="!audits.length">
       No audits created yet. Create one in Audit Plan.
+    </div>
+    <div class="pagination" *ngIf="totalCount > pageSize">
+      <button class="ghost small" type="button" (click)="prevPage()" [disabled]="pageIndex === 1">
+        Prev
+      </button>
+      <span>Page {{ pageIndex }} of {{ totalPages }}</span>
+      <button class="ghost small" type="button" (click)="nextPage()" [disabled]="pageIndex === totalPages">
+        Next
+      </button>
     </div>
   </section>
 

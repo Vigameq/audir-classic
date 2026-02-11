@@ -28,7 +28,7 @@ export class AuditPerform implements OnInit {
   private readonly router = inject(Router);
 
   protected get audits() {
-    const audits = this.auditPlanService.plans();
+    const audits = this.pagedAudits;
     const start = this.filterStart ? new Date(this.filterStart) : null;
     const end = this.filterEnd ? new Date(this.filterEnd) : null;
     const filtered = audits.filter((audit) => {
@@ -98,12 +98,16 @@ export class AuditPerform implements OnInit {
   protected filterStart = '';
   protected filterEnd = '';
   protected sortOrder: 'asc' | 'desc' = 'desc';
+  protected readonly pageSize = 10;
+  protected pageIndex = 1;
+  protected totalCount = 0;
+  protected pagedAudits: AuditPlanRecord[] = [];
 
   ngOnInit(): void {
-    this.auditPlanService.migrateFromLocal().subscribe();
     this.templateService.migrateFromLocal().subscribe();
     this.responseService.migrateFromLocal().subscribe();
     this.departmentService.migrateFromLocal().subscribe();
+    this.loadPage();
     this.route.paramMap.subscribe((params) => {
       const code = params.get('code');
       if (!code) {
@@ -116,7 +120,7 @@ export class AuditPerform implements OnInit {
 
   private async loadAuditByCode(code: string): Promise<void> {
     const audit =
-      this.auditPlanService.plans().find((item) => item.code === code) ??
+      this.pagedAudits.find((item) => item.code === code) ??
       (await firstValueFrom(this.auditPlanService.fetchByCode(code)));
     if (!audit) {
       return;
@@ -131,6 +135,15 @@ export class AuditPerform implements OnInit {
       await firstValueFrom(this.departmentService.syncFromApi());
     }
     this.openPerform(audit);
+  }
+
+  private loadPage(): void {
+    this.auditPlanService.fetchPage(this.pageIndex, this.pageSize).subscribe({
+      next: ({ items, total }) => {
+        this.pagedAudits = items;
+        this.totalCount = total;
+      },
+    });
   }
 
   protected openPerform(audit: AuditPlanRecord): void {
@@ -180,6 +193,23 @@ export class AuditPerform implements OnInit {
     this.evidenceItemsByAsset = {};
     this.ncErrors = [];
     this.router.navigate(['/audit-perform'], { replaceUrl: true });
+  }
+
+  protected get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalCount / this.pageSize));
+  }
+
+  protected nextPage(): void {
+    this.goToPage(this.pageIndex + 1);
+  }
+
+  protected prevPage(): void {
+    this.goToPage(this.pageIndex - 1);
+  }
+
+  protected goToPage(page: number): void {
+    this.pageIndex = Math.min(Math.max(page, 1), this.totalPages);
+    this.loadPage();
   }
 
   protected get departments(): string[] {
