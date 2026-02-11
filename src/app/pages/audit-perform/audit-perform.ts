@@ -85,7 +85,6 @@ export class AuditPerform implements OnInit {
     string,
     { name: string; type: string; key?: string; dataUrl?: string }[][]
   > = {};
-    {};
   protected ncErrors: boolean[] = [];
   protected noteHover: string | null = null;
   protected isQrGenerating: Record<string, boolean> = {};
