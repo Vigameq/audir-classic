@@ -40,8 +40,10 @@ export class Login {
             this.auth.setFirstName(match?.first_name ?? '');
             this.auth.setLastName(match?.last_name ?? '');
             this.dataSync.syncAll().subscribe({
-              next: () => this.router.navigate(['/dashboard']),
-              error: () => this.router.navigate(['/dashboard']),
+              next: () =>
+                this.router.navigate([role === 'Customer' ? '/customer-dashboard' : '/dashboard']),
+              error: () =>
+                this.router.navigate([role === 'Customer' ? '/customer-dashboard' : '/dashboard']),
             });
           },
           error: () => {

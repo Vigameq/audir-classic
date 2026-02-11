@@ -17,6 +17,7 @@ export type AuditPlanRecord = {
   region: string;
   auditNote: string;
   responseType: string;
+  customerId?: string;
   assetScope?: number[];
   assetScopeCount?: number;
   createdAt: string;
@@ -91,6 +92,7 @@ export class AuditPlanService {
         region: plan.region || null,
         audit_note: plan.auditNote || null,
         response_type: plan.responseType || null,
+        customer_id: plan.customerId || null,
         asset_scope: plan.assetScope ?? null,
       })
       .pipe(switchMap(() => this.syncFromApi()));
@@ -111,6 +113,7 @@ export class AuditPlanService {
     if (updates.region !== undefined) payload['region'] = updates.region;
     if (updates.auditNote !== undefined) payload['audit_note'] = updates.auditNote;
     if (updates.responseType !== undefined) payload['response_type'] = updates.responseType;
+    if (updates.customerId !== undefined) payload['customer_id'] = updates.customerId;
     if (updates.assetScope !== undefined) payload['asset_scope'] = updates.assetScope;
     return this.http
       .put(`${this.baseUrl}/audit-plans/${planId}`, payload)
@@ -152,6 +155,7 @@ export class AuditPlanService {
               region: plan.region || null,
               audit_note: plan.auditNote || null,
               response_type: plan.responseType || null,
+              customer_id: plan.customerId || null,
               asset_scope: plan.assetScope ?? null,
             })
           )
@@ -219,6 +223,7 @@ export class AuditPlanService {
       region: String(payload?.region ?? ''),
       auditNote: String(payload?.audit_note ?? ''),
       responseType: String(payload?.response_type ?? ''),
+      customerId: String(payload?.customer_id ?? ''),
       assetScope: assetScopeValues.length ? assetScopeValues : undefined,
       assetScopeCount,
       createdAt: String(payload?.created_at ?? ''),

@@ -127,6 +127,21 @@ const requireAuth = (req: AuthedRequest, res: Response, next: NextFunction) => {
   }
 };
 
+const getCustomerEmail = async (req: AuthedRequest): Promise<string | null> => {
+  if (req.user?.role !== 'Customer') {
+    return null;
+  }
+  const userId = Number(req.user?.sub ?? 0);
+  if (!userId) {
+    return null;
+  }
+  const { rows } = await pool.query(
+    'SELECT email FROM users WHERE id = $1 AND tenant_id = $2',
+    [userId, req.user?.tenant_id]
+  );
+  return rows[0]?.email ? String(rows[0].email).toLowerCase() : null;
+};
+
 router.get('/health', (_req, res) => res.json({ ok: true }));
 
 router.post('/auth/login', async (req, res) => {
@@ -391,10 +406,14 @@ router.delete('/templates/:id', requireAuth, async (req: AuthedRequest, res) => 
 });
 
 router.get('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
+  const customerEmail = await getCustomerEmail(req);
   const { rows } = await pool.query(
-    `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at
-     FROM audit_plans WHERE tenant_id = $1 ORDER BY created_at DESC`,
-    [req.user?.tenant_id]
+    `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at
+     FROM audit_plans
+     WHERE tenant_id = $1
+     ${customerEmail ? 'AND customer_id = $2' : ''}
+     ORDER BY created_at DESC`,
+    customerEmail ? [req.user?.tenant_id, customerEmail] : [req.user?.tenant_id]
   );
   return res.json(rows);
 });
@@ -405,6 +424,9 @@ const generateCode = () => {
 };
 
 router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   const payload = req.body ?? {};
   const code = payload.code ? String(payload.code) : generateCode();
   const auditType = payload.audit_type ? String(payload.audit_type) : null;
@@ -432,9 +454,9 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   })();
   const assetScopeJson = assetScope ? JSON.stringify(assetScope) : null;
   const { rows } = await pool.query(
-    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::jsonb, NOW(), NOW())
-     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
+    `INSERT INTO audit_plans (tenant_id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::jsonb, $16, NOW(), NOW())
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at`,
     [
       req.user?.tenant_id,
       code,
@@ -451,12 +473,16 @@ router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
       payload.audit_note ?? null,
       payload.response_type ?? null,
       assetScopeJson,
+      payload.customer_id ?? null,
     ]
   );
   return res.status(201).json(rows[0]);
 });
 
 router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   const planId = Number(req.params.id);
   const payload = req.body ?? {};
   const assetScope = (() => {
@@ -493,6 +519,7 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
     ['audit_note', payload.audit_note],
     ['response_type', payload.response_type],
     ['asset_scope', assetScopeJson],
+    ['customer_id', payload.customer_id],
   ].filter(([, value]) => value !== undefined);
   if (!fields.length) {
     return res.status(400).json({ detail: 'No updates provided' });
@@ -502,7 +529,7 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
   const { rows } = await pool.query(
     `UPDATE audit_plans SET ${setClause}, updated_at = NOW()
      WHERE id = $1 AND tenant_id = $${fields.length + 2}
-     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, created_at, updated_at`,
+     RETURNING id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at`,
     [planId, ...values, req.user?.tenant_id]
   );
   if (!rows[0]) {
@@ -512,6 +539,9 @@ router.put('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
 });
 
 router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   await pool.query('DELETE FROM audit_plans WHERE id = $1 AND tenant_id = $2', [
     Number(req.params.id),
     req.user?.tenant_id,
@@ -533,6 +563,20 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   if (!planId) {
     return res.status(400).json({ detail: 'Missing audit identifier' });
   }
+  if (req.user?.role === 'Customer') {
+    const customerEmail = await getCustomerEmail(req);
+    if (!customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+    const planCheck = await pool.query(
+      'SELECT customer_id FROM audit_plans WHERE id = $1 AND tenant_id = $2',
+      [planId, req.user?.tenant_id]
+    );
+    const planCustomer = String(planCheck.rows[0]?.customer_id ?? '').toLowerCase();
+    if (!planCustomer || planCustomer !== customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+  }
   const { rows } = await pool.query(
     `SELECT id, audit_plan_id, asset_number, question_index, question_text, response, response_is_negative,
             assigned_nc, note, evidence_name, evidence_data_url, evidence_urls, status, created_at, updated_at
@@ -545,6 +589,9 @@ router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
 });
 
 router.post('/evidence/presign', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   if (!spacesClient || !spacesBucket || !spacesPublicBase) {
     return res.status(500).json({ detail: 'Spaces configuration missing' });
   }
@@ -587,6 +634,20 @@ router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
   if (!auditCode) {
     return res.status(400).json({ detail: 'Missing audit code' });
   }
+  if (req.user?.role === 'Customer') {
+    const customerEmail = await getCustomerEmail(req);
+    if (!customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+    const planCheck = await pool.query(
+      'SELECT customer_id FROM audit_plans WHERE tenant_id = $1 AND code = $2 LIMIT 1',
+      [req.user?.tenant_id, auditCode]
+    );
+    const planCustomer = String(planCheck.rows[0]?.customer_id ?? '').toLowerCase();
+    if (!planCustomer || planCustomer !== customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+  }
   const prefix = `${auditCode}/`;
   const { Contents } = await spacesClient.send(
     new ListObjectsV2Command({
@@ -615,6 +676,9 @@ router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
 });
 
 router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   const payload = req.body ?? {};
   const auditCode = payload.audit_code ? String(payload.audit_code) : '';
   const auditPlanId = payload.audit_plan_id ? Number(payload.audit_plan_id) : null;
@@ -674,6 +738,9 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
 });
 
 router.put('/audit-answers/:id/assigned-nc', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   const answerId = Number(req.params.id);
   if (!answerId) {
     return res.status(400).json({ detail: 'Missing answer id' });
@@ -693,6 +760,7 @@ router.put('/audit-answers/:id/assigned-nc', requireAuth, async (req: AuthedRequ
 });
 
 router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
+  const customerEmail = await getCustomerEmail(req);
   const { rows } = await pool.query(
     `SELECT a.id AS answer_id,
             p.code AS audit_code,
@@ -721,14 +789,20 @@ router.get('/nc-records', requireAuth, async (req: AuthedRequest, res) => {
      JOIN audit_plans p ON p.id = a.audit_plan_id
      LEFT JOIN nc_actions n ON n.audit_answer_id = a.id AND n.tenant_id = a.tenant_id
      LEFT JOIN users u ON u.id = n.assigned_user_id AND u.tenant_id = a.tenant_id
-     WHERE a.tenant_id = $1 AND a.status = 'Submitted' AND a.response_is_negative = TRUE
+     WHERE a.tenant_id = $1
+       AND a.status = 'Submitted'
+       AND a.response_is_negative = TRUE
+       ${customerEmail ? 'AND p.customer_id = $2' : ''}
      ORDER BY a.updated_at DESC`,
-    [req.user?.tenant_id]
+    customerEmail ? [req.user?.tenant_id, customerEmail] : [req.user?.tenant_id]
   );
   return res.json(rows);
 });
 
 router.post('/nc-actions', requireAuth, async (req: AuthedRequest, res) => {
+  if (req.user?.role === 'Customer') {
+    return res.status(403).json({ detail: 'Not authorized' });
+  }
   const payload = req.body ?? {};
   const answerId = Number(payload.answer_id);
   if (!answerId) {

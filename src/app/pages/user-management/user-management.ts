@@ -43,7 +43,7 @@ export class UserManagement implements OnInit {
     password: '',
   };
 
-  protected readonly roles = ['Auditor', 'Manager', 'Super Admin'];
+  protected readonly roles = ['Auditor', 'Manager', 'Super Admin', 'Customer'];
   protected users: UserRow[] = [];
   protected get departments(): string[] {
     return this.departmentService.departments();

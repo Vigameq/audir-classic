@@ -40,9 +40,11 @@ export class AuditPlan implements OnInit {
     auditNote: '',
     responseType: '',
     assetScopeCount: 1,
+    customerId: '',
   };
   protected readonly assetScopeOptions = Array.from({ length: 150 }, (_, index) => index + 1);
   protected auditors: User[] = [];
+  protected customers: User[] = [];
   protected showSuccessModal = false;
   protected successSummary = {
     dateRange: '',
@@ -218,6 +220,7 @@ export class AuditPlan implements OnInit {
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
+        this.customers = users.filter((user) => user.role === 'Customer');
       },
     });
   }
@@ -237,6 +240,7 @@ export class AuditPlan implements OnInit {
       auditNote: '',
       responseType: '',
       assetScopeCount: 1,
+      customerId: '',
     };
     this.noteChars = 0;
     form.resetForm(this.auditForm);
@@ -265,6 +269,7 @@ export class AuditPlan implements OnInit {
         region: this.auditForm.region,
         auditNote: this.auditForm.auditNote,
         responseType: this.auditForm.responseType,
+        customerId: this.auditForm.customerId || undefined,
         assetScope: Array.from(
           { length: this.auditForm.assetScopeCount || 1 },
           (_, index) => index + 1

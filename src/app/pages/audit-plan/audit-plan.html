@@ -101,6 +101,15 @@
             </select>
           </div>
           <div class="field">
+            <label>Customer ID</label>
+            <select name="customerId" [(ngModel)]="auditForm.customerId">
+              <option value="">Select customer</option>
+              <option *ngFor="let customer of customers" [value]="customer.email">
+                {{ customer.first_name }} {{ customer.last_name }} · {{ customer.email }}
+              </option>
+            </select>
+          </div>
+          <div class="field">
             <label>Assets in scope</label>
             <select name="assetScopeCount" [(ngModel)]="auditForm.assetScopeCount">
               <option *ngFor="let count of assetScopeOptions" [value]="count">
@@ -230,6 +239,10 @@
       <div class="summary-row">
         <span>Response type</span>
         <strong>{{ auditForm.responseType || '—' }}</strong>
+      </div>
+      <div class="summary-row">
+        <span>Customer ID</span>
+        <strong>{{ auditForm.customerId || '—' }}</strong>
       </div>
       <div class="summary-row">
         <span>Assets in scope</span>

@@ -12,42 +12,49 @@
         <a
           routerLink="/dashboard"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Customer'"
         >
           Dashboard
         </a>
         <a
+          routerLink="/customer-dashboard"
+          routerLinkActive="active"
+          *ngIf="auth.role() === 'Customer'"
+        >
+          Customer
+        </a>
+        <a
           routerLink="/audit-plan"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Customer'"
         >
           Plan
         </a>
         <a
           routerLink="/audit-manage"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Customer'"
         >
           Manage
         </a>
         <a
           routerLink="/audit-perform"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Customer'"
         >
           Perform
         </a>
         <a
           routerLink="/nc-management"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Customer'"
         >
           NC Management
         </a>
         <a
           routerLink="/templates"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Auditor'"
+          *ngIf="auth.role() !== 'Super Admin' && auth.role() !== 'Auditor' && auth.role() !== 'Customer'"
         >
           Templates
         </a>
@@ -55,7 +62,7 @@
         <a
           routerLink="/user-management"
           routerLinkActive="active"
-          *ngIf="auth.role() !== 'Manager' && auth.role() !== 'Auditor'"
+          *ngIf="auth.role() !== 'Manager' && auth.role() !== 'Auditor' && auth.role() !== 'Customer'"
         >
           User Management
         </a>

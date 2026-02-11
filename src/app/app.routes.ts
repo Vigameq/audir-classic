@@ -17,6 +17,12 @@ export const routes: Routes = [
     title: 'Dashboard',
   },
   {
+    path: 'customer-dashboard',
+    loadComponent: () =>
+      import('./pages/customer-dashboard/customer-dashboard').then((m) => m.CustomerDashboard),
+    title: 'Customer Dashboard',
+  },
+  {
     path: 'audit-plan',
     loadComponent: () =>
       import('./pages/audit-plan/audit-plan').then((m) => m.AuditPlan),
