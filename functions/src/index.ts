@@ -13,7 +13,7 @@ import * as functions from 'firebase-functions/v1';
 import jwt from 'jsonwebtoken';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
-import { S3Client, GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsV2Command, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 type AuthPayload = {
