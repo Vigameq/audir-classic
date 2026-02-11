@@ -105,7 +105,7 @@
             <select name="customerId" [(ngModel)]="auditForm.customerId">
               <option value="">Select customer</option>
               <option *ngFor="let customer of customers" [value]="customer.email">
-                {{ customer.first_name }} {{ customer.last_name }} · {{ customer.email }}
+                {{ customer.first_name }} {{ customer.last_name }}
               </option>
             </select>
           </div>
