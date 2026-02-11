@@ -689,22 +689,36 @@ export class AuditPerform implements OnInit {
             files: validFiles.map((file) => ({ name: file.name, type: file.type })),
           })
         );
-        await Promise.all(
-          uploadInfo.uploads.map((upload, fileIndex) =>
-            fetch(upload.uploadUrl, {
-              method: 'PUT',
-              headers: { 'Content-Type': validFiles[fileIndex].type || 'application/octet-stream' },
-              body: validFiles[fileIndex],
-            })
-          )
-        );
-        const uploadsByName = new Map(uploadInfo.uploads.map((u) => [u.name, u.publicUrl]));
-        this.evidenceItems[index] = validFiles.map((file) => ({
+        const successfulUploads: { name: string; type: string; publicUrl: string }[] = [];
+        for (let i = 0; i < uploadInfo.uploads.length; i += 1) {
+          const upload = uploadInfo.uploads[i];
+          const file = validFiles[i];
+          const response = await fetch(upload.uploadUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || 'application/octet-stream' },
+            body: file,
+          });
+          if (response.ok) {
+            successfulUploads.push({ name: file.name, type: file.type, publicUrl: upload.publicUrl });
+          } else {
+            console.error('Evidence upload failed', file.name, response.status);
+          }
+        }
+        if (!successfulUploads.length) {
+          window.alert('Evidence upload failed. Please try again.');
+          input.value = '';
+          return;
+        }
+        const uploadsByName = new Map(successfulUploads.map((u) => [u.name, u.publicUrl]));
+        this.evidenceItems[index] = successfulUploads.map((file) => ({
           name: file.name,
           type: file.type,
-          dataUrl: uploadsByName.get(file.name),
+          dataUrl: file.publicUrl,
         }));
-        const firstPublic = uploadsByName.get(firstImage?.name ?? '') ?? uploadsByName.get(validFiles[0].name) ?? '';
+        const firstPublic =
+          uploadsByName.get(firstImage?.name ?? '') ??
+          uploadsByName.get(successfulUploads[0].name) ??
+          '';
         this.evidenceDataUrls[index] = firstPublic;
         if (this.activeAudit) {
           const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
