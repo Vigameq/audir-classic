@@ -42,7 +42,7 @@ const env = {
   dbUser: process.env.DB_USER ?? config.db_user ?? "",
   dbPassword: process.env.DB_PASSWORD ?? config.db_password ?? "",
   dbSslMode: process.env.DB_SSLMODE ?? config.db_sslmode ?? "require",
-  dbSchema: process.env.DB_SCHEMA ?? config.db_schema ?? "public",
+  dbSchema: process.env.DB_SCHEMA ?? config.db_schema ?? "auditx",
   jwtSecret: process.env.JWT_SECRET ?? config.jwt_secret ?? "",
   accessTokenExpireMinutes:
     process.env.ACCESS_TOKEN_EXPIRE_MINUTES ?? config.access_token_expire_minutes ?? "60",
