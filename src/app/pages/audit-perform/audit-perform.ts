@@ -668,16 +668,15 @@ export class AuditPerform implements OnInit {
     );
     if (!validFiles.length) {
       window.alert('Only JPG/PNG images and MP4/WEBM/MOV videos are allowed.');
-      this.evidenceFiles[index] = '';
-      this.evidenceDataUrls[index] = '';
-      this.evidenceItems[index] = [];
       input.value = '';
       return;
     }
 
-    this.evidenceItems[index] = [];
+    const existingItems = this.evidenceItems[index] ?? [];
     const firstImage = validFiles.find((file) => file.type.startsWith('image/')) ?? null;
-    this.evidenceFiles[index] = firstImage ? firstImage.name : validFiles[0].name;
+    if (!this.evidenceFiles[index]) {
+      this.evidenceFiles[index] = firstImage ? firstImage.name : validFiles[0].name;
+    }
 
     if (this.activeAudit && this.activeAsset) {
       try {
@@ -710,16 +709,25 @@ export class AuditPerform implements OnInit {
           return;
         }
         const uploadsByName = new Map(successfulUploads.map((u) => [u.name, u.publicUrl]));
-        this.evidenceItems[index] = successfulUploads.map((file) => ({
+        const newItems = successfulUploads.map((file) => ({
           name: file.name,
           type: file.type,
           dataUrl: file.publicUrl,
         }));
+        const combined = [...existingItems, ...newItems].filter(
+          (item, itemIndex, list) =>
+            list.findIndex(
+              (entry) => entry.name === item.name && entry.dataUrl === item.dataUrl
+            ) === itemIndex
+        );
+        this.evidenceItems[index] = combined;
         const firstPublic =
           uploadsByName.get(firstImage?.name ?? '') ??
           uploadsByName.get(successfulUploads[0].name) ??
           '';
-        this.evidenceDataUrls[index] = firstPublic;
+        if (!this.evidenceDataUrls[index]) {
+          this.evidenceDataUrls[index] = firstPublic;
+        }
         if (this.activeAudit) {
           const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
           localStorage.setItem(key, JSON.stringify(this.evidenceItems[index]));
@@ -747,13 +755,22 @@ export class AuditPerform implements OnInit {
       );
 
     Promise.all(imageReaders).then((images) => {
-      this.evidenceItems[index] = images.concat(
+      const newItems = images.concat(
         validFiles
           .filter((file) => file.type.startsWith('video/'))
           .map((file) => ({ name: file.name, type: file.type, dataUrl: undefined }))
       );
-      this.evidenceDataUrls[index] = images[0]?.dataUrl ?? '';
+      const combined = [...existingItems, ...newItems].filter(
+        (item, itemIndex, list) =>
+          list.findIndex(
+            (entry) => entry.name === item.name && entry.dataUrl === item.dataUrl
+          ) === itemIndex
+      );
+      this.evidenceItems[index] = combined;
       if (!this.evidenceDataUrls[index]) {
+        this.evidenceDataUrls[index] = images[0]?.dataUrl ?? '';
+      }
+      if (!this.evidenceDataUrls[index] && !this.evidenceFiles[index]) {
         this.evidenceFiles[index] = validFiles[0]?.name ?? '';
       }
       if (this.activeAudit) {
