@@ -406,6 +406,8 @@ router.delete('/templates/:id', requireAuth, async (req: AuthedRequest, res) => 
 });
 
 router.get('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('Pragma', 'no-cache');
   const customerEmail = await getCustomerEmail(req);
   const { rows } = await pool.query(
     `SELECT id, code, start_date, end_date, audit_type, audit_subtype, auditor_name, department, location_city, site, country, region, audit_note, response_type, asset_scope, customer_id, created_at, updated_at
@@ -550,6 +552,8 @@ router.delete('/audit-plans/:id', requireAuth, async (req: AuthedRequest, res) =
 });
 
 router.get('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.set('Pragma', 'no-cache');
   const auditCode = String(req.query.audit_code ?? '');
   const auditPlanId = req.query.audit_plan_id ? Number(req.query.audit_plan_id) : null;
   let planId = auditPlanId;
