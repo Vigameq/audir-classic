@@ -82,6 +82,6 @@ export class Evidence implements OnInit {
   }
 
   protected getItemUrl(item: EvidenceItem): string {
-    return encodeURI(item.url);
+    return item.url;
   }
 }
