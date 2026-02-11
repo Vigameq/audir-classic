@@ -655,22 +655,17 @@ router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
       Prefix: prefix,
     })
   );
-  const items =
-    Contents?.filter((item) => item.Key && !item.Key.endsWith('/')).map(async (item) => {
+  const resolvedItems =
+    Contents?.filter((item) => item.Key && !item.Key.endsWith('/')).map((item) => {
       const key = item.Key as string;
-      const command = new GetObjectCommand({
-        Bucket: spacesBucket,
-        Key: key,
-      });
-      const signedUrl = await getSignedUrl(spacesClient, command, { expiresIn: 3600 });
+      const publicUrl = `${spacesPublicBase.replace(/\/$/, '')}/${key}`;
       return {
         key,
-        url: signedUrl,
+        url: publicUrl,
         size: item.Size ?? 0,
         lastModified: item.LastModified ? item.LastModified.toISOString() : '',
       };
     }) ?? [];
-  const resolvedItems = await Promise.all(items);
   const folderUrl = `${spacesPublicBase.replace(/\/$/, '')}/${prefix}`;
   return res.json({ folderUrl, items: resolvedItems });
 });
