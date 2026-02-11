@@ -689,6 +689,7 @@ export class AuditPerform implements OnInit {
           })
         );
         const successfulUploads: { name: string; type: string; publicUrl: string }[] = [];
+        const failedUploads: string[] = [];
         for (let i = 0; i < uploadInfo.uploads.length; i += 1) {
           const upload = uploadInfo.uploads[i];
           const file = validFiles[i];
@@ -701,12 +702,18 @@ export class AuditPerform implements OnInit {
             successfulUploads.push({ name: file.name, type: file.type, publicUrl: upload.publicUrl });
           } else {
             console.error('Evidence upload failed', file.name, response.status);
+            failedUploads.push(file.name);
           }
         }
         if (!successfulUploads.length) {
           window.alert('Evidence upload failed. Please try again.');
           input.value = '';
           return;
+        }
+        if (failedUploads.length) {
+          window.alert(
+            `Some files failed to upload (${failedUploads.length}). The rest were saved.`
+          );
         }
         const uploadsByName = new Map(successfulUploads.map((u) => [u.name, u.publicUrl]));
         const newItems = successfulUploads.map((file) => ({
