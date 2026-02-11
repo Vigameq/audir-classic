@@ -119,3 +119,18 @@
   font-size: 0.8rem;
   color: var(--color-muted);
 }
+
+.back-link {
+  border: 1px solid rgba(255, 154, 0, 0.4);
+  border-radius: 999px;
+  padding: 0.45rem 1.1rem;
+  background: #fff7eb;
+  color: #a8550d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  border-color: rgba(255, 154, 0, 0.7);
+  box-shadow: 0 8px 16px rgba(255, 154, 0, 0.18);
+}

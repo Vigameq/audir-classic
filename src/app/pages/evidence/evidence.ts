@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Location } from '@angular/common';
 
 type EvidenceItem = {
   key: string;
@@ -24,6 +25,7 @@ type EvidenceGroup = {
 export class Evidence implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
 
   protected auditCode = '';
   protected folderUrl = '';
@@ -83,5 +85,9 @@ export class Evidence implements OnInit {
 
   protected getItemUrl(item: EvidenceItem): string {
     return item.url;
+  }
+
+  protected goBack(): void {
+    this.location.back();
   }
 }

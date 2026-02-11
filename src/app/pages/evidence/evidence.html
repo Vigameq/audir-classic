@@ -5,6 +5,7 @@
       <h1>Evidence: {{ auditCode || '—' }}</h1>
       <p class="subtitle">Public folder link and evidence list by asset.</p>
     </div>
+    <button class="back-link" type="button" (click)="goBack()">Back</button>
   </header>
 
   <div class="status" *ngIf="loading">Loading evidence…</div>
