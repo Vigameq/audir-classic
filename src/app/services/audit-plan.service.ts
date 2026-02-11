@@ -127,41 +127,7 @@ export class AuditPlanService {
   }
 
   migrateFromLocal(): Observable<AuditPlanRecord[]> {
-    const local = this.loadLocalRaw();
-    if (!local.length) {
-      return this.syncFromApi();
-    }
-    return this.http.get<unknown[]>(`${this.baseUrl}/audit-plans`).pipe(
-      map((rows) => (Array.isArray(rows) ? rows.map((row) => this.mapFromApi(row)) : [])),
-      switchMap((remote) => {
-        const remoteCodes = remote.map((item) => item.code);
-        const toCreate = local.filter((item) => !remoteCodes.includes(item.code));
-        if (!toCreate.length) {
-          return this.syncFromApi();
-        }
-        return forkJoin(
-          toCreate.map((plan) =>
-            this.http.post(`${this.baseUrl}/audit-plans`, {
-              code: plan.code,
-              start_date: plan.startDate,
-              end_date: plan.endDate,
-              audit_type: plan.auditType,
-              audit_subtype: plan.auditSubtype || null,
-              auditor_name: plan.auditorName || null,
-              department: plan.department || null,
-              location_city: plan.locationCity || null,
-              site: plan.site || null,
-              country: plan.country || null,
-              region: plan.region || null,
-              audit_note: plan.auditNote || null,
-              response_type: plan.responseType || null,
-              customer_id: plan.customerId || null,
-              asset_scope: plan.assetScope ?? null,
-            })
-          )
-        ).pipe(switchMap(() => this.syncFromApi()));
-      })
-    );
+    return this.syncFromApi();
   }
 
   fetchByCode(code: string): Observable<AuditPlanRecord | null> {
