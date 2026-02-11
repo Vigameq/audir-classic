@@ -158,6 +158,15 @@
           </select>
         </label>
         <label>
+          Customer
+          <select name="customerId" [(ngModel)]="editForm.customerId">
+            <option value="">Select customer</option>
+            <option *ngFor="let customer of customers" [value]="customer.email">
+              {{ customer.first_name }} {{ customer.last_name }}
+            </option>
+          </select>
+        </label>
+        <label>
           Department
           <select name="department" [(ngModel)]="editForm.department">
             <option value="">Select department</option>

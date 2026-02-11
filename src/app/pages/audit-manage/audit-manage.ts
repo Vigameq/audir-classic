@@ -33,6 +33,7 @@ export class AuditManage implements OnInit {
   private readonly templateService = inject(TemplateService);
 
   protected auditors: User[] = [];
+  protected customers: User[] = [];
   protected activeAudit: AuditPlanRecord | null = null;
   protected editForm = {
     startDate: '',
@@ -48,6 +49,7 @@ export class AuditManage implements OnInit {
     auditNote: '',
     responseType: '',
     assetScopeCount: 1,
+    customerId: '',
   };
   protected readonly assetScopeOptions = Array.from({ length: 150 }, (_, index) => index + 1);
   protected viewAudit: AuditPlanRecord | null = null;
@@ -275,6 +277,7 @@ export class AuditManage implements OnInit {
     this.userService.listUsers().subscribe({
       next: (users) => {
         this.auditors = users.filter((user) => user.role === 'Auditor');
+        this.customers = users.filter((user) => user.role === 'Customer');
       },
     });
     this.loadAuditProgress();
@@ -298,6 +301,7 @@ export class AuditManage implements OnInit {
       assetScopeCount:
         audit.assetScopeCount ??
         (audit.assetScope?.length ? Math.max(...audit.assetScope) : 1),
+      customerId: audit.customerId || '',
     };
   }
 
@@ -325,6 +329,7 @@ export class AuditManage implements OnInit {
         region: this.editForm.region,
         auditNote: this.editForm.auditNote,
         responseType: this.editForm.responseType,
+        customerId: this.editForm.customerId || undefined,
         assetScope: Array.from(
           { length: Number(this.editForm.assetScopeCount) || 1 },
           (_, index) => index + 1
