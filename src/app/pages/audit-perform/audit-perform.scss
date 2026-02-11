@@ -59,6 +59,15 @@ button.small {
   font-size: 0.8rem;
 }
 
+button:disabled,
+.file-trigger:disabled {
+  background: #e6e6e6;
+  color: #9a9a9a;
+  border-color: #d8d8d8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .file-trigger {
   font: inherit;
   border: 1px solid transparent;

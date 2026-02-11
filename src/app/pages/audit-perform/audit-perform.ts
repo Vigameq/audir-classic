@@ -67,7 +67,7 @@ export class AuditPerform implements OnInit {
   protected savedQuestions: boolean[] = [];
   protected evidenceFiles: string[] = [];
   protected evidenceDataUrls: string[] = [];
-  protected evidenceItems: { name: string; type: string; dataUrl?: string }[][] = [];
+  protected evidenceItems: { name: string; type: string; key?: string; dataUrl?: string }[][] = [];
   protected noteEntries: string[] = [];
   protected get assetNumberOptions(): string[] {
     return this.assetScope.length ? this.assetScope : ['1'];
@@ -81,7 +81,10 @@ export class AuditPerform implements OnInit {
   protected statusByAsset: Record<string, ('Saved' | 'Submitted' | '')[]> = {};
   protected evidenceFilesByAsset: Record<string, string[]> = {};
   protected evidenceDataUrlsByAsset: Record<string, string[]> = {};
-  protected evidenceItemsByAsset: Record<string, { name: string; type: string; dataUrl?: string }[][]> =
+  protected evidenceItemsByAsset: Record<
+    string,
+    { name: string; type: string; key?: string; dataUrl?: string }[][]
+  > = {};
     {};
   protected ncErrors: boolean[] = [];
   protected noteHover: string | null = null;
@@ -340,6 +343,14 @@ export class AuditPerform implements OnInit {
     return this.activeTemplate.questions.every((_, index) => statuses[index] === 'Submitted');
   }
 
+  protected areAllAssetsComplete(): boolean {
+    if (!this.activeTemplate) {
+      return false;
+    }
+    const assets = this.assetScope.length ? this.assetScope : ['1'];
+    return assets.every((asset) => this.isAssetComplete(asset));
+  }
+
   protected setActiveAsset(asset: string): void {
     if (!asset) {
       return;
@@ -419,11 +430,16 @@ export class AuditPerform implements OnInit {
         : dataUrls[index]
           ? [dataUrls[index]]
           : [];
-      items[index] = urls.map((url, itemIndex) => ({
-        name: itemIndex === 0 ? files[index] || 'Evidence' : `Evidence ${itemIndex + 1}`,
-        type: url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') ? 'video/mp4' : 'image/png',
-        dataUrl: url,
-      }));
+      items[index] = urls.map((url, itemIndex) => {
+        const key = this.extractEvidenceKey(url);
+        return {
+          name: itemIndex === 0 ? files[index] || 'Evidence' : `Evidence ${itemIndex + 1}`,
+          type: url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov') ? 'video/mp4' : 'image/png',
+          key,
+          dataUrl: key ? undefined : url,
+        };
+      });
+      this.signEvidenceItems(items[index], asset, index);
       saved[index] = !!answer.status;
       statuses[index] =
         (answer.status as 'Saved' | 'Submitted' | '') ?? '';
@@ -472,7 +488,7 @@ export class AuditPerform implements OnInit {
           evidence_data_url: this.evidenceDataUrls[index] || null,
           evidence_urls:
             this.evidenceItems[index]
-              ?.map((item) => item.dataUrl)
+              ?.map((item) => item.key ?? this.extractEvidenceKey(item.dataUrl ?? ''))
               .filter((url): url is string => !!url) ?? null,
           status,
         })
@@ -582,18 +598,84 @@ export class AuditPerform implements OnInit {
       try {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          this.evidenceItemsByAsset[asset][index] = parsed;
-          const firstImage = parsed.find((entry) => entry?.type?.startsWith?.('image/'));
-          if (firstImage?.dataUrl) {
-            this.evidenceDataUrlsByAsset[asset][index] = firstImage.dataUrl;
+          this.evidenceItemsByAsset[asset][index] = parsed.map((entry: any) => ({
+            name: entry?.name ?? 'Evidence',
+            type: entry?.type ?? 'image/png',
+            key: entry?.key ?? this.extractEvidenceKey(entry?.dataUrl ?? ''),
+            dataUrl: undefined,
+          }));
+          const firstImage = this.evidenceItemsByAsset[asset][index].find((entry) =>
+            entry?.type?.startsWith?.('image/')
+          );
+          if (firstImage?.name) {
             this.evidenceFilesByAsset[asset][index] =
               firstImage.name || this.evidenceFilesByAsset[asset][index];
           }
+          this.signEvidenceItems(this.evidenceItemsByAsset[asset][index], asset, index);
         }
       } catch {
         // ignore invalid cached evidence
       }
     }
+  }
+
+  private extractEvidenceKey(value: string): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      try {
+        const url = new URL(value);
+        return url.pathname.replace(/^\/+/, '');
+      } catch {
+        return undefined;
+      }
+    }
+    return value;
+  }
+
+  private signEvidenceItems(
+    items: { name: string; type: string; key?: string; dataUrl?: string }[],
+    asset: string,
+    index: number
+  ): void {
+    const keys = items.map((item) => item.key).filter((key): key is string => !!key);
+    if (!keys.length) {
+      return;
+    }
+    if (!this.activeAudit) {
+      return;
+    }
+    this.auditAnswerService.getEvidenceViewUrls({ keys, audit_code: this.activeAudit.code }).subscribe({
+      next: (result) => {
+        const urls = Array.isArray(result?.urls) ? result.urls : [];
+        items.forEach((item, idx) => {
+          item.dataUrl = urls[idx] ?? item.dataUrl;
+        });
+        const firstImage = items.find((entry) => entry?.type?.startsWith?.('image/'));
+        if (firstImage?.dataUrl) {
+          this.evidenceDataUrlsByAsset[asset][index] = firstImage.dataUrl;
+          this.evidenceFilesByAsset[asset][index] =
+            firstImage.name || this.evidenceFilesByAsset[asset][index];
+        }
+      },
+    });
+  }
+
+  private persistEvidenceItems(
+    index: number,
+    items: { name: string; type: string; key?: string }[]
+  ): void {
+    if (!this.activeAudit) {
+      return;
+    }
+    const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
+    const stored = items.map((item) => ({
+      name: item.name,
+      type: item.type,
+      key: item.key,
+    }));
+    localStorage.setItem(key, JSON.stringify(stored));
   }
 
   private getAssetScopeKey(): string {
@@ -715,7 +797,7 @@ export class AuditPerform implements OnInit {
             files: validFiles.map((file) => ({ name: file.name, type: file.type })),
           })
         );
-        const successfulUploads: { name: string; type: string; publicUrl: string }[] = [];
+        const successfulUploads: { name: string; type: string; key: string; publicUrl: string }[] = [];
         const failedUploads: string[] = [];
         for (let i = 0; i < uploadInfo.uploads.length; i += 1) {
           const upload = uploadInfo.uploads[i];
@@ -726,7 +808,12 @@ export class AuditPerform implements OnInit {
             body: file,
           });
           if (response.ok) {
-            successfulUploads.push({ name: file.name, type: file.type, publicUrl: upload.publicUrl });
+            successfulUploads.push({
+              name: file.name,
+              type: file.type,
+              key: upload.key,
+              publicUrl: upload.publicUrl,
+            });
           } else {
             console.error('Evidence upload failed', file.name, response.status);
             failedUploads.push(file.name);
@@ -746,6 +833,7 @@ export class AuditPerform implements OnInit {
         const newItems = successfulUploads.map((file) => ({
           name: file.name,
           type: file.type,
+          key: file.key,
           dataUrl: file.publicUrl,
         }));
         const combined = [...existingItems, ...newItems].filter(
@@ -755,6 +843,7 @@ export class AuditPerform implements OnInit {
             ) === itemIndex
         );
         this.evidenceItems[index] = combined;
+        this.signEvidenceItems(this.evidenceItems[index], this.activeAsset, index);
         const firstPublic =
           uploadsByName.get(firstImage?.name ?? '') ??
           uploadsByName.get(successfulUploads[0].name) ??
@@ -762,10 +851,7 @@ export class AuditPerform implements OnInit {
         if (!this.evidenceDataUrls[index]) {
           this.evidenceDataUrls[index] = firstPublic;
         }
-        if (this.activeAudit) {
-          const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
-          localStorage.setItem(key, JSON.stringify(this.evidenceItems[index]));
-        }
+        this.persistEvidenceItems(index, this.evidenceItems[index]);
         input.value = '';
         return;
       } catch (error) {
@@ -807,10 +893,7 @@ export class AuditPerform implements OnInit {
       if (!this.evidenceDataUrls[index] && !this.evidenceFiles[index]) {
         this.evidenceFiles[index] = validFiles[0]?.name ?? '';
       }
-      if (this.activeAudit) {
-        const key = `audir_evidence_list_${this.activeAudit.code}_${this.activeAsset}_${index}`;
-        localStorage.setItem(key, JSON.stringify(this.evidenceItems[index]));
-      }
+      this.persistEvidenceItems(index, this.evidenceItems[index]);
     });
     input.value = '';
   }

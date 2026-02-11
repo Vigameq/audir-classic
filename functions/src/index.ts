@@ -695,6 +695,43 @@ router.get('/evidence/list', requireAuth, async (req: AuthedRequest, res) => {
   return res.json({ folderUrl, items: resolvedItems });
 });
 
+router.post('/evidence/sign', requireAuth, async (req: AuthedRequest, res) => {
+  if (!spacesClient || !spacesBucket) {
+    return res.status(500).json({ detail: 'Spaces configuration missing' });
+  }
+  const payload = req.body ?? {};
+  const auditCode = String(payload.audit_code ?? '').trim();
+  const keys = Array.isArray(payload.keys) ? payload.keys : [];
+  if (!auditCode || !keys.length) {
+    return res.status(400).json({ detail: 'Missing keys' });
+  }
+  if (req.user?.role === 'Customer') {
+    const customerEmail = await getCustomerEmail(req);
+    if (!customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+    const planCheck = await pool.query(
+      'SELECT customer_id FROM audit_plans WHERE tenant_id = $1 AND code = $2 LIMIT 1',
+      [req.user?.tenant_id, auditCode]
+    );
+    const planCustomer = String(planCheck.rows[0]?.customer_id ?? '').toLowerCase();
+    if (!planCustomer || planCustomer !== customerEmail) {
+      return res.status(403).json({ detail: 'Not authorized' });
+    }
+  }
+  const urls = await Promise.all(
+    keys.map(async (rawKey: string) => {
+      const key = String(rawKey ?? '').replace(/^\/+/, '');
+      const command = new GetObjectCommand({
+        Bucket: spacesBucket,
+        Key: key,
+      });
+      return getSignedUrl(spacesClient, command, { expiresIn: 3600 });
+    })
+  );
+  return res.json({ urls });
+});
+
 router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
   if (req.user?.role === 'Customer') {
     return res.status(403).json({ detail: 'Not authorized' });

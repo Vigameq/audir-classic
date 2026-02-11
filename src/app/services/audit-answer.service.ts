@@ -64,6 +64,10 @@ export class AuditAnswerService {
     }>(`${this.baseUrl}/evidence/presign`, payload);
   }
 
+  getEvidenceViewUrls(payload: { keys: string[]; audit_code: string }): Observable<{ urls: string[] }> {
+    return this.http.post<{ urls: string[] }>(`${this.baseUrl}/evidence/sign`, payload);
+  }
+
   private mapFromApi(payload: any): AuditAnswerRecord {
     return {
       id: String(payload?.id ?? ''),

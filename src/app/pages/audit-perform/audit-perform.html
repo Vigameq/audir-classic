@@ -231,7 +231,12 @@
           </li>
         </ol>
         <div class="submit-all">
-          <button class="primary" type="button" (click)="submitAllQuestions()">
+          <button
+            class="primary"
+            type="button"
+            (click)="submitAllQuestions()"
+            [disabled]="!areAllAssetsComplete()"
+          >
             Submit asset
           </button>
         </div>
