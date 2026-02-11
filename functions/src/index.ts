@@ -47,6 +47,7 @@ const env = {
   accessTokenExpireMinutes:
     process.env.ACCESS_TOKEN_EXPIRE_MINUTES ?? config.access_token_expire_minutes ?? "60",
   frontendOrigin: process.env.FRONTEND_ORIGIN ?? config.frontend_origin ?? "*",
+  disableAuditCreate: process.env.DISABLE_AUDIT_CREATE ?? config.disable_audit_create ?? "false",
 };
 
 app.use(cors({ origin: env.frontendOrigin, credentials: true }));
@@ -428,6 +429,9 @@ const generateCode = () => {
 router.post('/audit-plans', requireAuth, async (req: AuthedRequest, res) => {
   if (req.user?.role === 'Customer') {
     return res.status(403).json({ detail: 'Not authorized' });
+  }
+  if (config.app?.disable_audit_create === 'true') {
+    return res.status(403).json({ detail: 'Audit creation disabled' });
   }
   const payload = req.body ?? {};
   const code = payload.code ? String(payload.code) : generateCode();
