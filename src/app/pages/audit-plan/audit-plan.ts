@@ -52,7 +52,14 @@ export class AuditPlan implements OnInit {
     auditSubtype: '',
   };
 
-  protected get auditTypes(): string[] {
+  protected readonly auditTypes = [
+    'Process Audit',
+    'Product Audit',
+    'System Audit',
+    'Supplier Audit',
+  ];
+
+  protected get auditSubtypes(): string[] {
     return this.templateService.templates().map((template) => template.name);
   }
 

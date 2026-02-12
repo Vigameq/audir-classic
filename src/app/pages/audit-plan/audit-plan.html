@@ -59,12 +59,12 @@
           </div>
           <div class="field">
             <label>Audit Subtype</label>
-            <input
-              type="text"
-              name="auditSubtype"
-              [(ngModel)]="auditForm.auditSubtype"
-              placeholder="Optional subtype"
-            />
+            <select name="auditSubtype" [(ngModel)]="auditForm.auditSubtype">
+              <option value="">Select audit subtype</option>
+              <option *ngFor="let subtype of auditSubtypes" [value]="subtype">
+                {{ subtype }}
+              </option>
+            </select>
           </div>
           <div class="field">
             <label>Auditor Name</label>
