@@ -401,9 +401,12 @@ export class AuditManage implements OnInit {
 
   protected getAuditProgress(audit: AuditPlanRecord): { nc: number; nonNc: number } {
     const answers = this.answersByAudit[audit.code] ?? [];
-    const submitted = answers.filter((answer) => answer.status === 'Submitted');
-    const nc = submitted.filter((answer) => answer.responseIsNegative).length;
-    const nonNc = submitted.length - nc;
+    const answered = answers.filter((answer) => (answer.response || '').trim());
+    const nc = answered.filter(
+      (answer) =>
+        answer.responseIsNegative || (answer.assignedNc || '').trim().length > 0
+    ).length;
+    const nonNc = answered.length - nc;
     return { nc, nonNc };
   }
 

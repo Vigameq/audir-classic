@@ -16,12 +16,12 @@
       <strong>{{ inProgressAudits.length }}</strong>
       <em>{{ createdAudits.length }} created</em>
     </article>
-    <article>
+    <article *ngIf="!isCustomer">
       <span>Open NCs</span>
       <strong>{{ openNcCount }}</strong>
       <em>{{ pendingReviewAll }} pending review</em>
     </article>
-    <article>
+    <article *ngIf="!isCustomer">
       <span>Closed NCs</span>
       <strong>{{ closedNcCount }}</strong>
       <em>{{ ncRecords.length }} total</em>
@@ -75,7 +75,7 @@
         <strong>{{ completedAudits.length }}</strong>
       </div>
     </div>
-    <div class="chart">
+    <div class="chart" *ngIf="!isCustomer">
       <div class="panel-header">
         <h2>NC status breakdown</h2>
         <span class="legend"><span class="dot"></span>Current</span>

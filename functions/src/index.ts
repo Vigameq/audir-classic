@@ -753,6 +753,7 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
     payload.asset_number !== undefined && payload.asset_number !== null
       ? Number(payload.asset_number)
       : 1;
+  const evidenceUrls = Array.isArray(payload.evidence_urls) ? payload.evidence_urls : null;
   if (!planId || questionIndex === null) {
     return res.status(400).json({ detail: 'Missing audit answer fields' });
   }
@@ -787,7 +788,7 @@ router.post('/audit-answers', requireAuth, async (req: AuthedRequest, res) => {
       payload.note ?? null,
       payload.evidence_name ?? null,
       payload.evidence_data_url ?? null,
-      payload.evidence_urls ?? null,
+      evidenceUrls ? JSON.stringify(evidenceUrls) : null,
       payload.status ?? 'Saved',
     ]
   );

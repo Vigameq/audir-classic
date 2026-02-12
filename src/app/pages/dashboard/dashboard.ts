@@ -67,6 +67,10 @@ export class Dashboard implements OnInit {
     return this.auth.role() === 'Super Admin';
   }
 
+  protected get isCustomer(): boolean {
+    return this.auth.role() === 'Customer';
+  }
+
   protected get audits(): AuditPlanRecord[] {
     return this.auditPlanService.plans();
   }

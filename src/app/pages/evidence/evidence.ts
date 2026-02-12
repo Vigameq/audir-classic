@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Location } from '@angular/common';
 
@@ -26,6 +26,7 @@ export class Evidence implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+  private readonly router = inject(Router);
 
   protected auditCode = '';
   protected folderUrl = '';
@@ -88,6 +89,6 @@ export class Evidence implements OnInit {
   }
 
   protected goBack(): void {
-    this.location.back();
+    this.router.navigate(['/audit-manage']).catch(() => this.location.back());
   }
 }
