@@ -110,7 +110,7 @@
         <h2>Edit audit</h2>
         <button class="ghost small" type="button" (click)="closeEdit(editFormRef)">Close</button>
       </header>
-      <p class="modal-subtitle">Audit type and subtype are read-only.</p>
+      <p class="modal-subtitle">Audit type is read-only.</p>
       <div class="form-grid">
         <label>
           Start date
@@ -126,7 +126,12 @@
         </label>
         <label>
           Audit subtype
-          <input type="text" name="auditSubtype" [(ngModel)]="editForm.auditSubtype" disabled />
+          <select name="auditSubtype" [(ngModel)]="editForm.auditSubtype">
+            <option value="">Select audit subtype</option>
+            <option *ngFor="let subtype of auditSubtypes" [value]="subtype">
+              {{ subtype }}
+            </option>
+          </select>
         </label>
         <label>
           Response type

@@ -68,7 +68,7 @@ export class Dashboard implements OnInit {
   }
 
   protected get isCustomer(): boolean {
-    return this.auth.role() === 'Customer';
+    return this.auth.role().trim().toLowerCase() === 'customer';
   }
 
   protected get audits(): AuditPlanRecord[] {

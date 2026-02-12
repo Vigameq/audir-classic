@@ -23,10 +23,7 @@
       <span>Completed</span>
       <strong>{{ completedAudits.length }}</strong>
     </article>
-    <article class="summary-card">
-      <span>Open NCs</span>
-      <strong>{{ openNcRecords.length }}</strong>
-    </article>
+    <!-- Open NCs removed for customer dashboard -->
   </section>
 
   <section class="card">
@@ -66,31 +63,5 @@
     </ng-template>
   </section>
 
-  <section class="card">
-    <div class="card-header">
-      <div>
-        <h2>NC overview</h2>
-        <p>Track NC status for your audits.</p>
-      </div>
-      <span class="count">{{ ncService.records().length }} NCs</span>
-    </div>
-    <div class="nc-list" *ngIf="ncService.records().length; else noNc">
-      <article class="nc-card" *ngFor="let record of ncService.records()">
-        <div class="nc-title">
-          <strong>{{ record.auditCode }}</strong>
-          <span class="status" [class.open]="isOpenNc(record)">
-            {{ record.status || 'Assigned' }}
-          </span>
-        </div>
-        <p>{{ record.question || '—' }}</p>
-        <div class="nc-meta">
-          <span>{{ record.assignedNc || '—' }}</span>
-          <span>{{ record.assignedUserName || record.assignedUserEmail || 'Unassigned' }}</span>
-        </div>
-      </article>
-    </div>
-    <ng-template #noNc>
-      <div class="empty">No NCs for your audits yet.</div>
-    </ng-template>
-  </section>
+  <!-- NC overview removed for customer dashboard -->
 </section>

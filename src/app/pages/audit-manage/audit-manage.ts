@@ -75,6 +75,10 @@ export class AuditManage implements OnInit {
     return this.pagedAudits;
   }
 
+  protected get auditSubtypes(): string[] {
+    return this.templateService.templates().map((template) => template.name);
+  }
+
   protected get completedAudits(): AuditPlanRecord[] {
     return this.audits.filter((audit) => this.completionMap[audit.code] === 'Completed');
   }
