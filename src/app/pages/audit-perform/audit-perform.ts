@@ -95,7 +95,7 @@ export class AuditPerform implements OnInit {
   }
 
   protected get answeredCount(): number {
-    return this.responseSelections.filter((value) => value && value.trim().length > 0).length;
+    return (this.responseSelections ?? []).filter((value) => value && value.trim().length > 0).length;
   }
   protected filterStart = '';
   protected filterEnd = '';
@@ -127,16 +127,8 @@ export class AuditPerform implements OnInit {
     if (!audit) {
       return;
     }
-    if (!this.templateService.templates().length) {
-      await firstValueFrom(this.templateService.syncFromApi());
-    }
-    if (!this.responseService.responses().length) {
-      await firstValueFrom(this.responseService.syncFromApi());
-    }
-    if (!this.departmentService.departments().length) {
-      await firstValueFrom(this.departmentService.syncFromApi());
-    }
-    this.openPerform(audit);
+    await this.ensureReferenceDataLoaded();
+    await this.openPerform(audit);
   }
 
   private loadPage(): void {
@@ -148,15 +140,14 @@ export class AuditPerform implements OnInit {
     });
   }
 
-  protected openPerform(audit: AuditPlanRecord): void {
+  protected async openPerform(audit: AuditPlanRecord): Promise<void> {
     if (this.auth.role() === 'Auditor' && !this.isAssignedToCurrentUser(audit)) {
       return;
     }
+    await this.ensureReferenceDataLoaded();
     this.activeAudit = audit;
     this.router.navigate(['/audit-perform', audit.code], { replaceUrl: true });
-    this.activeTemplate =
-      this.templateService.templates().find((template) => template.name === audit.auditType) ??
-      null;
+    this.activeTemplate = this.resolveTemplateForAudit(audit);
     const response = this.responseService
       .responses()
       .find((item) => item.name === audit.responseType);
@@ -167,6 +158,18 @@ export class AuditPerform implements OnInit {
       this.auditAnswerService.listByAuditCode(this.activeAudit.code).subscribe({
         next: (answers) => this.applyAnswers(answers),
       });
+    }
+  }
+
+  private async ensureReferenceDataLoaded(): Promise<void> {
+    if (!this.templateService.templates().length) {
+      await firstValueFrom(this.templateService.syncFromApi());
+    }
+    if (!this.responseService.responses().length) {
+      await firstValueFrom(this.responseService.syncFromApi());
+    }
+    if (!this.departmentService.departments().length) {
+      await firstValueFrom(this.departmentService.syncFromApi());
     }
   }
 
@@ -357,13 +360,13 @@ export class AuditPerform implements OnInit {
     this.ensureAssetState(asset);
     this.loadEvidenceForAsset(asset);
     this.activeAsset = asset;
-    this.responseSelections = this.responsesByAsset[asset];
-    this.noteEntries = this.notesByAsset[asset];
-    this.ncAssignments = this.ncByAsset[asset];
-    this.savedQuestions = this.savedByAsset[asset];
-    this.evidenceFiles = this.evidenceFilesByAsset[asset];
-    this.evidenceDataUrls = this.evidenceDataUrlsByAsset[asset];
-    this.evidenceItems = this.evidenceItemsByAsset[asset];
+    this.responseSelections = this.responsesByAsset[asset] ?? [];
+    this.noteEntries = this.notesByAsset[asset] ?? [];
+    this.ncAssignments = this.ncByAsset[asset] ?? [];
+    this.savedQuestions = this.savedByAsset[asset] ?? [];
+    this.evidenceFiles = this.evidenceFilesByAsset[asset] ?? [];
+    this.evidenceDataUrls = this.evidenceDataUrlsByAsset[asset] ?? [];
+    this.evidenceItems = this.evidenceItemsByAsset[asset] ?? [];
     this.noteWords = this.noteEntries.map((value) => this.countWords(value));
     this.ncErrors = this.activeTemplate
       ? new Array(this.activeTemplate.questions.length).fill(false)
@@ -513,7 +516,7 @@ export class AuditPerform implements OnInit {
     audits.forEach((audit) => {
       this.auditAnswerService.listByAuditCode(audit.code).subscribe({
         next: (answers) => {
-          const totalQuestions = this.getTemplateQuestionCount(audit.auditType);
+          const totalQuestions = this.getTemplateQuestionCount(audit);
           if (!answers.length) {
             return;
           }
@@ -547,9 +550,18 @@ export class AuditPerform implements OnInit {
     this.completedAuditCodes.add(code);
   }
 
-  private getTemplateQuestionCount(auditType: string): number {
-    const template = this.templateService.templates().find((item) => item.name === auditType);
+  private getTemplateQuestionCount(audit: AuditPlanRecord): number {
+    const template = this.resolveTemplateForAudit(audit);
     return template?.questions.length ?? 0;
+  }
+
+  private resolveTemplateForAudit(audit: AuditPlanRecord): TemplateRecord | null {
+    const templates = this.templateService.templates();
+    return (
+      templates.find((template) => template.name === (audit.auditSubtype ?? '').trim()) ??
+      templates.find((template) => template.name === audit.auditType) ??
+      null
+    );
   }
 
   private ensureAssetState(asset: string): void {
